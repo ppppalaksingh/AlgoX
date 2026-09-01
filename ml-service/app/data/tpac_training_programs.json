@@ -1,0 +1,202 @@
+[
+  {
+    "id": "tpac1",
+    "title": "Planning and Designing of Large Scale Sample Surveys",
+    "description": "Review of sample survey techniques, survey planning (frame, sampling scheme, sample size), questionnaire design, post-survey operations including field/computer scrutiny, multipliers, and report writing.",
+    "domain": "statistical",
+    "tags": ["Survey Design", "Sampling"],
+    "duration": "One week",
+    "institute": "NSSTA, Greater Noida",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac2",
+    "title": "Handling Large Scale Data & Data Analysis using R",
+    "description": "Practical orientation to data analysis in R including descriptive analysis, regression, logistic/log-linear analysis, factor analysis, cluster analysis using live NSSO/Census data, and estimation procedures.",
+    "domain": "technical",
+    "tags": ["R", "Data Visualization"],
+    "duration": "One week",
+    "institute": "IIT Kanpur / IASRI",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac3",
+    "title": "Big Data Analysis",
+    "description": "Concept of Big Data, fundamentals of analytics for data-driven decision making, data visualization, predictive analytics, data mining, forecasting, clustering, regression, using R, SAS, SPSS and Excel.",
+    "domain": "technical",
+    "tags": ["Data Science", "AI/ML"],
+    "duration": "One week",
+    "institute": "Dr. MCRHRD Hyderabad / C R Rao AIMSC / IIT Madras",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac4",
+    "title": "Artificial Intelligence (AI) and Concept of Block Chain",
+    "description": "Artificial Intelligence and Machine Learning fundamentals, cybersecurity attack mitigation, blockchain applications in land records, and disruptive technologies with a focus on official statistics.",
+    "domain": "technical",
+    "tags": ["AI/ML", "Cybersecurity"],
+    "duration": "One week",
+    "institute": "C R Rao AIMSC Hyderabad / IISc Bangalore / IIT Madras",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac5",
+    "title": "Training on Artificial Intelligence and Machine Learning",
+    "description": "Extended two-week programme on AI and machine learning techniques for official statistics applications.",
+    "domain": "technical",
+    "tags": ["AI/ML"],
+    "duration": "Two weeks",
+    "institute": "IIT Madras",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac6",
+    "title": "Python Training for Statisticians",
+    "description": "Python fundamentals including data structures, file operations, exception handling, and data science packages (NumPy, pandas, matplotlib, seaborn, SciPy, statsmodels, scikit-learn) with hands-on model building.",
+    "domain": "technical",
+    "tags": ["Python", "Data Science"],
+    "duration": "One week",
+    "institute": "C R Rao AIMSC, Hyderabad",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac7",
+    "title": "Data Analysts and Data Ware House",
+    "description": "Data warehousing concepts and tools, schema modeling, ETL tools, dimension/fact table design, entity relationship modeling, and SQL script generation.",
+    "domain": "technical",
+    "tags": ["SQL", "Data Science"],
+    "duration": "One week",
+    "institute": "C R Rao AIMSC, Hyderabad",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac8",
+    "title": "National Accounts Statistics",
+    "description": "Theoretical concepts of national and environmental accounting, estimation of national income, GDP, savings, capital formation, and private consumption expenditure for planning and economic development.",
+    "domain": "statistical",
+    "tags": ["National Accounts"],
+    "duration": "One week",
+    "institute": "NSSTA / IMF SARTTAC",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac9",
+    "title": "Advanced Sampling Techniques with Practical Examples from NSSO Surveys",
+    "description": "Revision of basic sampling techniques, small area estimation, sampling for rare populations, network sampling, quota sampling, and cluster sampling with practical NSSO and health survey examples.",
+    "domain": "statistical",
+    "tags": ["Sampling", "Survey Design"],
+    "duration": "One week",
+    "institute": "NSSTA",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac10",
+    "title": "Index Numbers and Price Statistics",
+    "description": "Sources and limitations of price statistics in India, concepts and construction methodology of WPI and CPI, development indices, and compilation of the Index of Industrial Production.",
+    "domain": "statistical",
+    "tags": ["Price Statistics"],
+    "duration": "One week",
+    "institute": "NSSTA, Greater Noida",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac11",
+    "title": "Social Statistics",
+    "description": "Human Development Index, gender statistics, population census, civil/sample registration systems, vital statistics, health/education/labour statistics, and multi-dimensional poverty measurement.",
+    "domain": "statistical",
+    "tags": ["Social Statistics", "SDG Indicators"],
+    "duration": "One week",
+    "institute": "NSSTA / Labour Bureau, Shimla",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac12",
+    "title": "Sampling Methods and Techniques used in Large Scale Sample Surveys",
+    "description": "Survey planning, frame and scheme selection, questionnaire design, post-survey scrutiny and estimation procedures, with practical experience from NSSO, NFHS, RCH and SRS surveys.",
+    "domain": "statistical",
+    "tags": ["Sampling", "Survey Design"],
+    "duration": "One week",
+    "institute": "NSSTA, Greater Noida",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac13",
+    "title": "Demography and Population Studies",
+    "description": "Concepts of mortality, fertility and morbidity; life table construction and population projection; population policy impact on socio-economic development including poverty, gender and urbanization.",
+    "domain": "statistical",
+    "tags": ["Population Statistics"],
+    "duration": "One week",
+    "institute": "IIPS Mumbai / NSSTA",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac14",
+    "title": "Communication Skill Development",
+    "description": "Effective communication methods, foundation tools for one-on-one and group settings, influencing techniques, and communication strategy planning for face-to-face and virtual facilitation.",
+    "domain": "behavioural",
+    "tags": ["Communication"],
+    "duration": "One week",
+    "institute": "IIM Ahmedabad",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac15",
+    "title": "Management Development",
+    "description": "Comprehensive management module covering HR, time, stress, financial, change and conflict management, communication, motivation, leadership, and PPP frameworks.",
+    "domain": "behavioural",
+    "tags": ["Leadership", "Change Management"],
+    "duration": "One week",
+    "institute": "Dr. MCRHRD, Hyderabad",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac16",
+    "title": "Statistical Literacy and Storytelling",
+    "description": "Developing skills to communicate statistical findings effectively to non-technical audiences through data storytelling techniques.",
+    "domain": "behavioural",
+    "tags": ["Communication", "Data Visualization"],
+    "duration": "One week",
+    "institute": "IIM Ahmedabad",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac17",
+    "title": "Fundamentals of Computer and EDP (Data Management & Analysis)",
+    "description": "Introduction to MS Office (Word, PowerPoint, Excel, Mail Merge), working with the internet, and cybersecurity fundamentals for statistical officials.",
+    "domain": "digitalGovernance",
+    "tags": ["Cybersecurity", "Data Privacy"],
+    "duration": "One week",
+    "institute": "NSSTA, Greater Noida",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac18",
+    "title": "Office Management including Office Procedures & Communication",
+    "description": "Office administration, RTI Act awareness, conduct and vigilance rules, file management, and APAR familiarization for statistical service officers.",
+    "domain": "digitalGovernance",
+    "tags": ["Digital Public Infrastructure"],
+    "duration": "One week",
+    "institute": "NSSTA, Greater Noida",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac19",
+    "title": "Integration of Survey and Administrative Data",
+    "description": "Techniques and methods for integrating survey-collected data with administrative data sources for improved official statistics.",
+    "domain": "statistical",
+    "tags": ["Metadata Standards", "Data Quality"],
+    "duration": "One week",
+    "institute": "IASRI Delhi / NSSTA",
+    "source": "NSSTA Training Calendar 2021-22"
+  },
+  {
+    "id": "tpac20",
+    "title": "Poverty Analysis and Mapping and Measuring Inequality",
+    "description": "Definitions and estimation of poverty and income inequality, poverty line methodology, NSSO data applications, and evaluation of poverty alleviation programmes.",
+    "domain": "statistical",
+    "tags": ["Social Statistics"],
+    "duration": "One week",
+    "institute": "JNU",
+    "source": "NSSTA Training Calendar 2021-22"
+  }
+]

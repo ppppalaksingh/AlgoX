@@ -1,0 +1,17 @@
+Title: Public Policy, Official Statistics & Data Governance Framework in India
+
+Overview:
+The Ministry of Statistics and Programme Implementation (MoSPI) is responsible for the coverage and quality aspects of official statistics released in India. The National Statistical Office (NSO) conducts large-scale sample surveys and compiles national accounts, index of industrial production (IIP), and consumer price indices (CPI).
+
+Key Competency Areas:
+1. Sampling Methodology & Survey Design:
+   Stratified multistage sampling is standard for household socio-economic surveys. Weighting and estimation procedures ensure national representation.
+
+2. Digital Governance & Cybersecurity:
+   The Digital Personal Data Protection (DPDP) Act mandates stringent data privacy and encryption standards across all public sector data repositories and APIs.
+
+3. AI & Automation in Civil Services:
+   Implementing machine learning models on government administrative datasets enables predictive policy modeling, anomaly detection in direct benefit transfer (DBT) schemes, and automated anomaly flagging.
+
+4. Sustainable Development Goals (SDG) Indicators:
+   National Indicator Framework (NIF) monitors India's progress across 17 SDGs using standardized statistical metadata.

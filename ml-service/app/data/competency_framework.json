@@ -1,0 +1,32 @@
+{
+  "Statistical Officer": {
+    "statistical": 4,
+    "technical": 3,
+    "digitalGovernance": 2,
+    "behavioural": 3
+  },
+  "Data Analyst": {
+    "statistical": 3,
+    "technical": 4,
+    "digitalGovernance": 2,
+    "behavioural": 2
+  },
+  "Survey Officer": {
+    "statistical": 4,
+    "technical": 2,
+    "digitalGovernance": 2,
+    "behavioural": 3
+  },
+  "Regional Director": {
+    "statistical": 3,
+    "technical": 2,
+    "digitalGovernance": 3,
+    "behavioural": 4
+  },
+  "IT/Systems Officer": {
+    "statistical": 2,
+    "technical": 4,
+    "digitalGovernance": 4,
+    "behavioural": 2
+  }
+}

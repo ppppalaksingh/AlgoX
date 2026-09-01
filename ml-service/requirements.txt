@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+sentence-transformers
+scikit-learn
+python-dotenv
+python-multipart
+httpx
