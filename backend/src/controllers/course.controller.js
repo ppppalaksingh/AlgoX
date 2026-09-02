@@ -12,10 +12,10 @@ async function getOrCreateUser(clerkId) {
       clerkId,
       name: "Learner",
       designation: "Assistant Director",
-      department: "Data & Statistics",
+      department: "National Statistical Office (NSO)",
       experienceYears: 4,
-      qualifications: ["Data Analytics", "Civil Services Foundation"],
-      pastTrainings: ["iGOT Basics", "Statistical Methods"],
+      qualifications: ["Master in Statistics", "Civil Services Foundation"],
+      pastTrainings: ["iGOT Basics", "Statistical Sampling Methods"],
     });
   }
   return user;
@@ -29,10 +29,10 @@ export const getRecommendedCourses = async (req, res) => {
     if (!profile) {
       const gapResult = await getGapAnalysis({
         designation: user.designation || "Assistant Director",
-        department: user.department || "Data & Statistics",
+        department: user.department || "National Statistical Office (NSO)",
         experienceYears: user.experienceYears || 4,
-        qualifications: user.qualifications || ["Data Analytics"],
-        pastTrainings: user.pastTrainings || ["iGOT Basics"],
+        qualifications: user.qualifications || ["Master in Statistics"],
+        pastTrainings: user.pastTrainings || ["Statistical Sampling Methods"],
       });
       profile = await CompetencyProfile.create({
         userId: user._id,
@@ -41,9 +41,14 @@ export const getRecommendedCourses = async (req, res) => {
       });
     }
 
+    const { source, domain, topN } = req.query;
+
     const { data } = await axios.post(`${ML_BASE_URL}/recommendations`, {
       domainScores: profile.domainScores,
       skillGaps: profile.skillGaps,
+      sourceFilter: source || null,
+      domainFilter: domain || null,
+      topN: topN ? parseInt(topN) : 12,
     });
 
     res.json(data);
@@ -55,30 +60,13 @@ export const getRecommendedCourses = async (req, res) => {
 
 export const getAllCourses = async (req, res) => {
   try {
-    const user = await getOrCreateUser(req.userId);
-    let profile = await CompetencyProfile.findOne({ userId: user._id });
-
-    if (!profile) {
-      const gapResult = await getGapAnalysis({
-        designation: user.designation || "Assistant Director",
-        department: user.department || "Data & Statistics",
-        experienceYears: user.experienceYears || 4,
-        qualifications: user.qualifications || ["Data Analytics"],
-        pastTrainings: user.pastTrainings || ["iGOT Basics"],
-      });
-      profile = await CompetencyProfile.create({
-        userId: user._id,
-        domainScores: gapResult.domainScores,
-        skillGaps: gapResult.skillGaps,
-      });
+    try {
+      const { data } = await axios.get(`${ML_BASE_URL}/catalog`);
+      return res.json(data);
+    } catch (catalogErr) {
+      // Fallback to recommendation endpoint
+      return getRecommendedCourses(req, res);
     }
-
-    const { data } = await axios.post(`${ML_BASE_URL}/recommendations`, {
-      domainScores: profile.domainScores,
-      skillGaps: profile.skillGaps,
-    });
-
-    res.json(data);
   } catch (err) {
     console.error("[course.controller] getAllCourses error:", err.message);
     res.status(500).json({ error: err.message });

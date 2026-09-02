@@ -1,0 +1,275 @@
+[
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "statistical",
+    "query": "Planning and designing of large scale sample surveys and questionnaire framing",
+    "target": "Planning and Designing of Large Scale Sample Surveys (NSSTA, Greater Noida)",
+    "score": 0.98,
+    "division": "SDRD / NSSTA"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "statistical",
+    "query": "Stratified multi-stage sampling, First Stage Units FSU selection, and sample multipliers",
+    "target": "Planning and Designing of Large Scale Sample Surveys (NSSTA, Greater Noida)",
+    "score": 0.96,
+    "division": "SDRD"
+  },
+  {
+    "source": "mospi.gov.in / NAD",
+    "domain": "statistical",
+    "query": "Compilation of GDP, GVA, Gross Capital Formation and System of National Accounts SNA 2008",
+    "target": "National Accounts Statistics & SNA 2008 Guidelines (NSSTA)",
+    "score": 0.98,
+    "division": "National Accounts Division (NAD)"
+  },
+  {
+    "source": "mospi.gov.in / NAD",
+    "domain": "statistical",
+    "query": "Supply and Use Tables SUT, Input-Output modeling and sectoral value added estimation",
+    "target": "National Accounts Statistics & SNA 2008 Guidelines (NSSTA)",
+    "score": 0.95,
+    "division": "National Accounts Division (NAD)"
+  },
+  {
+    "source": "mospi.gov.in / ESD",
+    "domain": "statistical",
+    "query": "All India Consumer Price Index CPI rural urban combined compilation with Laspeyres formula",
+    "target": "Price Statistics, CPI/WPI Methodology and Index Number Compilation (MoSPI / NSSTA)",
+    "score": 0.97,
+    "division": "Economic Statistics Division (ESD)"
+  },
+  {
+    "source": "mospi.gov.in / ESD",
+    "domain": "statistical",
+    "query": "Index of Industrial Production IIP item basket weighting, mining, manufacturing, electricity sectors",
+    "target": "Industrial Statistics and Index of Industrial Production IIP (MoSPI)",
+    "score": 0.96,
+    "division": "Economic Statistics Division (ESD)"
+  },
+  {
+    "source": "mospi.gov.in / FOD / SDRD",
+    "domain": "statistical",
+    "query": "Annual Survey of Industries ASI factory sector data scrutiny, capital invested and gross output",
+    "target": "Industrial Statistics and Index of Industrial Production IIP (MoSPI)",
+    "score": 0.95,
+    "division": "Field Operations Division (FOD)"
+  },
+  {
+    "source": "mospi.gov.in / SSD",
+    "domain": "statistical",
+    "query": "Periodic Labour Force Survey PLFS Worker Population Ratio, Labour Force Participation and Unemployment",
+    "target": "Labour and Employment Statistics & PLFS Methodology (MoSPI / NSSO)",
+    "score": 0.98,
+    "division": "Social Statistics Division (SSD)"
+  },
+  {
+    "source": "mospi.gov.in / SSD",
+    "domain": "statistical",
+    "query": "Time Use Survey TUS unpaid care work, activity classification and gender statistical indicators",
+    "target": "Social Statistics, Gender Indicators and Time Use Survey Methodology (NSSTA)",
+    "score": 0.94,
+    "division": "Social Statistics Division (SSD)"
+  },
+  {
+    "source": "mospi.gov.in / SSD / NIF",
+    "domain": "statistical",
+    "query": "Sustainable Development Goals SDG National Indicator Framework NIF and UN-SDMX metadata",
+    "target": "SDG Indicator Framework and Metadata Standards (iGOT & MoSPI)",
+    "score": 0.97,
+    "division": "Social Statistics Division (SSD)"
+  },
+  {
+    "source": "mospi.gov.in / SDRD",
+    "domain": "statistical",
+    "query": "Household Consumption Expenditure Survey HCES MPCE calculation and poverty threshold estimation",
+    "target": "Socio-Economic Surveys & Household Expenditure Methodology (NSSO / NSSTA)",
+    "score": 0.97,
+    "division": "Survey Design and Research Division (SDRD)"
+  },
+  {
+    "source": "mospi.gov.in / SDRD",
+    "domain": "statistical",
+    "query": "Annual Survey of Unincorporated Sector Enterprises ASUSE informal economy data collection",
+    "target": "Enterprise Surveys and Unincorporated Sector Statistics (MoSPI / NSSTA)",
+    "score": 0.96,
+    "division": "Survey Design and Research Division (SDRD)"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Python programming for statisticians with NumPy, pandas, statsmodels and data scrutiny",
+    "target": "Python Training for Statisticians (C R Rao AIMSC, Hyderabad)",
+    "score": 0.98,
+    "division": "NSSTA / Data Informatics Division"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Automated data scrutiny and anomaly detection in NSSO microdata using Python scripts",
+    "target": "Python Training for Statisticians (C R Rao AIMSC, Hyderabad)",
+    "score": 0.96,
+    "division": "Data Processing Division (DPD)"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Handling large scale official survey data, regression, cluster and factor analysis in R",
+    "target": "Handling Large Scale Data & Data Analysis using R (IIT Kanpur / IASRI)",
+    "score": 0.98,
+    "division": "NSSTA / IIT Kanpur"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Survey package in R for complex survey sampling variance estimation and calibration weights",
+    "target": "Handling Large Scale Data & Data Analysis using R (IIT Kanpur / IASRI)",
+    "score": 0.95,
+    "division": "NSSTA / IASRI"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Big Data analytics, predictive modeling and distributed data mining for official databases",
+    "target": "Big Data Analysis (Dr. MCRHRD Hyderabad / C R Rao AIMSC / IIT Madras)",
+    "score": 0.97,
+    "division": "NSSTA"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Artificial Intelligence and Machine Learning techniques for official statistical applications",
+    "target": "Training on Artificial Intelligence and Machine Learning (IIT Madras)",
+    "score": 0.98,
+    "division": "NSSTA / IIT Madras"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Large Language Models LLMs and Generative AI for automated public report summarization",
+    "target": "Large Language Models: Concepts and Applications (IIT Hyderabad / iGOT)",
+    "score": 0.96,
+    "division": "iGOT / IIT Hyderabad"
+  },
+  {
+    "source": "nssta.gov.in / TPAC Calendar",
+    "domain": "technical",
+    "query": "Geographic Information System GIS, QGIS, ArcGIS, satellite imagery and Urban Frame Survey UFS",
+    "target": "GIS and Spatial Data Analysis (NSSTA, Greater Noida)",
+    "score": 0.97,
+    "division": "NSSTA / DIID"
+  },
+  {
+    "source": "mospi.gov.in / DIID",
+    "domain": "technical",
+    "query": "Spatial sampling, remote sensing crop area estimation and GIS based sampling frames",
+    "target": "GIS and Spatial Data Analysis (NSSTA, Greater Noida)",
+    "score": 0.95,
+    "division": "Data Informatics and Innovation Division"
+  },
+  {
+    "source": "mospi.gov.in / DIID / DPD",
+    "domain": "technical",
+    "query": "SQL queries, relational database schema and relational data warehousing for census data",
+    "target": "Relational Database Management and SQL for Official Data (NSSTA)",
+    "score": 0.96,
+    "division": "Data Processing Division (DPD)"
+  },
+  {
+    "source": "mospi.gov.in / DIID",
+    "domain": "digitalGovernance",
+    "query": "Digital Personal Data Protection DPDP Act 2023 compliance, data principal rights and fiduciary duties",
+    "target": "Data Privacy and DPDP Act in Governance (Data Security Council of India & iGOT)",
+    "score": 0.98,
+    "division": "MoSPI Policy / iGOT"
+  },
+  {
+    "source": "mospi.gov.in / DIID",
+    "domain": "digitalGovernance",
+    "query": "Survey microdata anonymization, perturbation techniques and open data dissemination protocols",
+    "target": "Data Privacy and DPDP Act in Governance (Data Security Council of India & iGOT)",
+    "score": 0.95,
+    "division": "DIID / MoSPI Microdata"
+  },
+  {
+    "source": "mospi.gov.in / DIID",
+    "domain": "digitalGovernance",
+    "query": "Government Cloud MeghRaj architecture, virtual server hosting and official data cybersecurity",
+    "target": "Cybersecurity Fundamentals for Government Officials (iGOT Karmayogi)",
+    "score": 0.96,
+    "division": "DIID / NIC"
+  },
+  {
+    "source": "mospi.gov.in / DIID",
+    "domain": "digitalGovernance",
+    "query": "Digital Public Infrastructure DPI, Aadhaar, DigiLocker, e-Office and API integration for statistics",
+    "target": "Digital Public Infrastructure and e-Governance Systems (iGOT Karmayogi)",
+    "score": 0.95,
+    "division": "MoSPI Administration"
+  },
+  {
+    "source": "nssta.gov.in / In-service",
+    "domain": "behavioural",
+    "query": "Leadership, public administration ethics and evidence-based decision making for statistical officers",
+    "target": "Leadership and Change Management in Civil Services (iGOT & NSSTA)",
+    "score": 0.97,
+    "division": "NSSTA / DoPT"
+  },
+  {
+    "source": "nssta.gov.in / In-service",
+    "domain": "behavioural",
+    "query": "Effective communication of official statistics, data visualization storytelling and media briefing",
+    "target": "Statistical Literacy, Data Storytelling and Public Communication (NSSTA)",
+    "score": 0.96,
+    "division": "NSSTA / Dissemination Division"
+  },
+  {
+    "source": "nssta.gov.in / In-service",
+    "domain": "behavioural",
+    "query": "Survey field team coordination, project management and timeline monitoring in FOD",
+    "target": "Survey Project Management and Field Administration (NSSTA)",
+    "score": 0.96,
+    "division": "Field Operations Division (FOD)"
+  },
+  {
+    "source": "nssta.gov.in / In-service",
+    "domain": "behavioural",
+    "query": "Ethics, impartiality, UN Fundamental Principles of Official Statistics and confidentiality",
+    "target": "Ethics, Integrity and UN Fundamental Principles in Official Statistics (NSSTA / iGOT)",
+    "score": 0.98,
+    "division": "National Statistical Commission (NSC)"
+  },
+
+  {
+    "source": "Negative contrast anchor",
+    "domain": "contrast",
+    "query": "Stratified sampling theory and sample allocation",
+    "target": "Cybersecurity Fundamentals for Government Officials (iGOT Karmayogi)",
+    "score": 0.05,
+    "division": "None"
+  },
+  {
+    "source": "Negative contrast anchor",
+    "domain": "contrast",
+    "query": "Python pandas data cleaning for surveys",
+    "target": "Ethics, Integrity and UN Fundamental Principles in Official Statistics (NSSTA / iGOT)",
+    "score": 0.05,
+    "division": "None"
+  },
+  {
+    "source": "Negative contrast anchor",
+    "domain": "contrast",
+    "query": "National Accounts GDP compilation",
+    "target": "Digital Public Infrastructure and e-Governance Systems (iGOT Karmayogi)",
+    "score": 0.10,
+    "division": "None"
+  },
+  {
+    "source": "Negative contrast anchor",
+    "domain": "contrast",
+    "query": "Consumer Price Index CPI inflation",
+    "target": "GIS and Spatial Data Analysis (NSSTA, Greater Noida)",
+    "score": 0.12,
+    "division": "None"
+  }
+]

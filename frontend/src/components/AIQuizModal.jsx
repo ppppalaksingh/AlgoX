@@ -206,7 +206,9 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                 </h4>
                 {questions.map((q, idx) => {
                   const userAns = selectedAnswers[idx];
-                  const isCorrect = userAns === q.correctAnswer;
+                  const cleanU = userAns ? userAns.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ") : "";
+                  const cleanC = q.correctAnswer ? q.correctAnswer.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ") : "";
+                  const isCorrect = Boolean(cleanU && cleanC && (cleanU === cleanC || (cleanU.length > 15 && cleanC.length > 15 && (cleanU.includes(cleanC) || cleanC.includes(cleanU)))));
                   return (
                     <div key={idx} className="p-3.5 rounded-xl border border-slate-200 text-sm space-y-1.5 bg-white">
                       <div className="flex items-start gap-2">

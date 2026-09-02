@@ -10,6 +10,8 @@ import courseRoutes from "./routes/course.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import learningPathRoutes from "./routes/learningPath.routes.js";
 import documentRoutes from "./routes/document.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 
 dotenv.config();
 connectDB();
@@ -27,8 +29,10 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/learning-path", learningPathRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/chat", chatRoutes);
 
-app.get("/", (req, res) => res.send("AlgoX backend running"));
+app.get("/", (req, res) => res.send("AlgoX Official Statistics Platform backend running"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

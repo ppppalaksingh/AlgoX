@@ -1,32 +1,172 @@
 {
-  "Statistical Officer": {
-    "statistical": 4,
-    "technical": 3,
-    "digitalGovernance": 2,
-    "behavioural": 3
+  "Director General (DG)": {
+    "statistical": 4.8,
+    "technical": 3.8,
+    "digitalGovernance": 4.5,
+    "behavioural": 4.9,
+    "subCompetencies": {
+      "National Accounts": 5,
+      "Survey Design": 5,
+      "SDG Indicators": 5,
+      "Data Governance & DPI": 5,
+      "Leadership & Strategy": 5,
+      "Evidence-based Policy": 5
+    }
   },
-  "Data Analyst": {
-    "statistical": 3,
-    "technical": 4,
-    "digitalGovernance": 2,
-    "behavioural": 2
+  "Deputy Director General (DDG)": {
+    "statistical": 4.6,
+    "technical": 4.0,
+    "digitalGovernance": 4.2,
+    "behavioural": 4.7,
+    "subCompetencies": {
+      "Sampling Theory": 5,
+      "National Accounts": 4.5,
+      "Price & Index Statistics": 4.5,
+      "AI & Data Governance": 4.2,
+      "Change Management": 4.8
+    }
   },
-  "Survey Officer": {
-    "statistical": 4,
-    "technical": 2,
-    "digitalGovernance": 2,
-    "behavioural": 3
+  "Director / Joint Director": {
+    "statistical": 4.4,
+    "technical": 4.1,
+    "digitalGovernance": 4.0,
+    "behavioural": 4.5,
+    "subCompetencies": {
+      "Survey Operations": 4.8,
+      "Data Quality Frameworks": 4.6,
+      "Python & R for Statistics": 4.0,
+      "Cybersecurity & DPDP": 4.0,
+      "Project Management": 4.5
+    }
   },
-  "Regional Director": {
-    "statistical": 3,
-    "technical": 2,
-    "digitalGovernance": 3,
-    "behavioural": 4
+  "Deputy Director": {
+    "statistical": 4.2,
+    "technical": 4.2,
+    "digitalGovernance": 3.8,
+    "behavioural": 4.0,
+    "subCompetencies": {
+      "Sampling Design": 4.5,
+      "Price Statistics (CPI/WPI)": 4.4,
+      "R & Stata Analytics": 4.2,
+      "Data Privacy": 3.8,
+      "Decision Making": 4.0
+    }
   },
-  "IT/Systems Officer": {
-    "statistical": 2,
-    "technical": 4,
-    "digitalGovernance": 4,
-    "behavioural": 2
+  "Assistant Director": {
+    "statistical": 4.0,
+    "technical": 3.8,
+    "digitalGovernance": 3.5,
+    "behavioural": 3.8,
+    "subCompetencies": {
+      "Survey Design & Sampling": 4.2,
+      "National Accounts": 3.8,
+      "Python / R Analytics": 4.0,
+      "Data Visualization": 4.0,
+      "DPDP Compliance": 3.5,
+      "Public Communication": 3.8
+    }
+  },
+  "Senior Statistical Officer (SSO)": {
+    "statistical": 4.2,
+    "technical": 3.6,
+    "digitalGovernance": 3.2,
+    "behavioural": 3.5,
+    "subCompetencies": {
+      "Field Scrutiny & Data Quality": 4.6,
+      "Sampling & Multipliers": 4.2,
+      "PLFS & Household Surveys": 4.4,
+      "Python & SQL": 3.5,
+      "e-Office & Digital Tools": 3.4
+    }
+  },
+  "Junior Statistical Officer (JSO)": {
+    "statistical": 3.6,
+    "technical": 3.4,
+    "digitalGovernance": 3.0,
+    "behavioural": 3.2,
+    "subCompetencies": {
+      "Field Data Collection": 4.2,
+      "Basic Sampling Methods": 3.8,
+      "Excel & Basic Python": 3.5,
+      "Data Quality Verification": 3.8,
+      "DPDP Awareness": 3.0
+    }
+  },
+  "Statistical Investigator": {
+    "statistical": 3.4,
+    "technical": 3.0,
+    "digitalGovernance": 2.8,
+    "behavioural": 3.0,
+    "subCompetencies": {
+      "Survey Canvassing": 4.0,
+      "Field Verification": 3.8,
+      "Mobile CAPI / CAPI Apps": 3.5,
+      "Basic Statistics": 3.2
+    }
+  },
+  "Data Processing Assistant (DPA)": {
+    "statistical": 3.2,
+    "technical": 4.4,
+    "digitalGovernance": 3.8,
+    "behavioural": 3.0,
+    "subCompetencies": {
+      "SQL & Database Queries": 4.5,
+      "Data Cleaning & Scrutiny": 4.6,
+      "Python / R Automation": 4.2,
+      "Government Cloud (MeghRaj)": 3.8,
+      "Cybersecurity": 3.6
+    }
+  },
+  "GIS & Spatial Analytics Specialist": {
+    "statistical": 3.8,
+    "technical": 4.8,
+    "digitalGovernance": 3.6,
+    "behavioural": 3.2,
+    "subCompetencies": {
+      "GIS & QGIS / ArcGIS": 5.0,
+      "Remote Sensing": 4.8,
+      "Spatial Sampling": 4.5,
+      "Python Geospatial (GeoPandas)": 4.6,
+      "Open Data Standards": 4.0
+    }
+  },
+  "National Accounts Specialist": {
+    "statistical": 4.8,
+    "technical": 3.8,
+    "digitalGovernance": 3.4,
+    "behavioural": 3.6,
+    "subCompetencies": {
+      "GDP / GVA Estimation": 5.0,
+      "SNA 2008 Guidelines": 5.0,
+      "Supply Use Tables (SUT)": 4.8,
+      "Econometric Modeling": 4.5,
+      "Metadata Standards": 4.2
+    }
+  },
+  "Price & Index Officer (CPI/WPI)": {
+    "statistical": 4.5,
+    "technical": 3.6,
+    "digitalGovernance": 3.2,
+    "behavioural": 3.4,
+    "subCompetencies": {
+      "Laspeyres / Paasche Indices": 5.0,
+      "Item Basket Weighting": 4.8,
+      "Price Data Scrutiny": 4.6,
+      "R & Stata": 3.8,
+      "Dissemination Protocols": 3.6
+    }
+  },
+  "IT / Systems Officer": {
+    "statistical": 2.8,
+    "technical": 4.8,
+    "digitalGovernance": 4.6,
+    "behavioural": 3.2,
+    "subCompetencies": {
+      "Cloud Infrastructure (MeghRaj)": 4.8,
+      "Cybersecurity & Encryption": 4.8,
+      "APIs & Microservices": 4.6,
+      "AI/ML Pipeline Deployment": 4.4,
+      "DPDP Compliance Architecture": 4.6
+    }
   }
 }
