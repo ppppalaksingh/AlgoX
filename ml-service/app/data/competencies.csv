@@ -1,0 +1,34 @@
+domain,competency,competency_id
+Statistical,Survey Design,CMP001
+Statistical,Sampling Techniques,CMP002
+Statistical,National Accounts,CMP003
+Statistical,Price Statistics,CMP004
+Statistical,Labour Statistics,CMP005
+Statistical,Agricultural Statistics,CMP006
+Statistical,Industrial Statistics,CMP007
+Statistical,SDG Indicators,CMP008
+Statistical,Metadata Standards,CMP009
+Statistical,Data Quality Frameworks,CMP010
+Technical,Python,CMP011
+Technical,R Programming,CMP012
+Technical,SQL,CMP013
+Technical,Stata,CMP014
+Technical,SPSS,CMP015
+Technical,SAS,CMP016
+Technical,GIS,CMP017
+Technical,Data Visualization,CMP018
+Technical,AI/ML,CMP019
+Technical,Cloud Computing,CMP020
+Technical,APIs,CMP021
+Technical,Open Data,CMP022
+Digital Governance,Cybersecurity,CMP023
+Digital Governance,Data Privacy,CMP024
+Digital Governance,Digital Signatures,CMP025
+Digital Governance,Government Cloud,CMP026
+Digital Governance,Digital Public Infrastructure,CMP027
+Behavioural,Leadership,CMP028
+Behavioural,Communication,CMP029
+Behavioural,Project Management,CMP030
+Behavioural,Ethics,CMP031
+Behavioural,Decision Making,CMP032
+Behavioural,Change Management,CMP033

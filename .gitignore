@@ -30,6 +30,20 @@ build/
 *.swp
 *.swo
 
+# Large Model Weights (Prevents GitHub 100MB limit & ensures fast deployments)
+*.safetensors
+*.bin
+*.pt
+*.onnx
+ml-service/app/models/
+
+# Temporary uploads & documents
+backend/uploads/*
+backend/temp_*
+backend/temp_docs/
+backend/temp_hd_images/
+backend/temp_uploads/
+
 # OS
 .DS_Store
 Thumbs.db

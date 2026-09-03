@@ -48,7 +48,7 @@ export const getRecommendedCourses = async (req, res) => {
       skillGaps: profile.skillGaps,
       sourceFilter: source || null,
       domainFilter: domain || null,
-      topN: topN ? parseInt(topN) : 12,
+      topN: topN ? parseInt(topN) : 140,
     });
 
     res.json(data);

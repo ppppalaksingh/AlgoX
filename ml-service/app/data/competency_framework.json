@@ -1,42 +1,82 @@
 {
-  "Director General (DG)": {
+  "Director General": {
     "statistical": 4.8,
-    "technical": 3.8,
-    "digitalGovernance": 4.5,
+    "technical": 4.0,
+    "digitalGovernance": 4.6,
     "behavioural": 4.9,
     "subCompetencies": {
-      "National Accounts": 5,
-      "Survey Design": 5,
-      "SDG Indicators": 5,
-      "Data Governance & DPI": 5,
-      "Leadership & Strategy": 5,
-      "Evidence-based Policy": 5
+      "Survey Design (CMP001)": 5.0,
+      "Sampling Techniques (CMP002)": 5.0,
+      "National Accounts (CMP003)": 5.0,
+      "SDG Indicators (CMP008)": 5.0,
+      "Data Quality Frameworks (CMP010)": 5.0,
+      "Data Privacy (CMP024)": 4.8,
+      "Government Cloud (CMP026)": 4.5,
+      "Leadership (CMP028)": 5.0,
+      "Communication (CMP029)": 5.0,
+      "Project Management (CMP030)": 5.0,
+      "Ethics (CMP031)": 5.0,
+      "Decision Making (CMP032)": 5.0,
+      "Change Management (CMP033)": 5.0
     }
   },
-  "Deputy Director General (DDG)": {
+  "Additional Director General": {
     "statistical": 4.6,
-    "technical": 4.0,
-    "digitalGovernance": 4.2,
+    "technical": 4.1,
+    "digitalGovernance": 4.4,
     "behavioural": 4.7,
     "subCompetencies": {
-      "Sampling Theory": 5,
-      "National Accounts": 4.5,
-      "Price & Index Statistics": 4.5,
-      "AI & Data Governance": 4.2,
-      "Change Management": 4.8
+      "Survey Design (CMP001)": 4.8,
+      "Sampling Techniques (CMP002)": 4.8,
+      "National Accounts (CMP003)": 4.8,
+      "Price Statistics (CMP004)": 4.8,
+      "Labour Statistics (CMP005)": 4.8,
+      "AI/ML (CMP019)": 4.0,
+      "Cybersecurity (CMP023)": 4.4,
+      "Data Privacy (CMP024)": 4.6,
+      "Leadership (CMP028)": 4.8,
+      "Communication (CMP029)": 4.8,
+      "Project Management (CMP030)": 4.8,
+      "Ethics (CMP031)": 5.0,
+      "Decision Making (CMP032)": 4.8
     }
   },
-  "Director / Joint Director": {
-    "statistical": 4.4,
-    "technical": 4.1,
-    "digitalGovernance": 4.0,
+  "Director": {
+    "statistical": 4.5,
+    "technical": 4.2,
+    "digitalGovernance": 4.2,
     "behavioural": 4.5,
     "subCompetencies": {
-      "Survey Operations": 4.8,
-      "Data Quality Frameworks": 4.6,
-      "Python & R for Statistics": 4.0,
-      "Cybersecurity & DPDP": 4.0,
-      "Project Management": 4.5
+      "Survey Design (CMP001)": 4.6,
+      "Sampling Techniques (CMP002)": 4.6,
+      "National Accounts (CMP003)": 4.6,
+      "Price Statistics (CMP004)": 4.6,
+      "Metadata Standards (CMP009)": 4.5,
+      "Python (CMP011)": 4.0,
+      "R Programming (CMP012)": 4.0,
+      "Cybersecurity (CMP023)": 4.2,
+      "Data Privacy (CMP024)": 4.4,
+      "Leadership (CMP028)": 4.5,
+      "Project Management (CMP030)": 4.6,
+      "Ethics (CMP031)": 4.8
+    }
+  },
+  "Joint Director": {
+    "statistical": 4.3,
+    "technical": 4.2,
+    "digitalGovernance": 4.0,
+    "behavioural": 4.3,
+    "subCompetencies": {
+      "Survey Design (CMP001)": 4.5,
+      "Sampling Techniques (CMP002)": 4.5,
+      "Price Statistics (CMP004)": 4.5,
+      "Labour Statistics (CMP005)": 4.5,
+      "Python (CMP011)": 4.2,
+      "R Programming (CMP012)": 4.2,
+      "GIS (CMP017)": 4.0,
+      "Data Privacy (CMP024)": 4.0,
+      "Leadership (CMP028)": 4.3,
+      "Project Management (CMP030)": 4.4
     }
   },
   "Deputy Director": {
@@ -45,11 +85,17 @@
     "digitalGovernance": 3.8,
     "behavioural": 4.0,
     "subCompetencies": {
-      "Sampling Design": 4.5,
-      "Price Statistics (CPI/WPI)": 4.4,
-      "R & Stata Analytics": 4.2,
-      "Data Privacy": 3.8,
-      "Decision Making": 4.0
+      "Survey Design (CMP001)": 4.4,
+      "Sampling Techniques (CMP002)": 4.4,
+      "National Accounts (CMP003)": 4.2,
+      "Price Statistics (CMP004)": 4.2,
+      "Python (CMP011)": 4.2,
+      "R Programming (CMP012)": 4.2,
+      "SQL (CMP013)": 4.2,
+      "Data Visualization (CMP018)": 4.2,
+      "Government Cloud (CMP026)": 3.8,
+      "Communication (CMP029)": 4.0,
+      "Decision Making (CMP032)": 4.0
     }
   },
   "Assistant Director": {
@@ -58,115 +104,65 @@
     "digitalGovernance": 3.5,
     "behavioural": 3.8,
     "subCompetencies": {
-      "Survey Design & Sampling": 4.2,
-      "National Accounts": 3.8,
-      "Python / R Analytics": 4.0,
-      "Data Visualization": 4.0,
-      "DPDP Compliance": 3.5,
-      "Public Communication": 3.8
+      "Survey Design (CMP001)": 4.2,
+      "Sampling Techniques (CMP002)": 4.2,
+      "National Accounts (CMP003)": 4.0,
+      "Labour Statistics (CMP005)": 4.0,
+      "Python (CMP011)": 3.8,
+      "R Programming (CMP012)": 3.8,
+      "SQL (CMP013)": 3.8,
+      "Data Privacy (CMP024)": 3.6,
+      "Leadership (CMP028)": 3.8,
+      "Project Management (CMP030)": 3.8
     }
   },
   "Senior Statistical Officer (SSO)": {
-    "statistical": 4.2,
+    "statistical": 3.8,
     "technical": 3.6,
     "digitalGovernance": 3.2,
     "behavioural": 3.5,
     "subCompetencies": {
-      "Field Scrutiny & Data Quality": 4.6,
-      "Sampling & Multipliers": 4.2,
-      "PLFS & Household Surveys": 4.4,
-      "Python & SQL": 3.5,
-      "e-Office & Digital Tools": 3.4
+      "Survey Design (CMP001)": 4.0,
+      "Sampling Techniques (CMP002)": 4.0,
+      "Industrial Statistics (CMP007)": 3.8,
+      "Python (CMP011)": 3.8,
+      "R Programming (CMP012)": 3.6,
+      "Data Visualization (CMP018)": 3.6,
+      "Digital Signatures (CMP025)": 3.4,
+      "Communication (CMP029)": 3.6,
+      "Ethics (CMP031)": 4.0
     }
   },
-  "Junior Statistical Officer (JSO)": {
-    "statistical": 3.6,
+  "Statistical Officer (SO)": {
+    "statistical": 3.5,
     "technical": 3.4,
     "digitalGovernance": 3.0,
     "behavioural": 3.2,
     "subCompetencies": {
-      "Field Data Collection": 4.2,
-      "Basic Sampling Methods": 3.8,
-      "Excel & Basic Python": 3.5,
-      "Data Quality Verification": 3.8,
-      "DPDP Awareness": 3.0
+      "Survey Design (CMP001)": 3.6,
+      "Sampling Techniques (CMP002)": 3.6,
+      "Price Statistics (CMP004)": 3.5,
+      "Python (CMP011)": 3.5,
+      "SQL (CMP013)": 3.5,
+      "Cybersecurity (CMP023)": 3.0,
+      "Communication (CMP029)": 3.2,
+      "Ethics (CMP031)": 3.5
     }
   },
-  "Statistical Investigator": {
-    "statistical": 3.4,
-    "technical": 3.0,
+  "Junior Statistical Officer (JSO)": {
+    "statistical": 3.2,
+    "technical": 3.2,
     "digitalGovernance": 2.8,
     "behavioural": 3.0,
     "subCompetencies": {
-      "Survey Canvassing": 4.0,
-      "Field Verification": 3.8,
-      "Mobile CAPI / CAPI Apps": 3.5,
-      "Basic Statistics": 3.2
-    }
-  },
-  "Data Processing Assistant (DPA)": {
-    "statistical": 3.2,
-    "technical": 4.4,
-    "digitalGovernance": 3.8,
-    "behavioural": 3.0,
-    "subCompetencies": {
-      "SQL & Database Queries": 4.5,
-      "Data Cleaning & Scrutiny": 4.6,
-      "Python / R Automation": 4.2,
-      "Government Cloud (MeghRaj)": 3.8,
-      "Cybersecurity": 3.6
-    }
-  },
-  "GIS & Spatial Analytics Specialist": {
-    "statistical": 3.8,
-    "technical": 4.8,
-    "digitalGovernance": 3.6,
-    "behavioural": 3.2,
-    "subCompetencies": {
-      "GIS & QGIS / ArcGIS": 5.0,
-      "Remote Sensing": 4.8,
-      "Spatial Sampling": 4.5,
-      "Python Geospatial (GeoPandas)": 4.6,
-      "Open Data Standards": 4.0
-    }
-  },
-  "National Accounts Specialist": {
-    "statistical": 4.8,
-    "technical": 3.8,
-    "digitalGovernance": 3.4,
-    "behavioural": 3.6,
-    "subCompetencies": {
-      "GDP / GVA Estimation": 5.0,
-      "SNA 2008 Guidelines": 5.0,
-      "Supply Use Tables (SUT)": 4.8,
-      "Econometric Modeling": 4.5,
-      "Metadata Standards": 4.2
-    }
-  },
-  "Price & Index Officer (CPI/WPI)": {
-    "statistical": 4.5,
-    "technical": 3.6,
-    "digitalGovernance": 3.2,
-    "behavioural": 3.4,
-    "subCompetencies": {
-      "Laspeyres / Paasche Indices": 5.0,
-      "Item Basket Weighting": 4.8,
-      "Price Data Scrutiny": 4.6,
-      "R & Stata": 3.8,
-      "Dissemination Protocols": 3.6
-    }
-  },
-  "IT / Systems Officer": {
-    "statistical": 2.8,
-    "technical": 4.8,
-    "digitalGovernance": 4.6,
-    "behavioural": 3.2,
-    "subCompetencies": {
-      "Cloud Infrastructure (MeghRaj)": 4.8,
-      "Cybersecurity & Encryption": 4.8,
-      "APIs & Microservices": 4.6,
-      "AI/ML Pipeline Deployment": 4.4,
-      "DPDP Compliance Architecture": 4.6
+      "Survey Design (CMP001)": 3.5,
+      "Sampling Techniques (CMP002)": 3.5,
+      "Price Statistics (CMP004)": 3.2,
+      "Python (CMP011)": 3.2,
+      "SPSS (CMP015)": 3.2,
+      "Digital Signatures (CMP025)": 3.0,
+      "Communication (CMP029)": 3.0,
+      "Ethics (CMP031)": 3.5
     }
   }
 }

@@ -3,24 +3,34 @@ import { User, Building2, Briefcase, Award, Sparkles, CheckCircle2, Loader2, Boo
 
 export default function ProfileView({ user, profileData, onSaveProfile, isSaving, onRunAnalysis, isAnalyzing }) {
   const [formData, setFormData] = useState({
-    name: user?.name || "Learner",
-    email: user?.email || "learner@mospi.gov.in",
+    name: profileData?.name || user?.name || "Learner",
+    email: profileData?.email || user?.email || "learner@mospi.gov.in",
     designation: profileData?.designation || "Assistant Director",
     department: profileData?.department || "National Statistical Office (NSO)",
-    experienceYears: profileData?.experienceYears || 4,
-    qualifications: profileData?.qualifications?.join(", ") || "B.Tech Computer Science, PG Diploma in Data Analytics",
-    pastTrainings: profileData?.pastTrainings?.join(", ") || "iGOT Digital Governance, Statistical Sampling Methods",
+    experienceYears: profileData?.experienceYears ?? 4,
+    qualifications: Array.isArray(profileData?.qualifications)
+      ? profileData.qualifications.join(", ")
+      : profileData?.qualifications || "Master in Statistics, PG Diploma in Data Analytics",
+    pastTrainings: Array.isArray(profileData?.pastTrainings)
+      ? profileData.pastTrainings.join(", ")
+      : profileData?.pastTrainings || "iGOT Digital Governance, Statistical Sampling Methods",
   });
 
   useEffect(() => {
     if (profileData) {
       setFormData((prev) => ({
         ...prev,
+        name: profileData.name || prev.name,
+        email: profileData.email || prev.email,
         designation: profileData.designation || prev.designation,
         department: profileData.department || prev.department,
         experienceYears: profileData.experienceYears ?? prev.experienceYears,
-        qualifications: profileData.qualifications?.join(", ") || prev.qualifications,
-        pastTrainings: profileData.pastTrainings?.join(", ") || prev.pastTrainings,
+        qualifications: Array.isArray(profileData.qualifications)
+          ? profileData.qualifications.join(", ")
+          : profileData.qualifications || prev.qualifications,
+        pastTrainings: Array.isArray(profileData.pastTrainings)
+          ? profileData.pastTrainings.join(", ")
+          : profileData.pastTrainings || prev.pastTrainings,
       }));
     }
   }, [profileData]);

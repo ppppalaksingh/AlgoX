@@ -12,6 +12,8 @@ import learningPathRoutes from "./routes/learningPath.routes.js";
 import documentRoutes from "./routes/document.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
+import certificateRoutes from "./routes/certificate.routes.js";
+import progressRoutes from "./routes/progress.routes.js";
 
 dotenv.config();
 connectDB();
@@ -31,6 +33,8 @@ app.use("/api/learning-path", learningPathRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/certificates", certificateRoutes);
+app.use("/api/progress", progressRoutes);
 
 app.get("/", (req, res) => res.send("AlgoX Official Statistics Platform backend running"));
 

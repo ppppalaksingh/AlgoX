@@ -1,8 +1,27 @@
 import axios from "axios";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import Admin from "../models/Admin.model.js";
 import User from "../models/User.model.js";
 import CompetencyProfile from "../models/CompetencyProfile.model.js";
 import { isUserAdmin, ADMIN_WHITELIST } from "../config/adminConfig.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const EMPLOYEES_PATH = path.join(__dirname, "../data/mospi_employees_3000.json");
+
+let cachedEmployees = null;
+function getEmployeesData() {
+  if (!cachedEmployees && fs.existsSync(EMPLOYEES_PATH)) {
+    try {
+      cachedEmployees = JSON.parse(fs.readFileSync(EMPLOYEES_PATH, "utf-8"));
+    } catch (e) {
+      console.warn("Failed to load mospi_employees_3000.json:", e.message);
+    }
+  }
+  return cachedEmployees || [];
+}
 
 const ML_BASE_URL = process.env.ML_SERVICE_URL || "http://localhost:8000";
 
@@ -98,37 +117,68 @@ export const registerNewAdmin = async (req, res) => {
   }
 };
 
-// Retrieve all registered officials with competency and training profiles for Admin Drill-Down
+// Retrieve all 3,000 registered officials with competency and training profiles for Admin Drill-Down
 export const getAllOfficialsData = async (req, res) => {
   try {
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const rawEmps = getEmployeesData();
+    const dbUsers = await User.find({}).sort({ createdAt: -1 });
     const profiles = await CompetencyProfile.find({});
 
-    const officialsList = users.map((u) => {
+    // Map DB users first
+    const dbOfficials = dbUsers.map((u) => {
       const prof = profiles.find((p) => String(p.userId) === String(u._id));
       return {
         id: u._id,
-        clerkId: u.clerkId,
+        employee_id: u.clerkId?.substring(0, 8) || "EMP-LIVE",
         name: u.name || "Official",
         email: u.email || `${u.name?.toLowerCase().replace(/\s+/g, ".")}@mospi.gov.in`,
         designation: u.designation || "Assistant Director",
         department: u.department || "National Statistical Office (NSO)",
         cadre: u.department?.includes("Field") ? "Field Operations Division (FOD)" : "Indian Statistical Service (ISS)",
         experienceYears: u.experienceYears || 4,
-        overallCompetency: prof?.domainScores?.statistical ? Math.round(((prof.domainScores.statistical + prof.domainScores.technical + prof.domainScores.digitalGovernance + prof.domainScores.behavioural) / 20) * 100) : 74,
+        state: "New Delhi",
+        overallCompetency: prof?.domainScores?.statistical ? Math.round(((prof.domainScores.statistical + prof.domainScores.technical + prof.domainScores.digitalGovernance + prof.domainScores.behavioural) / 20) * 100) : 78,
         domainScores: prof?.domainScores ? {
           statistical: Math.round((prof.domainScores.statistical / 5) * 100),
           technical: Math.round((prof.domainScores.technical / 5) * 100),
           digitalGovernance: Math.round((prof.domainScores.digitalGovernance / 5) * 100),
           behavioural: Math.round((prof.domainScores.behavioural / 5) * 100),
-        } : { statistical: 82, technical: 64, digitalGovernance: 70, behavioural: 88 },
+        } : { statistical: 84, technical: 68, digitalGovernance: 72, behavioural: 88 },
         topSkillGap: "Python for Data Scrutiny",
         coursesCompleted: u.pastTrainings?.length || 5,
         status: "Active",
       };
     });
 
-    res.json({ officials: officialsList });
+    // Map 3000 employees dataset
+    const datasetOfficials = rawEmps.map((emp) => {
+      const baseScore = Math.min(94, Math.max(55, Math.round(50 + (emp.experience_years * 1.4) + (emp.seniority_level * 3.5))));
+      return {
+        id: emp.employee_id,
+        employee_id: emp.employee_id,
+        name: emp.name,
+        email: `${emp.name.toLowerCase().replace(/[^a-z]/g, ".")}@mospi.gov.in`,
+        designation: emp.designation,
+        department: emp.department,
+        cadre: emp.department.includes("NSSO") || emp.department.includes("Field") ? "Field Operations Division (FOD)" : emp.designation.includes("Junior") || emp.designation.includes("Senior") ? "Subordinate Statistical Service (SSS)" : "Indian Statistical Service (ISS)",
+        experienceYears: emp.experience_years,
+        qualification: emp.qualification,
+        state: emp.state,
+        overallCompetency: baseScore,
+        domainScores: {
+          statistical: Math.min(98, Math.max(60, baseScore + (emp.qualification.includes("Statistics") ? 6 : 0))),
+          technical: Math.min(95, Math.max(45, baseScore - 4 + (emp.qualification.includes("Computer") || emp.qualification.includes("Data") ? 10 : 0))),
+          digitalGovernance: Math.min(92, Math.max(50, baseScore - 2)),
+          behavioural: Math.min(96, Math.max(60, baseScore + Math.round(emp.seniority_level * 1.5))),
+        },
+        topSkillGap: baseScore < 70 ? "Stratified Sampling & Multipliers" : "Python for Survey Scrutiny",
+        coursesCompleted: Math.max(1, Math.round(emp.seniority_level * 1.5 + 2)),
+        status: "Active",
+      };
+    });
+
+    const allOfficials = [...dbOfficials, ...datasetOfficials];
+    res.json({ officials: allOfficials, total: allOfficials.length });
   } catch (err) {
     console.error("[admin.controller] getAllOfficialsData error:", err.message);
     res.status(500).json({ error: err.message });
@@ -145,38 +195,38 @@ export const getAdminAnalytics = async (req, res) => {
       console.warn("[admin.controller] Fallback to built-in analytics data:", mlErr.message);
       analyticsData = {
         summary: {
-          totalOfficials: 4850,
-          activeLearners: 3920,
-          overallCompetencyScore: 74.5,
-          totalTrainingHours: 142800,
-          coursesCompleted: 18450,
-          certificationsIssued: 9620,
-          avgSkillGapReduction: "24.8%"
+          totalOfficials: 3000,
+          activeLearners: 2840,
+          overallCompetencyScore: 76.5,
+          totalTrainingHours: 112800,
+          coursesCompleted: 11958,
+          certificationsIssued: 8420,
+          avgSkillGapReduction: "26.4%"
         },
         cadres: [
           { cadre: "Indian Statistical Service (ISS)", headcount: 820, avgCompetency: 82.4, topSkillGap: "AI/ML in Governance", completionRate: 88 },
-          { cadre: "Subordinate Statistical Service (SSS)", headcount: 2450, avgCompetency: 71.8, topSkillGap: "Python for Data Scrutiny", completionRate: 79 },
-          { cadre: "Data Processing Cadre (DPD)", headcount: 680, avgCompetency: 76.5, topSkillGap: "Government Cloud (MeghRaj)", completionRate: 84 },
-          { cadre: "State DES Deputed Officers", headcount: 900, avgCompetency: 67.2, topSkillGap: "Survey Sampling & Multipliers", completionRate: 72 }
+          { cadre: "Subordinate Statistical Service (SSS)", headcount: 1450, avgCompetency: 72.8, topSkillGap: "Python for Data Scrutiny", completionRate: 81 },
+          { cadre: "Data Informatics & Innovation (DIID)", headcount: 380, avgCompetency: 78.5, topSkillGap: "Government Cloud (MeghRaj)", completionRate: 86 },
+          { cadre: "State DES Deputed Officers", headcount: 350, avgCompetency: 68.2, topSkillGap: "Survey Sampling & Multipliers", completionRate: 74 }
         ],
         domainAverages: {
-          statistical: 78.2,
-          technical: 65.4,
-          digitalGovernance: 71.0,
-          behavioural: 83.5
+          statistical: 79.2,
+          technical: 68.4,
+          digitalGovernance: 72.0,
+          behavioural: 84.5
         },
         heatmapData: [
-          { division: "Field Operations Division (FOD)", statistical: 84, technical: 58, digitalGovernance: 64, behavioural: 80, criticalGap: "Mobile CAPI & Python" },
-          { division: "Data Processing Division (DPD)", statistical: 72, technical: 82, digitalGovernance: 78, behavioural: 74, criticalGap: "Cloud Security" },
-          { division: "Survey Design & Research (SDRD)", statistical: 91, technical: 70, digitalGovernance: 68, behavioural: 82, criticalGap: "AI Predictive Modeling" },
-          { division: "National Accounts Division (NAD)", statistical: 89, technical: 66, digitalGovernance: 72, behavioural: 85, criticalGap: "Big Data SNA Integration" },
-          { division: "Economic Statistics Division (ESD)", statistical: 86, technical: 68, digitalGovernance: 70, behavioural: 81, criticalGap: "Web-Scraping for CPI" }
+          { division: "National Sample Survey Office (NSSO)", statistical: 86, technical: 62, digitalGovernance: 66, behavioural: 82, criticalGap: "Mobile CAPI & Python" },
+          { division: "Data Informatics & Innovation (DIID)", statistical: 74, technical: 85, digitalGovernance: 80, behavioural: 76, criticalGap: "Cloud Security" },
+          { division: "Central Statistics Office (CSO)", statistical: 92, technical: 72, digitalGovernance: 70, behavioural: 84, criticalGap: "AI Predictive Modeling" },
+          { division: "National Accounts Division (NAD)", statistical: 91, technical: 68, digitalGovernance: 74, behavioural: 86, criticalGap: "Big Data SNA Integration" },
+          { division: "Price Statistics Division (PSD)", statistical: 88, technical: 70, digitalGovernance: 72, behavioural: 82, criticalGap: "Web-Scraping for CPI" }
         ],
         predictiveForecast: [
-          { skill: "Generative AI & LLMs in Official Reports", currentAdoption: "18%", projectedDemand2027: "82%", urgency: "High", recommendedTPACProgram: "Training on Artificial Intelligence and Machine Learning (IIT Madras)" },
-          { skill: "GIS & Satellite Spatial Sampling", currentAdoption: "32%", projectedDemand2027: "78%", urgency: "High", recommendedTPACProgram: "GIS and Spatial Data Analysis (NSSTA)" },
-          { skill: "DPDP Act 2023 & Microdata Privacy", currentAdoption: "45%", projectedDemand2027: "95%", urgency: "Critical", recommendedTPACProgram: "Cybersecurity & Data Privacy (DSCI & iGOT)" },
-          { skill: "Automated Survey Scrutiny with Python/R", currentAdoption: "40%", projectedDemand2027: "88%", urgency: "High", recommendedTPACProgram: "Python Training for Statisticians (C R Rao AIMSC)" }
+          { skill: "Generative AI & LLMs in Official Reports", currentAdoption: "22%", projectedDemand2027: "85%", urgency: "High", recommendedTPACProgram: "Training on Artificial Intelligence and Machine Learning (IIT Madras)" },
+          { skill: "GIS & Satellite Spatial Sampling", currentAdoption: "35%", projectedDemand2027: "80%", urgency: "High", recommendedTPACProgram: "GIS and Spatial Data Analysis (NSSTA)" },
+          { skill: "DPDP Act 2023 & Microdata Privacy", currentAdoption: "48%", projectedDemand2027: "96%", urgency: "Critical", recommendedTPACProgram: "Cybersecurity & Data Privacy (DSCI & iGOT)" },
+          { skill: "Automated Survey Scrutiny with Python/R", currentAdoption: "44%", projectedDemand2027: "90%", urgency: "High", recommendedTPACProgram: "Python Training for Statisticians (C R Rao AIMSC)" }
         ]
       };
     }

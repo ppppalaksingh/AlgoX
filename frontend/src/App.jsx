@@ -282,6 +282,46 @@ function Dashboard() {
     }
   }, []);
 
+  // Helper to fetch stored certificates from MongoDB
+  const fetchCertificates = useCallback(async (token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/certificates`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setCertificateList(data);
+        }
+      }
+    } catch (err) {
+      console.warn("[App] Certificates load note:", err.message);
+    }
+  }, []);
+
+  // Helper to fetch User Progress from MongoDB
+  const fetchProgress = useCallback(async (token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/progress`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.completedCourseIds) {
+          setCourseList((prev) =>
+            prev.map((c) =>
+              data.completedCourseIds.includes(c.id)
+                ? { ...c, percent: 100, status: "Completed" }
+                : c
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.warn("[App] Progress load note:", err.message);
+    }
+  }, []);
+
   // Helper to fetch Admin Analytics
   const fetchAdminAnalytics = useCallback(async (token) => {
     try {
@@ -379,33 +419,53 @@ function Dashboard() {
         const token = await getToken();
         if (!token) return;
 
-        // 1. Sync User Profile in MongoDB
-        const res = await fetch(`${API_BASE_URL}/users/profile`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: user.name,
-            email: user.email,
-            designation: "Assistant Director",
-            department: "National Statistical Office (NSO)",
-            experienceYears: 4,
-            qualifications: ["Master in Statistics", "PG Diploma in Data Analytics"],
-            pastTrainings: ["iGOT Digital Governance", "Statistical Sampling Methods"],
-          }),
-        });
+        // 1. Fetch User Profile from MongoDB if it exists
+        let existingProfile = null;
+        try {
+          const getRes = await fetch(`${API_BASE_URL}/users/profile`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (getRes.ok) {
+            existingProfile = await getRes.json();
+            if (existingProfile && existingProfile.name) {
+              setProfileData(existingProfile);
+            }
+          }
+        } catch (getErr) {
+          console.warn("[App] Existing profile fetch note:", getErr.message);
+        }
 
-        if (res.ok) {
-          const data = await res.json();
-          setProfileData(data);
+        // 2. Only create default profile if none exists in MongoDB
+        if (!existingProfile || !existingProfile.name) {
+          const res = await fetch(`${API_BASE_URL}/users/profile`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              name: user.name,
+              email: user.email,
+              designation: "Assistant Director",
+              department: "National Statistical Office (NSO)",
+              experienceYears: 4,
+              qualifications: ["Master in Statistics", "PG Diploma in Data Analytics"],
+              pastTrainings: ["iGOT Digital Governance", "Statistical Sampling Methods"],
+            }),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            setProfileData(data);
+          }
         }
 
         // 2. Fetch live data
         await fetchCompetencyData(token);
         await fetchMLRecommendations(token);
         await fetchDocuments(token);
+        await fetchCertificates(token);
+        await fetchProgress(token);
         await fetchAdminAnalytics(token);
 
         // 3. Verify Database Admin Status
@@ -684,7 +744,7 @@ function Dashboard() {
   };
 
   // Handler: Complete Course & Earn Certificate
-  const handleCompleteCourse = (course) => {
+  const handleCompleteCourse = async (course) => {
     setIsCourseModalOpen(false);
 
     setCourseList((prev) =>
@@ -701,15 +761,48 @@ function Dashboard() {
       )
     );
 
-    const newCert = {
+    const tempCert = {
       id: `cert-${Date.now()}`,
       title: course.title,
       issuedDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-      domain: course.domain || "Statistical Competency",
+      domain: course.domain || "Statistical",
+      institute: "National Statistical Systems Training Academy (NSSTA)",
+      regNumber: `NSSTA/ISS/${new Date().getFullYear()}/${Math.floor(10000 + Math.random() * 90000)}`,
     };
 
-    const newCertList = [newCert, ...certificateList];
+    const newCertList = [tempCert, ...certificateList];
     setCertificateList(newCertList);
+
+    // Save permanently in MongoDB backend
+    try {
+      const token = await getToken();
+      if (token) {
+        const res = await fetch(`${API_BASE_URL}/progress/complete-course`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            courseId: course.id,
+            durationHours: course.duration_hours || 20,
+            courseTitle: course.title,
+            domain: course.domain,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.certificate) {
+            setCertificateList((prev) => [data.certificate, ...prev.filter((c) => c._id !== data.certificate._id)]);
+          }
+          await fetchCompetencyData(token);
+          await fetchProgress(token);
+        }
+      }
+    } catch (saveErr) {
+      console.warn("[App] Complete course save note:", saveErr.message);
+    }
 
     // Update Stats dynamically
     updateDashboardStats(gapModalData?.overallReadiness || 86, courseList, newCertList);
@@ -1004,7 +1097,15 @@ function Dashboard() {
           )}
 
           {activeNav === "progress" && (
-            <FullProgress history={initialProgressHistory} summary={initialProgressSummary} />
+            <FullProgress
+              history={initialProgressHistory}
+              summary={initialProgressSummary}
+              competencyList={competencyList}
+              courses={courseList}
+              certificates={certificateList}
+              detailedGaps={detailedGaps}
+              profileData={profileData}
+            />
           )}
 
           {activeNav === "certificates" && (

@@ -2,6 +2,8 @@ import CompetencyProfile from "../models/CompetencyProfile.model.js";
 import User from "../models/User.model.js";
 import QuizAttempt from "../models/QuizAttempt.model.js";
 import Document from "../models/Document.model.js";
+import Certificate from "../models/Certificate.model.js";
+import UserProgress from "../models/UserProgress.model.js";
 import { getGapAnalysis } from "../services/mlService.js";
 
 async function getOrCreateUser(clerkId) {
@@ -24,9 +26,16 @@ export const runGapAnalysis = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
 
-    // Fetch live user activities (quiz scores, documents, certificates)
+    // Fetch live user activities (quiz scores, documents, certificates, progress)
     const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
-    const documents = await Document.find({ userId: user._id }).sort({ createdAt: -1 }).limit(5);
+    const certificates = await Certificate.find({ userId: user._id }).sort({ createdAt: -1 });
+    const progress = await UserProgress.findOne({ userId: user._id });
+
+    const completedCourses = [
+      ...(user.pastTrainings || []),
+      ...(certificates.map((c) => `${c.title} (${c.domain || 'Statistical'})`)),
+      ...(progress?.completedCourseIds || []),
+    ];
 
     const gapResult = await getGapAnalysis({
       designation: user.designation || "Assistant Director",
@@ -39,7 +48,7 @@ export const runGapAnalysis = async (req, res) => {
         score: q.score,
         totalQuestions: q.totalQuestions,
       })),
-      completedCourses: user.pastTrainings || [],
+      completedCourses,
     });
 
     const profile = await CompetencyProfile.findOneAndUpdate(
@@ -71,6 +80,14 @@ export const getMyCompetencyProfile = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
     const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
+    const certificates = await Certificate.find({ userId: user._id }).sort({ createdAt: -1 });
+    const progress = await UserProgress.findOne({ userId: user._id });
+
+    const completedCourses = [
+      ...(user.pastTrainings || []),
+      ...(certificates.map((c) => `${c.title} (${c.domain || 'Statistical'})`)),
+      ...(progress?.completedCourseIds || []),
+    ];
 
     const gapResult = await getGapAnalysis({
       designation: user.designation || "Assistant Director",
@@ -83,6 +100,7 @@ export const getMyCompetencyProfile = async (req, res) => {
         score: q.score,
         totalQuestions: q.totalQuestions,
       })),
+      completedCourses,
     });
 
     res.json(gapResult);

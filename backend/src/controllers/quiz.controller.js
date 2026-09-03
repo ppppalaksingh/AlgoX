@@ -5,7 +5,9 @@ import { v2 as cloudinary } from "cloudinary";
 import QuizAttempt from "../models/QuizAttempt.model.js";
 import User from "../models/User.model.js";
 import Document from "../models/Document.model.js";
-import { generateQuiz } from "../services/mlService.js";
+import CompetencyProfile from "../models/CompetencyProfile.model.js";
+import UserProgress from "../models/UserProgress.model.js";
+import { generateQuiz, getGapAnalysis } from "../services/mlService.js";
 
 // Configure Cloudinary if env variables are present
 if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
@@ -115,32 +117,58 @@ export const uploadAndGenerateQuiz = async (req, res) => {
     const lowerName = req.file.originalname.toLowerCase();
 
     // 1. If Plain Text / JSON / CSV / MD
-    if (req.file.mimetype === "text/plain" || lowerName.endsWith(".txt") || lowerName.endsWith(".csv") || lowerName.endsWith(".json") || lowerName.endsWith(".md")) {
+    if (req.file.mimetype === "text/plain" || lowerName.endsWith(".txt") || lowerName.endsWith(".csv") || lowerName.endsWith(".md")) {
       rawExtracted = req.file.buffer.toString("utf-8");
     }
-    // 2. If PDF, PPTX, PPT, DOCX, XLSX
+    // 2. If PDF
+    else if (req.file.mimetype === "application/pdf" || lowerName.includes(".pdf") || req.file.buffer.slice(0, 5).toString() === "%PDF-") {
+      try {
+        const { default: pdfParse } = await import("pdf-parse");
+        const pdfData = await pdfParse(req.file.buffer);
+        if (pdfData && pdfData.text && pdfData.text.trim().length > 15) {
+          rawExtracted = pdfData.text;
+        }
+      } catch (pdfErr) {
+        console.warn("[quiz.controller] pdf-parse note:", pdfErr.message);
+        rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
+      }
+    }
+    // 3. If PPTX, PPT, DOCX, XLSX
     else {
       try {
-        const parsePromise = parseOffice(filePath);
-        rawExtracted = await Promise.race([
-          parsePromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Office parse timeout")), 3500))
-        ]);
+        const parsed = await parseOffice(filePath);
+        if (typeof parsed === "string" && !parsed.includes('"config"')) {
+          rawExtracted = parsed;
+        } else if (parsed?.text) {
+          rawExtracted = parsed.text;
+        } else {
+          rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
+        }
       } catch (officeErr) {
         console.warn("[quiz.controller] parseOffice note:", officeErr.message);
         rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
       }
     }
 
-    let extractedText = typeof rawExtracted === "string" ? rawExtracted : (rawExtracted?.text || JSON.stringify(rawExtracted) || "");
+    let extractedText = typeof rawExtracted === "string" ? rawExtracted : (rawExtracted?.text || "");
 
-    // Safety fallback if extracted text is short or empty
-    if (!extractedText || extractedText.trim().length < 20) {
+    // Remove any raw internal officeparser config JSON
+    if (extractedText.includes('"config"') || (extractedText.startsWith("{") && extractedText.includes("newlineDelimiter"))) {
       extractedText = extractPrintableTextFromBuffer(req.file.buffer);
     }
-    if (!extractedText || extractedText.trim().length < 20) {
-      extractedText = `Document: ${req.file.originalname}. Official governance and statistical capacity building assessment covering sample survey design, national accounts, data validation, and public administration.`;
+
+    // Clean whitespace and invalid control characters
+    extractedText = extractedText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ").replace(/\s+/g, " ").trim();
+
+    // Safety fallback
+    if (!extractedText || extractedText.length < 20) {
+      extractedText = `Official study material: ${req.file.originalname}. Core official statistical capacity building documentation covering survey schedules, sampling methodology, and data scrutiny.`;
     }
+
+    // Generate a clean 1-2 sentence human-readable summary for the card
+    const cleanSummary = extractedText.length > 250
+      ? `${extractedText.slice(0, 240).trim()}...`
+      : extractedText;
 
     // Save Document record in MongoDB
     const docRecord = await Document.create({
@@ -150,7 +178,7 @@ export const uploadAndGenerateQuiz = async (req, res) => {
       fileUrl,
       mimetype: req.file.mimetype,
       size: req.file.size,
-      summary: extractedText.slice(0, 300),
+      summary: cleanSummary,
     });
 
     // Generate MCQs via ML service
@@ -329,11 +357,60 @@ export const submitQuizAnswers = async (req, res) => {
     attempt.score = score;
     await attempt.save();
 
+    // Recalibrate user's competency profile and persist in MongoDB
+    let recalibratedProfile = null;
+    try {
+      const user = await User.findById(attempt.userId);
+      if (user) {
+        const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
+        const gapResult = await getGapAnalysis({
+          designation: user.designation || "Assistant Director",
+          department: user.department || "National Statistical Office (NSO)",
+          experienceYears: user.experienceYears || 4,
+          qualifications: user.qualifications || ["Master in Statistics"],
+          pastTrainings: user.pastTrainings || ["Statistical Sampling Methods"],
+          quizAttempts: quizAttempts.map((q) => ({
+            sourceFileName: q.sourceFileName,
+            score: q.score,
+            totalQuestions: q.totalQuestions,
+          })),
+        });
+
+        recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
+          { userId: user._id },
+          {
+            domainScores: gapResult.domainScores,
+            skillGaps: gapResult.skillGaps,
+            subCompetencies: gapResult.subCompetencies,
+            overallReadiness: gapResult.overallReadiness,
+            highestGap: gapResult.highestGap,
+            topStrength: gapResult.topStrength,
+            aiExecutiveInsight: gapResult.aiExecutiveInsight,
+            domainTargets: gapResult.domainTargets,
+          },
+          { upsert: true, returnDocument: "after" }
+        );
+
+        // Also update UserProgress study hours & streak
+        await UserProgress.findOneAndUpdate(
+          { userId: user._id },
+          {
+            $inc: { totalHours: 2 },
+            $set: { lastActiveDate: new Date() },
+          },
+          { upsert: true }
+        );
+      }
+    } catch (recalErr) {
+      console.warn("[quiz.controller] Recalibration note:", recalErr.message);
+    }
+
     res.json({
       score,
       total: attempt.totalQuestions,
       percentage: Math.round((score / attempt.totalQuestions) * 100),
       questions: attempt.questions,
+      recalibratedProfile,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

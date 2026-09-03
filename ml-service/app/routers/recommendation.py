@@ -9,7 +9,7 @@ def recommendations(req: RecommendationRequest):
     gaps = [g.dict() if hasattr(g, 'dict') else g for g in req.skillGaps] if req.skillGaps else []
     courses = recommend_courses(
         gaps,
-        top_n=req.topN or 12,
+        top_n=req.topN or 140,
         source_filter=req.sourceFilter,
         domain_filter=req.domainFilter
     )

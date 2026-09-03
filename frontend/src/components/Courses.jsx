@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Clock, CheckCircle2, Search, Sparkles, ExternalLink, GraduationCap, Building } from "lucide-react";
+import { BookOpen, Clock, CheckCircle2, Search, Sparkles, ExternalLink, GraduationCap, Building, ShieldCheck, Play } from "lucide-react";
 import { getColor } from "../data/colorMap";
 
 function statusBadgeClasses(status) {
@@ -12,6 +12,7 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
   const [selectedSource, setSelectedSource] = useState("all"); // 'all' | 'iGOT' | 'TPAC'
   const [selectedDomain, setSelectedDomain] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(18);
 
   const domains = ["All", "Statistical", "Technical", "Digital Governance", "Behavioural"];
 
@@ -38,6 +39,16 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
     return matchesSource && matchesDomain && matchesSearch;
   });
 
+  const displayedCourses = filteredCourses.slice(0, visibleCount);
+
+  const getOfficialLink = (course) => {
+    if (course.officialUrl && !course.officialUrl.includes("/CRS")) return course.officialUrl;
+    if (course.igotLink && !course.igotLink.includes("/CRS")) return course.igotLink;
+    const isTPAC = course.source_type === "TPAC" || course.id?.startsWith("tpac") || course.institute?.includes("NSSTA") || course.provider?.includes("NSSTA");
+    if (isTPAC) return "https://nssta.gov.in";
+    return "https://portal.igotkarmayogi.gov.in/public/home";
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & Search */}
@@ -58,17 +69,23 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
             type="text"
             placeholder="Search statistical models, iGOT, NSSTA..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setVisibleCount(18);
+            }}
             className="w-full text-xs outline-none text-slate-800"
           />
         </div>
       </div>
 
       {/* Source Category Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-3 flex-wrap sm:flex-nowrap">
         <button
-          onClick={() => setSelectedSource("all")}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+          onClick={() => {
+            setSelectedSource("all");
+            setVisibleCount(18);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
             selectedSource === "all"
               ? "bg-blue-600 text-white shadow-xs"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -77,8 +94,11 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
           <BookOpen size={15} /> All Offerings ({courses?.length || 0})
         </button>
         <button
-          onClick={() => setSelectedSource("iGOT")}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+          onClick={() => {
+            setSelectedSource("iGOT");
+            setVisibleCount(18);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
             selectedSource === "iGOT"
               ? "bg-orange-500 text-white shadow-xs"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -88,8 +108,11 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
           iGOT Karmayogi Modules
         </button>
         <button
-          onClick={() => setSelectedSource("TPAC")}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+          onClick={() => {
+            setSelectedSource("TPAC");
+            setVisibleCount(18);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
             selectedSource === "TPAC"
               ? "bg-indigo-600 text-white shadow-xs"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -104,7 +127,10 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
         {domains.map((dom) => (
           <button
             key={dom}
-            onClick={() => setSelectedDomain(dom)}
+            onClick={() => {
+              setSelectedDomain(dom);
+              setVisibleCount(18);
+            }}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
               selectedDomain === dom
                 ? "bg-slate-900 text-white shadow-xs"
@@ -118,11 +144,12 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
 
       {/* Course Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-        {filteredCourses.map((course) => {
+        {displayedCourses.map((course) => {
           const color = getColor(course.color || "blue");
-          const isTPAC = course.source_type === "TPAC" || course.id?.startsWith("tpac");
+          const isTPAC = course.source_type === "TPAC" || course.id?.startsWith("tpac") || course.institute?.includes("NSSTA");
           const providerName = course.provider || course.institute || (isTPAC ? "NSSTA / MoSPI" : "iGOT Karmayogi");
           const matchPercent = course.matchPercent || (course.matchScore ? Math.round(course.matchScore * 100) : 85);
+          const officialLink = getOfficialLink(course);
 
           return (
             <div
@@ -170,6 +197,25 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
                   )}
                 </div>
 
+                {/* Direct Clickable Official Portal URL Chip */}
+                <div className="pt-1">
+                  <a
+                    href={officialLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-blue-700 hover:text-blue-900 hover:underline flex items-center justify-between font-semibold bg-blue-50/80 hover:bg-blue-100 border border-blue-200/90 rounded-xl px-3 py-1.5 transition-all shadow-2xs group/link"
+                    title={`Open official government portal: ${officialLink}`}
+                  >
+                    <span className="flex items-center gap-1.5 truncate min-w-0">
+                      <ExternalLink size={12} className="shrink-0 text-blue-600 group-hover/link:translate-x-0.5 transition-transform" />
+                      <span className="truncate">{officialLink.replace(/^https?:\/\//, '')}</span>
+                    </span>
+                    <span className="text-[10px] font-bold bg-blue-200/70 text-blue-800 px-1.5 py-0.5 rounded-md shrink-0 ml-1.5">
+                      {isTPAC ? "NSSTA Portal ↗" : "iGOT Portal ↗"}
+                    </span>
+                  </a>
+                </div>
+
                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full ${isTPAC ? "bg-indigo-600" : color.bar} rounded-full transition-all duration-300`}
@@ -186,7 +232,11 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
                         onStartCourse?.(course);
                       }
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-blue-600 border border-blue-200 rounded-xl py-2.5 hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer shadow-2xs"
+                    className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-bold rounded-xl py-2.5 transition-all cursor-pointer shadow-2xs ${
+                      isTPAC
+                        ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
                   >
                     {course.status === "Completed" ? (
                       <>
@@ -194,28 +244,38 @@ export default function Courses({ courses, onStartCourse, onViewCertificate }) {
                       </>
                     ) : (
                       <>
-                        <Clock size={14} /> {isTPAC ? "Enroll in TPAC" : "Start Module"}
+                        <Play size={14} className="fill-white" /> {isTPAC ? "Study TPAC Module" : "Start iGOT Module"}
                       </>
                     )}
                   </button>
 
-                  {course.igotLink && (
-                    <a
-                      href={course.igotLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center transition-colors text-xs"
-                      title="Open on official iGOT portal"
-                    >
-                      <ExternalLink size={14} />
-                    </a>
-                  )}
+                  <a
+                    href={officialLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center transition-all text-xs font-semibold shadow-2xs gap-1 cursor-pointer"
+                    title={`Open ${isTPAC ? 'NSSTA' : 'iGOT'} Portal`}
+                  >
+                    <ExternalLink size={14} />
+                  </a>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Load More Button if more courses available */}
+      {filteredCourses.length > displayedCourses.length && (
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 18)}
+            className="px-6 py-2.5 bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700 text-xs font-bold rounded-2xl shadow-xs transition-all cursor-pointer flex items-center gap-2"
+          >
+            Load More Courses ({filteredCourses.length - displayedCourses.length} Remaining)
+          </button>
+        </div>
+      )}
     </div>
   );
 }

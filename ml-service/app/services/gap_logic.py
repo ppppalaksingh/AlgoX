@@ -60,12 +60,14 @@ def estimate_current_level(
         if any(kw in t_str for kw in keywords):
             training_bonus += 0.35
 
-    # Completed courses boost
+    # Completed courses & certificates boost
     courses_bonus = 0.0
     for c in (completed_courses or []):
         c_str = str(c).lower()
         if any(kw in c_str for kw in keywords):
-            courses_bonus += 0.30
+            courses_bonus += 0.50
+        else:
+            courses_bonus += 0.20
 
     # Live Quiz Performance Impact (Real-time Adaptive ML)
     quiz_bonus = 0.0
@@ -83,11 +85,10 @@ def estimate_current_level(
 
         if relevant_scores:
             avg_quiz_score = sum(relevant_scores) / len(relevant_scores)
-            # High score (>75%) raises level; low score (<50%) flags deficiency
-            quiz_bonus = (avg_quiz_score - 50) / 100.0 * 0.85
+            quiz_bonus = max((avg_quiz_score / 100.0) * 0.85, 0.1)
 
     total = base + qual_bonus + training_bonus + courses_bonus + quiz_bonus
-    return round(min(max(total, 1.2), 4.9), 1)
+    return round(min(max(total, 1.2), 5.0), 1)
 
 def run_gap_analysis(profile: dict) -> dict:
     designation = profile.get("designation", "Assistant Director")
