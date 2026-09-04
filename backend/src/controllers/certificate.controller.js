@@ -1,5 +1,9 @@
 import Certificate from "../models/Certificate.model.js";
 import User from "../models/User.model.js";
+import QuizAttempt from "../models/QuizAttempt.model.js";
+import CompetencyProfile from "../models/CompetencyProfile.model.js";
+import UserProgress from "../models/UserProgress.model.js";
+import { getGapAnalysis } from "../services/mlService.js";
 
 async function getOrCreateUser(clerkId) {
   let user = await User.findOne({ clerkId });
@@ -9,9 +13,9 @@ async function getOrCreateUser(clerkId) {
       name: "Assistant Director",
       designation: "Assistant Director",
       department: "National Statistical Office (NSO)",
-      experienceYears: 4,
-      qualifications: ["Master in Statistics"],
-      pastTrainings: ["Statistical Sampling Methods"],
+      experienceYears: 0,
+      qualifications: [],
+      pastTrainings: [],
     });
   }
   return user;
@@ -22,8 +26,8 @@ export const getMyCertificates = async (req, res) => {
     const user = await getOrCreateUser(req.userId);
     let certs = await Certificate.find({ userId: user._id }).sort({ createdAt: -1 });
 
-    // Seed default baseline certificates if brand new user with 0 certificates
-    if (!certs || certs.length === 0) {
+    // Only seed baseline certificates if user has established prior experience (>0) and no certificates
+    if ((!certs || certs.length === 0) && (Number(user.experienceYears) || 0) > 0) {
       const defaultCerts = [
         {
           userId: user._id,
@@ -54,7 +58,7 @@ export const getMyCertificates = async (req, res) => {
       certs = await Certificate.insertMany(defaultCerts);
     }
 
-    res.json(certs);
+    res.json(certs || []);
   } catch (err) {
     console.error("[certificate.controller] getMyCertificates error:", err);
     res.status(500).json({ error: err.message });
@@ -75,7 +79,52 @@ export const createCertificate = async (req, res) => {
       institute: institute || "National Statistical Systems Training Academy (NSSTA)",
     });
 
-    res.status(201).json(cert);
+    // Recalibrate competency profile on certificate acquisition
+    let recalibratedProfile = null;
+    try {
+      const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
+      const certificates = await Certificate.find({ userId: user._id });
+      const progress = await UserProgress.findOne({ userId: user._id });
+
+      const completedCourses = [
+        ...(user.pastTrainings || []),
+        ...(certificates.map((c) => `${c.title} (${c.domain || 'Statistical'})`)),
+        ...(progress?.completedCourseIds || []),
+      ];
+
+      const gapResult = await getGapAnalysis({
+        designation: user.designation || "Assistant Director",
+        department: user.department || "National Statistical Office (NSO)",
+        experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+        qualifications: user.qualifications || [],
+        pastTrainings: user.pastTrainings || [],
+        quizAttempts: quizAttempts.map((q) => ({
+          sourceFileName: q.sourceFileName,
+          score: q.score,
+          totalQuestions: q.totalQuestions,
+        })),
+        completedCourses,
+      });
+
+      recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
+        { userId: user._id },
+        {
+          domainScores: gapResult.domainScores,
+          skillGaps: gapResult.skillGaps,
+          subCompetencies: gapResult.subCompetencies,
+          overallReadiness: gapResult.overallReadiness,
+          highestGap: gapResult.highestGap,
+          topStrength: gapResult.topStrength,
+          aiExecutiveInsight: gapResult.aiExecutiveInsight,
+          domainTargets: gapResult.domainTargets,
+        },
+        { upsert: true, new: true }
+      );
+    } catch (recalErr) {
+      console.warn("[certificate.controller] Recalibration note:", recalErr.message);
+    }
+
+    res.status(201).json({ ...cert.toObject(), recalibratedProfile });
   } catch (err) {
     console.error("[certificate.controller] createCertificate error:", err);
     res.status(500).json({ error: err.message });

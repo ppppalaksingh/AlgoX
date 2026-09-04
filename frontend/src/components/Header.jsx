@@ -210,22 +210,23 @@ export default function Header({
             className="flex items-center gap-2 p-1.5 sm:px-2.5 rounded-xl hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-              {user?.name?.charAt(0) ?? "O"}
+              {user?.name?.charAt(0) ?? "P"}
             </div>
             <div className="hidden sm:block text-left leading-tight">
-              <p className="text-xs font-bold text-slate-800 truncate max-w-28">{user?.name}</p>
-              <p className="text-[10px] text-slate-400 truncate capitalize">
-                {isAdminInDB ? "👑 MoSPI Admin" : "Officer"}
+              <p className="text-xs font-bold text-slate-800 truncate max-w-32">{user?.name || "Palak Singh"}</p>
+              <p className="text-[10px] text-slate-500 font-medium truncate max-w-32">
+                {isAdminInDB ? `👑 Admin · ${user?.designation || "Assistant Director"}` : (user?.designation || "Assistant Director")}
               </p>
             </div>
             <ChevronDown size={14} className="text-slate-400 hidden sm:block" />
           </button>
 
           {profileDropdownOpen && (
-            <div className="absolute right-0 top-12 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-              <div className="p-2 border-b border-slate-100 mb-1">
-                <p className="text-xs font-bold text-slate-800">{user?.name}</p>
-                <p className="text-[11px] text-slate-400 truncate">{user?.email || "officer@mospi.gov.in"}</p>
+            <div className="absolute right-0 top-12 w-60 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+              <div className="p-2.5 border-b border-slate-100 mb-1 bg-slate-50/60 rounded-xl">
+                <p className="text-xs font-bold text-slate-800">{user?.name || "Palak Singh"}</p>
+                <p className="text-[11px] font-semibold text-blue-700 mt-0.5">{user?.designation || "Assistant Director"}</p>
+                <p className="text-[10px] text-slate-400 truncate mt-0.5">{user?.email || "officer@mospi.gov.in"}</p>
                 {isAdminInDB && (
                   <span className="inline-block mt-1 text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
                     👑 Verified Database Admin

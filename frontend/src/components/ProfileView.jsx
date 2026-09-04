@@ -1,36 +1,58 @@
 import { useState, useEffect } from "react";
 import { User, Building2, Briefcase, Award, Sparkles, CheckCircle2, Loader2, BookOpen, ShieldCheck } from "lucide-react";
 
+const getCleanOfficerName = (raw, desig) => {
+  if (!raw) return "";
+  const trimmed = String(raw).trim();
+  if (
+    trimmed === "Assistant Director" ||
+    trimmed === "Director" ||
+    trimmed === "Deputy Director" ||
+    trimmed.toLowerCase() === String(desig || "").toLowerCase()
+  ) {
+    return "";
+  }
+  return trimmed;
+};
+
 export default function ProfileView({ user, profileData, onSaveProfile, isSaving, onRunAnalysis, isAnalyzing }) {
+  const currentDesig = profileData?.designation || localStorage.getItem("algox_user_designation") || user?.designation || "Assistant Director";
+  const initialCleanName =
+    getCleanOfficerName(profileData?.name, currentDesig) ||
+    getCleanOfficerName(localStorage.getItem("algox_user_name"), currentDesig) ||
+    getCleanOfficerName(user?.name, currentDesig) ||
+    "Tarun Gupta";
+
   const [formData, setFormData] = useState({
-    name: profileData?.name || user?.name || "Learner",
-    email: profileData?.email || user?.email || "learner@mospi.gov.in",
-    designation: profileData?.designation || "Assistant Director",
+    name: initialCleanName,
+    email: profileData?.email || user?.email || "officer@mospi.gov.in",
+    designation: currentDesig,
     department: profileData?.department || "National Statistical Office (NSO)",
-    experienceYears: profileData?.experienceYears ?? 4,
+    experienceYears: profileData?.experienceYears != null ? profileData.experienceYears : 0,
     qualifications: Array.isArray(profileData?.qualifications)
       ? profileData.qualifications.join(", ")
-      : profileData?.qualifications || "Master in Statistics, PG Diploma in Data Analytics",
+      : profileData?.qualifications || "",
     pastTrainings: Array.isArray(profileData?.pastTrainings)
       ? profileData.pastTrainings.join(", ")
-      : profileData?.pastTrainings || "iGOT Digital Governance, Statistical Sampling Methods",
+      : profileData?.pastTrainings || "",
   });
 
   useEffect(() => {
     if (profileData) {
+      const cleanIncomingName = getCleanOfficerName(profileData.name, profileData.designation);
       setFormData((prev) => ({
         ...prev,
-        name: profileData.name || prev.name,
+        name: cleanIncomingName || prev.name,
         email: profileData.email || prev.email,
         designation: profileData.designation || prev.designation,
         department: profileData.department || prev.department,
-        experienceYears: profileData.experienceYears ?? prev.experienceYears,
+        experienceYears: profileData.experienceYears != null ? profileData.experienceYears : (prev.experienceYears ?? 0),
         qualifications: Array.isArray(profileData.qualifications)
           ? profileData.qualifications.join(", ")
-          : profileData.qualifications || prev.qualifications,
+          : (profileData.qualifications != null ? profileData.qualifications : prev.qualifications),
         pastTrainings: Array.isArray(profileData.pastTrainings)
           ? profileData.pastTrainings.join(", ")
-          : profileData.pastTrainings || prev.pastTrainings,
+          : (profileData.pastTrainings != null ? profileData.pastTrainings : prev.pastTrainings),
       }));
     }
   }, [profileData]);
@@ -46,7 +68,7 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
       email: formData.email,
       designation: formData.designation,
       department: formData.department,
-      experienceYears: Number(formData.experienceYears) || 0,
+      experienceYears: formData.experienceYears !== "" && !isNaN(Number(formData.experienceYears)) ? Number(formData.experienceYears) : 0,
       qualifications: formData.qualifications.split(",").map((s) => s.trim()).filter(Boolean),
       pastTrainings: formData.pastTrainings.split(",").map((s) => s.trim()).filter(Boolean),
     };

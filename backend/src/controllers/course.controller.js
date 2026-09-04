@@ -13,9 +13,9 @@ async function getOrCreateUser(clerkId) {
       name: "Learner",
       designation: "Assistant Director",
       department: "National Statistical Office (NSO)",
-      experienceYears: 4,
-      qualifications: ["Master in Statistics", "Civil Services Foundation"],
-      pastTrainings: ["iGOT Basics", "Statistical Sampling Methods"],
+      experienceYears: 0,
+      qualifications: [],
+      pastTrainings: [],
     });
   }
   return user;
@@ -30,9 +30,9 @@ export const getRecommendedCourses = async (req, res) => {
       const gapResult = await getGapAnalysis({
         designation: user.designation || "Assistant Director",
         department: user.department || "National Statistical Office (NSO)",
-        experienceYears: user.experienceYears || 4,
-        qualifications: user.qualifications || ["Master in Statistics"],
-        pastTrainings: user.pastTrainings || ["Statistical Sampling Methods"],
+        experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+        qualifications: user.qualifications || [],
+        pastTrainings: user.pastTrainings || [],
       });
       profile = await CompetencyProfile.create({
         userId: user._id,

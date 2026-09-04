@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 
 import path from "path";
@@ -15,7 +15,6 @@ import chatRoutes from "./routes/chat.routes.js";
 import certificateRoutes from "./routes/certificate.routes.js";
 import progressRoutes from "./routes/progress.routes.js";
 
-dotenv.config();
 connectDB();
 
 const app = express();

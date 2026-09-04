@@ -1,52 +1,76 @@
-import { Target, CheckCircle2, ChevronRight, PlayCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Target, CheckCircle2, ChevronRight, PlayCircle, ArrowRight, Loader2, Sparkles } from "lucide-react";
 
 export default function RecommendedPath({ path, onStart, onViewFullPath, isStarting }) {
+  const steps = path?.steps || [];
+  const completedCount = steps.filter((s) => s.completed).length;
+  const totalCount = steps.length || 4;
+  const progressPct = Math.round((completedCount / totalCount) * 100);
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col shadow-xs">
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="font-semibold text-slate-800">Recommended Learning Path</h3>
+    <div className="bg-white rounded-3xl border border-slate-200/90 p-6 flex flex-col shadow-xs hover:shadow-md transition-all duration-200">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold text-slate-800 text-sm">Recommended Cadre Roadmap</h3>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">
+            {progressPct}% Completed
+          </span>
+        </div>
         <button
           onClick={onViewFullPath}
-          className="text-sm text-blue-600 font-medium flex items-center gap-1 hover:underline cursor-pointer"
+          className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline cursor-pointer group"
         >
-          View Full Path <ArrowRight size={14} />
+          Full Roadmap <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
         </button>
       </div>
 
       {/* Title banner */}
-      <div className="flex items-start gap-3 bg-blue-50 rounded-xl p-4 mb-5 border border-blue-100/70">
-        <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
-          <Target size={18} />
+      <div className="flex items-start gap-3 bg-gradient-to-br from-blue-50 to-indigo-50/60 rounded-2xl p-4 mb-4 border border-blue-100/80">
+        <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+          <Target size={20} />
         </div>
-        <div>
-          <p className="font-semibold text-slate-800 text-sm">{path?.title}</p>
-          <p className="text-xs text-slate-500 mt-0.5">{path?.description}</p>
+        <div className="min-w-0">
+          <p className="font-bold text-slate-900 text-xs sm:text-sm truncate">{path?.title || "Python & Microdata Scrutiny Track"}</p>
+          <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{path?.description || "Curated based on your active competency evaluation."}</p>
         </div>
       </div>
 
+      {/* Dynamic progress bar */}
+      <div className="w-full bg-slate-100 rounded-full h-1.5 mb-4 overflow-hidden">
+        <div
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-500"
+          style={{ width: `${progressPct}%` }}
+        />
+      </div>
+
       {/* Steps */}
-      <div className="space-y-1 flex-1">
-        {path?.steps?.map((step, idx) => (
-          <div key={step.id} className="relative flex items-start gap-3 pb-4">
+      <div className="space-y-2 flex-1">
+        {steps.map((step, idx) => (
+          <div
+            key={step.id}
+            onClick={onViewFullPath}
+            className="group relative flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+          >
             {/* connecting line */}
-            {idx < path.steps.length - 1 && (
-              <span className="absolute left-[13px] top-7 w-px h-full bg-slate-200" />
+            {idx < steps.length - 1 && (
+              <span className="absolute left-[19px] top-8 w-px h-6 bg-slate-200" />
             )}
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 z-10 transition-colors
-                ${step.completed ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"}`}
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10 transition-colors
+                ${step.completed ? "bg-emerald-500 text-white shadow-xs" : "bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-700"}`}
             >
-              {step.id}
+              {step.completed ? <CheckCircle2 size={15} /> : step.id}
             </div>
-            <div className="flex-1 flex items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-medium text-slate-800">{step.title}</p>
-                <p className="text-xs text-slate-500">{step.description}</p>
+            <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
+              <div className="min-w-0">
+                <p className={`text-xs font-semibold truncate ${step.completed ? "text-slate-800 line-through decoration-emerald-500/50" : "text-slate-700"}`}>
+                  {step.title}
+                </p>
+                <p className="text-[11px] text-slate-400 truncate">{step.description}</p>
               </div>
               {step.completed ? (
-                <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md shrink-0">Done</span>
               ) : (
-                <ChevronRight size={18} className="text-slate-300 shrink-0" />
+                <ChevronRight size={15} className="text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
               )}
             </div>
           </div>
@@ -56,16 +80,16 @@ export default function RecommendedPath({ path, onStart, onViewFullPath, isStart
       <button
         onClick={onStart}
         disabled={isStarting}
-        className="mt-2 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors text-white text-sm font-medium py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+        className="mt-3 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60 transition-all text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-xs hover:shadow-md cursor-pointer"
       >
         {isStarting ? (
           <>
-            <Loader2 size={16} className="animate-spin" /> Starting Path...
+            <Loader2 size={15} className="animate-spin" /> Loading Roadmap...
           </>
         ) : (
           <>
-            <PlayCircle size={16} />
-            Start Learning Path
+            <PlayCircle size={15} />
+            {progressPct > 0 ? "Continue Learning Path" : "Start Learning Path"}
           </>
         )}
       </button>

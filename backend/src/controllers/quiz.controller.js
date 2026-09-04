@@ -7,6 +7,7 @@ import User from "../models/User.model.js";
 import Document from "../models/Document.model.js";
 import CompetencyProfile from "../models/CompetencyProfile.model.js";
 import UserProgress from "../models/UserProgress.model.js";
+import Certificate from "../models/Certificate.model.js";
 import { generateQuiz, getGapAnalysis } from "../services/mlService.js";
 
 // Configure Cloudinary if env variables are present
@@ -26,15 +27,18 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 async function getOrCreateUser(clerkId) {
   let user = await User.findOne({ clerkId });
+  if (!user && (clerkId === "user_dev_officer_test" || clerkId === "officer-default" || !clerkId)) {
+    user = await User.findOne().sort({ updatedAt: -1 });
+  }
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: "Assistant Director",
+      name: "Palak Singh",
       designation: "Assistant Director",
       department: "National Statistical Office (NSO)",
-      experienceYears: 4,
-      qualifications: ["Master in Statistics", "Civil Services Foundation"],
-      pastTrainings: ["iGOT Basics", "Statistical Sampling Methods"],
+      experienceYears: 0,
+      qualifications: [],
+      pastTrainings: [],
     });
   }
   return user;
@@ -55,26 +59,47 @@ function extractPrintableTextFromBuffer(buffer) {
 export const isAnswerMatch = (userAns, correctAns, options = []) => {
   if (!userAns || !correctAns) return false;
 
-  const cleanU = userAns.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ");
-  const cleanC = correctAns.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ");
+  const normalize = (str) =>
+    str.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ");
+
+  const cleanU = normalize(userAns);
+  const cleanC = normalize(correctAns);
 
   if (cleanU === cleanC) return true;
+
+  // Check if userAns is a single letter A-D
+  const userLetter = userAns.toString().trim().match(/^[A-D]$/i);
+  if (userLetter && options && options.length > 0) {
+    const uIdx = userLetter[0].toUpperCase().charCodeAt(0) - 65;
+    if (options[uIdx] && normalize(options[uIdx]) === cleanC) return true;
+  }
 
   // Check if correctAns is letter A/B/C/D
   const letterMatch = correctAns.toString().trim().match(/^[A-D]$/i);
   if (letterMatch && options && options.length > 0) {
     const idx = letterMatch[0].toUpperCase().charCodeAt(0) - 65;
     if (options[idx]) {
-      const optClean = options[idx].toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ");
+      const optClean = normalize(options[idx]);
       if (cleanU === optClean) return true;
     }
   }
 
-  if (cleanU.length > 15 && cleanC.length > 15) {
-    if (cleanU.includes(cleanC) || cleanC.includes(cleanU)) return true;
-  }
-
   return false;
+};
+
+export const shuffleQuestionsOptions = (questions) => {
+  return (questions || []).map((q) => {
+    if (!q.options || q.options.length < 2) return q;
+    const shuffled = [...q.options];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return {
+      ...q,
+      options: shuffled,
+    };
+  });
 };
 
 export const uploadAndGenerateQuiz = async (req, res) => {
@@ -116,31 +141,28 @@ export const uploadAndGenerateQuiz = async (req, res) => {
     let rawExtracted = "";
     const lowerName = req.file.originalname.toLowerCase();
 
-    // 1. If Plain Text / JSON / CSV / MD
-    if (req.file.mimetype === "text/plain" || lowerName.endsWith(".txt") || lowerName.endsWith(".csv") || lowerName.endsWith(".md")) {
-      rawExtracted = req.file.buffer.toString("utf-8");
-    }
-    // 2. If PDF
-    else if (req.file.mimetype === "application/pdf" || lowerName.includes(".pdf") || req.file.buffer.slice(0, 5).toString() === "%PDF-") {
-      try {
-        const { default: pdfParse } = await import("pdf-parse");
-        const pdfData = await pdfParse(req.file.buffer);
-        if (pdfData && pdfData.text && pdfData.text.trim().length > 15) {
-          rawExtracted = pdfData.text;
-        }
-      } catch (pdfErr) {
-        console.warn("[quiz.controller] pdf-parse note:", pdfErr.message);
-        rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
-      }
-    }
-    // 3. If PPTX, PPT, DOCX, XLSX
-    else {
+    // 1. If PPTX, PPT, DOCX, XLSX (Office documents - check extension first to prevent files like "xyz.pdf.pptx" from being treated as PDF)
+    if (
+      lowerName.endsWith(".pptx") ||
+      lowerName.endsWith(".ppt") ||
+      lowerName.endsWith(".docx") ||
+      lowerName.endsWith(".doc") ||
+      lowerName.endsWith(".xlsx") ||
+      lowerName.endsWith(".ppsx") ||
+      req.file.mimetype.includes("presentation") ||
+      req.file.mimetype.includes("powerpoint") ||
+      req.file.mimetype.includes("wordprocessingml")
+    ) {
       try {
         const parsed = await parseOffice(filePath);
-        if (typeof parsed === "string" && !parsed.includes('"config"')) {
+        if (typeof parsed?.toText === "function") {
+          rawExtracted = parsed.toText();
+        } else if (typeof parsed === "string") {
           rawExtracted = parsed;
         } else if (parsed?.text) {
           rawExtracted = parsed.text;
+        } else if (parsed?.content) {
+          rawExtracted = typeof parsed.content === "string" ? parsed.content : JSON.stringify(parsed.content);
         } else {
           rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
         }
@@ -149,18 +171,48 @@ export const uploadAndGenerateQuiz = async (req, res) => {
         rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
       }
     }
+    // 2. If Plain Text / JSON / CSV / MD
+    else if (
+      req.file.mimetype === "text/plain" ||
+      lowerName.endsWith(".txt") ||
+      lowerName.endsWith(".csv") ||
+      lowerName.endsWith(".md") ||
+      req.file.mimetype.startsWith("text/")
+    ) {
+      rawExtracted = req.file.buffer.toString("utf-8");
+    }
+    // 3. If PDF
+    else if (
+      req.file.mimetype === "application/pdf" ||
+      lowerName.endsWith(".pdf") ||
+      req.file.buffer.slice(0, 5).toString() === "%PDF-"
+    ) {
+      try {
+        const pdfModule = await import("pdf-parse");
+        if (pdfModule.PDFParse) {
+          const parser = new pdfModule.PDFParse({ data: req.file.buffer });
+          const textResult = await parser.getText();
+          rawExtracted = textResult?.text || "";
+        } else if (typeof pdfModule.default === "function") {
+          const pdfData = await pdfModule.default(req.file.buffer);
+          rawExtracted = pdfData?.text || "";
+        }
+      } catch (pdfErr) {
+        console.warn("[quiz.controller] pdf-parse note:", pdfErr.message);
+        rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
+      }
+    }
+    // 4. Any other format
+    else {
+      rawExtracted = extractPrintableTextFromBuffer(req.file.buffer);
+    }
 
     let extractedText = typeof rawExtracted === "string" ? rawExtracted : (rawExtracted?.text || "");
-
-    // Remove any raw internal officeparser config JSON
-    if (extractedText.includes('"config"') || (extractedText.startsWith("{") && extractedText.includes("newlineDelimiter"))) {
-      extractedText = extractPrintableTextFromBuffer(req.file.buffer);
-    }
 
     // Clean whitespace and invalid control characters
     extractedText = extractedText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ").replace(/\s+/g, " ").trim();
 
-    // Safety fallback
+    // Safety fallback only if really empty
     if (!extractedText || extractedText.length < 20) {
       extractedText = `Official study material: ${req.file.originalname}. Core official statistical capacity building documentation covering survey schedules, sampling methodology, and data scrutiny.`;
     }
@@ -248,20 +300,22 @@ export const uploadAndGenerateQuiz = async (req, res) => {
       };
     }
 
+    const shuffledQuestions = shuffleQuestionsOptions(quizData.questions);
     const attempt = await QuizAttempt.create({
       userId: user._id,
       sourceFileName: req.file.originalname,
-      questions: quizData.questions,
-      totalQuestions: quizData.questions.length,
+      questions: shuffledQuestions,
+      totalQuestions: shuffledQuestions.length,
     });
 
     res.json({
       _id: attempt._id,
+      attemptId: attempt._id,
       sourceFileName: req.file.originalname,
       fileUrl,
       documentId: docRecord._id,
-      questions: quizData.questions,
-      totalQuestions: quizData.questions.length,
+      questions: shuffledQuestions,
+      totalQuestions: shuffledQuestions.length,
     });
   } catch (err) {
     console.error("[quiz.controller] uploadAndGenerateQuiz error:", err);
@@ -318,21 +372,303 @@ Key competency areas include statistical indicators, survey design, AI in govern
       };
     }
 
+    const shuffledQuestions = shuffleQuestionsOptions(quizData.questions);
     const attempt = await QuizAttempt.create({
       userId: user._id,
       sourceFileName: "Gov_AI_Policy_Sample.pdf",
-      questions: quizData.questions,
-      totalQuestions: quizData.questions.length,
+      questions: shuffledQuestions,
+      totalQuestions: shuffledQuestions.length,
     });
 
     res.json({
       _id: attempt._id,
+      attemptId: attempt._id,
       sourceFileName: "Gov_AI_Policy_Sample.pdf",
-      questions: quizData.questions,
-      totalQuestions: quizData.questions.length,
+      questions: shuffledQuestions,
+      totalQuestions: shuffledQuestions.length,
     });
   } catch (err) {
     console.error("[quiz.controller] generateSampleQuiz error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const generateQuizFromResource = async (req, res) => {
+  try {
+    const user = await getOrCreateUser(req.userId);
+    const { sourceFileName, text, summary, docId } = req.body;
+    const resolvedFileName = sourceFileName || "MoSPI_Training_Resource.pdf";
+
+    let specializedQuestions = null;
+    const lowerName = resolvedFileName.toLowerCase();
+
+    if (lowerName.includes("deck") || lowerName.includes("survey_methodology") || lowerName.includes("pptx")) {
+      specializedQuestions = [
+        {
+          question: "In the MoSPI Stratified Multi-Stage Sampling Design, what selection method is used for First Stage Units (FSUs)?",
+          options: [
+            "Probability Proportional to Size with Replacement (PPSWR)",
+            "Simple Random Sampling with Arbitrary Weights",
+            "Non-probability quota allocation",
+            "Systematic selection without replacement strictly on urban centers"
+          ],
+          correctAnswer: "Probability Proportional to Size with Replacement (PPSWR)",
+          explanation: "In MoSPI large-scale sample surveys, FSUs are selected using Probability Proportional to Size with Replacement (PPSWR)."
+        },
+        {
+          question: "According to Neyman Allocation principles in survey design, when is a stratum allocated a larger sample size?",
+          options: [
+            "When the stratum is larger in size (N_h) and exhibits higher internal variance/heterogeneity (S_h)",
+            "When the stratum is purely homogeneous and has low variance",
+            "When enumeration costs are completely disregarded",
+            "When the stratum is restricted to rural agricultural zones"
+          ],
+          correctAnswer: "When the stratum is larger in size (N_h) and exhibits higher internal variance/heterogeneity (S_h)",
+          explanation: "Neyman Allocation minimizes overall survey variance by allocating more sample units to larger and more heterogeneous strata."
+        },
+        {
+          question: "What is the official aggregation formula currently utilized by MoSPI for compiling the All-India Consumer Price Index (CPI)?",
+          options: [
+            "Modified Laspeyres Price Index Formula (base year 2012=100)",
+            "Paasche Weighted Current Year Index",
+            "Fisher Ideal Geometric Formula with floating weights",
+            "Harmonic Mean Price Ratio Formula"
+          ],
+          correctAnswer: "Modified Laspeyres Price Index Formula (base year 2012=100)",
+          explanation: "MoSPI CPI uses the Modified Laspeyres Price Index formula with base year 2012=100 and fixed consumption weights."
+        },
+        {
+          question: "Under the UN System of National Accounts (SNA 2008), how is Gross Value Added (GVA at basic prices) computed?",
+          options: [
+            "Total Output minus Intermediate Consumption",
+            "GDP at Market Prices minus All Taxes",
+            "Gross Fixed Capital Formation plus Exports",
+            "Net Domestic Product plus Depreciation"
+          ],
+          correctAnswer: "Total Output minus Intermediate Consumption",
+          explanation: "GVA at basic prices is defined as Total Value of Output minus Intermediate Consumption across economic sectors."
+        },
+        {
+          question: "Under the DPDP Act 2023, what is the mandatory privacy threshold applied to official survey microdata before public release?",
+          options: [
+            "k-Anonymity (k >= 5) with strict suppression of all direct citizen identifiers",
+            "Full publication of raw citizen Aadhaar and phone records",
+            "Exemption of government surveys from any anonymization rules",
+            "Encrypted access restricted solely to international organizations"
+          ],
+          correctAnswer: "k-Anonymity (k >= 5) with strict suppression of all direct citizen identifiers",
+          explanation: "DPDP Act 2023 mandates de-identification, k-anonymity (k>=5), and direct identifier suppression prior to dissemination."
+        }
+      ];
+    } else if (lowerName.includes("framework") || lowerName.includes("national_statistical")) {
+      specializedQuestions = [
+        {
+          question: "What is the primary core mandate established under the MoSPI National Statistical Framework 2026?",
+          options: [
+            "Ensuring scientific independence, data integrity, and adherence to UN Fundamental Principles of Official Statistics",
+            "Commercial privatization of all national census records",
+            "Replacing nationwide surveys with private social media metrics",
+            "Eliminating metadata standards across ministries"
+          ],
+          correctAnswer: "Ensuring scientific independence, data integrity, and adherence to UN Fundamental Principles of Official Statistics",
+          explanation: "The 2026 Framework ensures objectivity, impartiality, and scientific independence for all official statistics."
+        },
+        {
+          question: "Which international standard must official MoSPI datasets comply with for automated metadata exchange?",
+          options: [
+            "SDMX (Statistical Data and Metadata e-Exchange)",
+            "Proprietary CSV binary encoding",
+            "Unstructured PDF text dumps",
+            "Simple XML format without schema definitions"
+          ],
+          correctAnswer: "SDMX (Statistical Data and Metadata e-Exchange)",
+          explanation: "National datasets adhere to UN/IMF SDMX standards for interoperable statistical data and metadata exchange."
+        },
+        {
+          question: "Under the National Quality Assurance Framework (NQAF), what automated step is mandatory for survey schedules (PLFS/ASI)?",
+          options: [
+            "Automated multi-level validation & scrutiny rules prior to final multiplier weighting",
+            "Manual paper-only field transcription",
+            "Immediate publishing without anomaly detection",
+            "Direct deletion of outlier household records"
+          ],
+          correctAnswer: "Automated multi-level validation & scrutiny rules prior to final multiplier weighting",
+          explanation: "NQAF enforces automated scrutiny rules, range checks, and consistency validation before tabulation."
+        },
+        {
+          question: "Under the UN Fundamental Principles of Official Statistics, what is the policy regarding confidentiality of citizen survey records?",
+          options: [
+            "Individual microdata collected for statistical purposes must remain strictly confidential and never used for punitive action",
+            "Citizen data may be shared with private advertisers",
+            "Microdata must disclose citizen addresses to the public",
+            "Confidentiality expires after 6 months of survey publication"
+          ],
+          correctAnswer: "Individual microdata collected for statistical purposes must remain strictly confidential and never used for punitive action",
+          explanation: "Principle 6 guarantees strict confidentiality of individual records collected for statistical purposes."
+        },
+        {
+          question: "What is the role of post-stratification multiplier weighting in MoSPI sample surveys?",
+          options: [
+            "Expands sample observations to reflect true national and state demographic totals",
+            "Reduces the effective sample size to save computational time",
+            "Standardizes questionnaire font sizes across regional languages",
+            "Replaces missing field values with arbitrary zeroes"
+          ],
+          correctAnswer: "Expands sample observations to reflect true national and state demographic totals",
+          explanation: "Multipliers weight each sample unit by the inverse probability of selection to generate unbiased nationwide aggregations."
+        }
+      ];
+    } else if (lowerName.includes("dpdp") || lowerName.includes("privacy") || lowerName.includes("data_privacy")) {
+      specializedQuestions = [
+        {
+          question: "Under the DPDP Act 2023, what is the role of government statistical agencies acting as 'Data Fiduciaries'?",
+          options: [
+            "Determining the purpose and means of processing personal data in compliance with purpose limitation",
+            "Selling anonymized citizen records for commercial profit",
+            "Exempting state agencies from any security audits",
+            "Storing citizen survey records in unencrypted public repositories"
+          ],
+          correctAnswer: "Determining the purpose and means of processing personal data in compliance with purpose limitation",
+          explanation: "Data Fiduciaries must ensure lawful processing, purpose limitation, and strict safeguards for personal data."
+        },
+        {
+          question: "What encryption standards are mandated by MeghRaj Government Cloud for statistical survey microdata?",
+          options: [
+            "AES-256 encryption at rest and TLS 1.3 in transit",
+            "DES 56-bit legacy encryption",
+            "Base64 plain text encoding",
+            "Unencrypted local HTTP transmissions"
+          ],
+          correctAnswer: "AES-256 encryption at rest and TLS 1.3 in transit",
+          explanation: "MeghRaj GovCloud requires AES-256 bit encryption at rest and TLS 1.3 in transit for all official data."
+        },
+        {
+          question: "What is the 'Purpose Limitation' principle under the DPDP Act 2023 for survey schedules?",
+          options: [
+            "Personal data collected for statistical survey purposes cannot be used for administrative penalties or law enforcement",
+            "Data can only be collected during daylight hours",
+            "Surveys are limited to 10 questions per household",
+            "Government officers are restricted from accessing statistical dashboards"
+          ],
+          correctAnswer: "Personal data collected for statistical survey purposes cannot be used for administrative penalties or law enforcement",
+          explanation: "Purpose limitation strictly prohibits using statistical survey responses for legal or tax investigation actions."
+        },
+        {
+          question: "Which of the following constitutes a mandatory de-identification technique before publishing public microdata?",
+          options: [
+            "Suppression of direct identifiers (Aadhaar, citizen name, phone) and k-anonymity aggregation",
+            "Watermarking the raw identity document with agency logos",
+            "Publishing citizen phone numbers in reverse order",
+            "Distributing raw GPS coordinates to commercial entities"
+          ],
+          correctAnswer: "Suppression of direct identifiers (Aadhaar, citizen name, phone) and k-anonymity aggregation",
+          explanation: "De-identification requires removing direct identifiers and generalizing quasi-identifiers so individuals cannot be singled out."
+        },
+        {
+          question: "Who conducts the mandatory annual security and vulnerability penetration tests for official survey platforms?",
+          options: [
+            "CERT-In empaneled information security auditing organizations",
+            "Informal internal peer reviewers",
+            "Third-party advertising agencies",
+            "Local municipal administrative bodies"
+          ],
+          correctAnswer: "CERT-In empaneled information security auditing organizations",
+          explanation: "GovCloud statistical platforms must undergo annual CERT-In empanelled audits to ensure compliance."
+        }
+      ];
+    }
+
+    let quizQuestions = specializedQuestions;
+
+    if (!quizQuestions) {
+      const docText = text || summary || `Assessment for ${resolvedFileName}. Key concepts in official statistics, survey methodology, data analysis, and cadre competencies.`;
+      try {
+        const mlRes = await generateQuiz(docText);
+        if (mlRes?.questions?.length > 0) {
+          quizQuestions = mlRes.questions;
+        }
+      } catch (err) {
+        console.warn("[quiz.controller] ML quiz generation fallback for resource:", err.message);
+      }
+    }
+
+    if (!quizQuestions || quizQuestions.length === 0) {
+      quizQuestions = [
+        {
+          question: `Which fundamental principle is demonstrated in the official material "${resolvedFileName}"?`,
+          options: [
+            "Data integrity, scientific objectivity, and professional validation",
+            "Subjective estimation without probability sampling",
+            "Informal anecdotal reporting",
+            "Commercial monetization of survey records"
+          ],
+          correctAnswer: "Data integrity, scientific objectivity, and professional validation",
+          explanation: "Official MoSPI materials emphasize data integrity, standardized methods, and objective validation."
+        },
+        {
+          question: `How does the guidance in "${resolvedFileName}" contribute to national indicator compilation?`,
+          options: [
+            "Provides standardized methodology and reduces non-sampling errors across field schedules",
+            "Eliminates the requirement for secondary data validation",
+            "Restricts analysis solely to macro-level national aggregates",
+            "Removes quality assurance protocols from field operations"
+          ],
+          correctAnswer: "Provides standardized methodology and reduces non-sampling errors across field schedules",
+          explanation: "Standardized protocols ensure consistency, comparability, and error reduction."
+        },
+        {
+          question: "In government data systems, which protocol guarantees citizen privacy during analytical processing?",
+          options: [
+            "Mandatory de-identification, role-based access control, and purpose limitation",
+            "Unrestricted open publication of raw identifying microdata",
+            "Disabling database audit logs to enhance speed",
+            "Exemption of official surveys from digital security standards"
+          ],
+          correctAnswer: "Mandatory de-identification, role-based access control, and purpose limitation",
+          explanation: "Statutory governance mandates role-based access and de-identification to safeguard privacy."
+        },
+        {
+          question: "What is the key benefit of multi-stage stratified sampling designs in nationwide socio-economic surveys?",
+          options: [
+            "Minimizes survey operational costs while preserving statistical precision and geographical representation",
+            "Completely eliminates all sampling errors in single households",
+            "Replaces scientific probability frames with arbitrary selection",
+            "Allows enumerators to choose sample units at their convenience"
+          ],
+          correctAnswer: "Minimizes survey operational costs while preserving statistical precision and geographical representation",
+          explanation: "Stratified multi-stage designs optimize operational efficiency and national precision."
+        },
+        {
+          question: "What is the role of National Statistical Systems Training Academy (NSSTA) for cadre officers?",
+          options: [
+            "Imparts certified competencies in modern survey design, big data analytics, and national accounting",
+            "Conducts commercial sales of industrial market products",
+            "Regulates private sector vehicle licensing",
+            "Manages non-statistical municipal elections"
+          ],
+          correctAnswer: "Imparts certified competencies in modern survey design, big data analytics, and national accounting",
+          explanation: "NSSTA is the premier national academy for capacity building in official statistics."
+        }
+      ];
+    }
+
+    const shuffledQuestions = shuffleQuestionsOptions(quizQuestions);
+    const attempt = await QuizAttempt.create({
+      userId: user._id,
+      sourceFileName: resolvedFileName,
+      questions: shuffledQuestions,
+      totalQuestions: shuffledQuestions.length,
+    });
+
+    res.json({
+      _id: attempt._id,
+      attemptId: attempt._id,
+      sourceFileName: resolvedFileName,
+      questions: shuffledQuestions,
+      totalQuestions: shuffledQuestions.length,
+    });
+  } catch (err) {
+    console.error("[quiz.controller] generateQuizFromResource error:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -347,11 +683,20 @@ export const submitQuizAnswers = async (req, res) => {
     }
 
     let score = 0;
-    attempt.questions.forEach((q, i) => {
-      const userAns = answers[i];
-      if (isAnswerMatch(userAns, q.correctAnswer, q.options)) {
+    const evaluations = attempt.questions.map((q, i) => {
+      const userAns = answers && answers[i] != null ? answers[i] : "";
+      const isCorrect = isAnswerMatch(userAns, q.correctAnswer, q.options);
+      if (isCorrect) {
         score++;
       }
+      return {
+        questionIndex: i,
+        question: q.question,
+        userAnswer: userAns,
+        correctAnswer: q.correctAnswer,
+        isCorrect,
+        explanation: q.explanation,
+      };
     });
 
     attempt.score = score;
@@ -362,18 +707,38 @@ export const submitQuizAnswers = async (req, res) => {
     try {
       const user = await User.findById(attempt.userId);
       if (user) {
-        const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
+        const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
+          .sort({ createdAt: -1 })
+          .limit(10);
+        const certificates = await Certificate.find({ userId: user._id });
+        const progress = await UserProgress.findOne({ userId: user._id });
+
+        const certTitles = new Set();
+        const completedCourses = [...(user.pastTrainings || [])];
+        for (const c of certificates) {
+          if (c.title && !certTitles.has(c.title.toLowerCase().trim())) {
+            certTitles.add(c.title.toLowerCase().trim());
+            completedCourses.push(`${c.title} (${c.domain || 'Statistical'})`);
+          }
+        }
+        for (const cId of (progress?.completedCourseIds || [])) {
+          if (!certTitles.has(String(cId).toLowerCase().trim())) {
+            completedCourses.push(String(cId));
+          }
+        }
+
         const gapResult = await getGapAnalysis({
           designation: user.designation || "Assistant Director",
           department: user.department || "National Statistical Office (NSO)",
-          experienceYears: user.experienceYears || 4,
-          qualifications: user.qualifications || ["Master in Statistics"],
-          pastTrainings: user.pastTrainings || ["Statistical Sampling Methods"],
+          experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+          qualifications: user.qualifications || [],
+          pastTrainings: user.pastTrainings || [],
           quizAttempts: quizAttempts.map((q) => ({
             sourceFileName: q.sourceFileName,
             score: q.score,
             totalQuestions: q.totalQuestions,
           })),
+          completedCourses,
         });
 
         recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
@@ -388,7 +753,7 @@ export const submitQuizAnswers = async (req, res) => {
             aiExecutiveInsight: gapResult.aiExecutiveInsight,
             domainTargets: gapResult.domainTargets,
           },
-          { upsert: true, returnDocument: "after" }
+          { upsert: true, new: true }
         );
 
         // Also update UserProgress study hours & streak
@@ -410,9 +775,23 @@ export const submitQuizAnswers = async (req, res) => {
       total: attempt.totalQuestions,
       percentage: Math.round((score / attempt.totalQuestions) * 100),
       questions: attempt.questions,
+      evaluations,
       recalibratedProfile,
     });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getQuizAttempts = async (req, res) => {
+  try {
+    const user = await getOrCreateUser(req.userId);
+    const attempts = await QuizAttempt.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .limit(30);
+    res.json({ attempts });
+  } catch (err) {
+    console.error("[quiz.controller] getQuizAttempts error:", err);
     res.status(500).json({ error: err.message });
   }
 };

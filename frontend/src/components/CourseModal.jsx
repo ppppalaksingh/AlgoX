@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BookOpen,
   CheckCircle2,
@@ -18,9 +18,32 @@ import {
 } from "lucide-react";
 import { getColor } from "../data/colorMap";
 
-export default function CourseModal({ course, isOpen, onClose, onCompleteCourse }) {
+export default function CourseModal({ course, isOpen, onClose, onCompleteCourse, onRunAnalysis }) {
   const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
-  const [completedModules, setCompletedModules] = useState([0]);
+  const [completedModules, setCompletedModules] = useState([]);
+
+  // Load actual saved progress for this specific course whenever it opens
+  useEffect(() => {
+    if (course) {
+      setSelectedModuleIndex(0);
+      try {
+        const saved = localStorage.getItem(`course_progress_${course.id}`);
+        if (saved) {
+          setCompletedModules(JSON.parse(saved));
+        } else if (course.status === "Completed" || course.percent === 100) {
+          setCompletedModules([0, 1, 2, 3]);
+        } else {
+          setCompletedModules([]); // Fresh course starts at 0%
+        }
+      } catch {
+        if (course.status === "Completed" || course.percent === 100) {
+          setCompletedModules([0, 1, 2, 3]);
+        } else {
+          setCompletedModules([]);
+        }
+      }
+    }
+  }, [course?.id, course?.status, course?.percent]);
 
   if (!isOpen || !course) return null;
 
@@ -76,16 +99,34 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
   ];
 
   const toggleModule = (idx) => {
-    if (completedModules.includes(idx)) {
-      setCompletedModules((prev) => prev.filter((i) => i !== idx));
-    } else {
-      setCompletedModules((prev) => [...prev, idx]);
+    setCompletedModules((prev) => {
+      const next = prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx];
+      try {
+        localStorage.setItem(`course_progress_${course.id}`, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const handleCompleteActiveChapter = () => {
+    toggleModule(selectedModuleIndex);
+    if (selectedModuleIndex < modules.length - 1) {
+      setSelectedModuleIndex((prev) => prev + 1);
     }
+  };
+
+  const handleIssueCertificate = () => {
+    setCompletedModules([0, 1, 2, 3]);
+    try {
+      localStorage.setItem(`course_progress_${course.id}`, JSON.stringify([0, 1, 2, 3]));
+    } catch (e) {}
+    onCompleteCourse?.(course);
   };
 
   const currentModule = modules[selectedModuleIndex] || modules[0];
   const progressPercent = Math.round((completedModules.length / modules.length) * 100);
-  const isFullyComplete = completedModules.length === modules.length;
+  const isCurrentDone = completedModules.includes(selectedModuleIndex);
+  const isFullyComplete = completedModules.length === modules.length || course.status === "Completed";
 
   const officialPortalLink = course.officialUrl || course.igotLink || (isTPAC ? "https://nssta.gov.in" : "https://portal.igotkarmayogi.gov.in/public/home");
 
@@ -108,7 +149,7 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
                   {course.domain || "Statistical Competency"}
                 </span>
                 <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                  {course.level || "Level 3"}
+                  {course.level || "Level 2"}
                 </span>
               </div>
               <h2 className="text-base sm:text-lg font-bold text-white leading-snug">{course.title}</h2>
@@ -132,13 +173,19 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
         <div className="px-6 py-3 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-700">Course Mastery:</span>
-            <span className="text-xs font-extrabold text-blue-600">{progressPercent}%</span>
+            <span className={`text-xs font-extrabold ${progressPercent === 100 ? "text-emerald-600" : "text-blue-600"}`}>
+              {progressPercent}%
+            </span>
             <span className="text-[11px] text-slate-400">({completedModules.length}/{modules.length} Chapters)</span>
           </div>
 
           <div className="w-48 sm:w-64 h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
+              className={`h-full rounded-full transition-all duration-500 ${
+                progressPercent === 100
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                  : "bg-gradient-to-r from-blue-600 to-indigo-600"
+              }`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -147,13 +194,50 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
         {/* Main Body: Two Columns (Chapter List + Active Chapter Viewer) */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           
+          {/* Milestone Completion Announcement & AI Run trigger */}
+          {isFullyComplete && (
+            <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-blue-500/15 border border-emerald-300/80 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <CheckCircle2 size={22} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800">
+                    All Modules Completed! Official Certificate Ready.
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Click &quot;Run AI Analysis&quot; to recalculate your overall readiness and domain competency.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  handleIssueCertificate();
+                  onClose();
+                  onRunAnalysis?.();
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition shrink-0 cursor-pointer"
+              >
+                <Sparkles size={14} className="text-amber-300 animate-pulse" /> Run AI Analysis
+              </button>
+            </div>
+          )}
+
           {/* Active Chapter Interactive Study Card */}
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white space-y-4 border border-slate-700 shadow-md">
             <div className="flex items-center justify-between border-b border-slate-700 pb-3">
               <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Play size={13} className="fill-amber-400" /> Active Chapter: {selectedModuleIndex + 1}
               </span>
-              <span className="text-xs text-slate-400 font-medium">{currentModule.duration}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400 font-medium">{currentModule.duration}</span>
+                {isCurrentDone && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                    <Check size={11} /> Completed
+                  </span>
+                )}
+              </div>
             </div>
 
             <div>
@@ -172,13 +256,34 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
                 ))}
               </div>
             </div>
+
+            {/* Quick action to mark current chapter done */}
+            <div className="pt-2 flex items-center justify-between">
+              <span className="text-xs text-slate-400">
+                Study this lesson and mark done to unlock certification.
+              </span>
+              <button
+                type="button"
+                onClick={handleCompleteActiveChapter}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                  isCurrentDone
+                    ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                    : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs"
+                }`}
+              >
+                <Check size={13} /> {isCurrentDone ? "Mark Incomplete" : "Mark Chapter Completed"}
+              </button>
+            </div>
           </div>
 
           {/* Chapter Outline Selection */}
           <div className="space-y-2.5">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Layers size={14} className="text-blue-600" /> Course Syllabus &amp; Milestones
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Layers size={14} className="text-blue-600" /> Course Syllabus &amp; Milestones
+              </h4>
+              <span className="text-[11px] text-slate-400">Click circle to check off chapters</span>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {modules.map((m, idx) => {
@@ -207,6 +312,7 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
                         className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold transition-colors cursor-pointer ${
                           isDone ? "bg-emerald-600 text-white" : "border border-slate-300 text-slate-400 hover:border-blue-500"
                         }`}
+                        title={isDone ? "Mark incomplete" : "Mark complete"}
                       >
                         {isDone ? <Check size={14} /> : idx + 1}
                       </button>
@@ -238,15 +344,35 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse 
             <ExternalLink size={14} /> Open Official Portal ({provider.split('/')[0].trim()})
           </a>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-end">
             <button
+              type="button"
               onClick={() => {
-                setCompletedModules([0, 1, 2, 3]);
-                onCompleteCourse?.(course);
+                if (!isFullyComplete) {
+                  setCompletedModules([0, 1, 2, 3]);
+                  try {
+                    localStorage.setItem(`course_progress_${course.id}`, JSON.stringify([0, 1, 2, 3]));
+                  } catch (e) {}
+                  onCompleteCourse?.(course);
+                }
+                onClose();
+                onRunAnalysis?.();
               }}
-              className="flex-1 sm:flex-none px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              title="Run AI Gap Analysis and Recalibrate Competency Readiness"
             >
-              <Award size={15} /> Complete &amp; Issue Official Certificate
+              <Sparkles size={14} className="text-amber-300" /> Run AI Analysis
+            </button>
+
+            <button
+              onClick={handleIssueCertificate}
+              className={`flex-1 sm:flex-none px-5 py-2.5 text-white text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                isFullyComplete
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              }`}
+            >
+              <Award size={15} /> {isFullyComplete ? "Issued Certificate (View)" : "Complete & Issue Official Certificate"}
             </button>
             <button
               onClick={onClose}

@@ -6,9 +6,12 @@ export default function SkillGaps({ gaps, onStartCourseForGap, onRunAnalysis, is
 
   const domains = ["All", "Digital Governance", "Technical", "Statistical", "Behavioural"];
 
-  const filteredGaps = (gaps || []).filter(
-    (g) => selectedDomain === "All" || g.domain?.toLowerCase() === selectedDomain.toLowerCase()
-  );
+  const filteredGaps = (gaps || []).filter((g) => {
+    if (selectedDomain === "All") return true;
+    const gDom = (g.domain || "").toLowerCase();
+    const selDom = selectedDomain.toLowerCase();
+    return gDom.includes(selDom) || selDom.includes(gDom);
+  });
 
   return (
     <div className="space-y-6">

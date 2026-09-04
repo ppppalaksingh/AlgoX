@@ -37,9 +37,9 @@ export default function Certificates({ certificates, onViewCertificate, onBrowse
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {certificates.map((cert) => (
+          {certificates.map((cert, index) => (
             <div
-              key={cert.id}
+              key={cert._id || cert.id || `${cert.title}-${index}`}
               className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between gap-4 shadow-xs hover:border-slate-300 transition-all"
             >
               <div className="flex items-start gap-4">

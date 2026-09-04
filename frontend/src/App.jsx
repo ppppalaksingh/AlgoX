@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { SignedIn, SignedOut, useUser, useAuth } from "@clerk/clerk-react";
 import { Sparkles, Bot, Building2, FlaskConical, Route, FolderOpen, Bell, User, Settings, HelpCircle, BookOpen, ShieldAlert } from "lucide-react";
 
@@ -82,6 +82,26 @@ function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [adminAnalyticsData, setAdminAnalyticsData] = useState(null);
   const [isAdminInDB, setIsAdminInDB] = useState(false);
+  const [quizAttempts, setQuizAttempts] = useState([]);
+  const [progressData, setProgressData] = useState(null);
+
+  // Synchronized refs to avoid cyclic hook dependencies
+  const courseListRef = useRef(courseList);
+  useEffect(() => {
+    courseListRef.current = courseList;
+  }, [courseList]);
+
+  const certificateListRef = useRef(certificateList);
+  useEffect(() => {
+    certificateListRef.current = certificateList;
+  }, [certificateList]);
+
+  const progressDataRef = useRef(progressData);
+  useEffect(() => {
+    progressDataRef.current = progressData;
+  }, [progressData]);
+
+  const initializedUserRef = useRef(null);
 
   // Notifications
   const [notifications, setNotifications] = useState([
@@ -126,11 +146,44 @@ function Dashboard() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  const officerDesignation =
+    profileData?.designation ||
+    localStorage.getItem("algox_user_designation") ||
+    "Assistant Director";
+
+  const getCleanOfficerName = (raw) => {
+    if (!raw) return "";
+    const trimmed = String(raw).trim();
+    if (
+      trimmed === "Assistant Director" ||
+      trimmed === "Director" ||
+      trimmed === "Deputy Director" ||
+      trimmed === "Joint Director" ||
+      trimmed.toLowerCase() === officerDesignation.toLowerCase()
+    ) {
+      return "";
+    }
+    return trimmed;
+  };
+
+  const clerkFullName = clerkUser?.firstName
+    ? `${clerkUser.firstName} ${clerkUser.lastName || ""}`.trim()
+    : clerkUser?.username;
+
+  const emailUsername = clerkUser?.primaryEmailAddress?.emailAddress
+    ? clerkUser.primaryEmailAddress.emailAddress.split("@")[0]
+    : "";
+
+  const officerName =
+    getCleanOfficerName(profileData?.name) ||
+    getCleanOfficerName(localStorage.getItem("algox_user_name")) ||
+    getCleanOfficerName(clerkFullName) ||
+    (emailUsername ? emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1) : "Tarun Gupta");
+
   const user = {
-    name: clerkUser?.firstName
-      ? `${clerkUser.firstName} ${clerkUser.lastName || ""}`.trim()
-      : clerkUser?.username || "Assistant Director",
-    email: clerkUser?.primaryEmailAddress?.emailAddress || "officer@mospi.gov.in",
+    name: officerName,
+    designation: officerDesignation,
+    email: profileData?.email || clerkUser?.primaryEmailAddress?.emailAddress || "officer@mospi.gov.in",
     notificationsCount: notifications.length,
   };
 
@@ -186,34 +239,82 @@ function Dashboard() {
     }
   };
 
+  // Dynamic progress summary computed live from courses, competency profile, and quiz assessments
+  const dynamicProgressSummary = useMemo(() => {
+    const total = courseList.length || 1;
+    const completed = courseList.filter((c) => c.status === "Completed" || c.percent === 100).length;
+    const inProgress = courseList.filter((c) => c.status === "In Progress" || (c.percent > 0 && c.percent < 100)).length;
+    const notStarted = courseList.filter((c) => (!c.status || c.status === "Available") && (!c.percent || c.percent === 0)).length;
+    const avgCompetency = Math.round(
+      competencyList.reduce((acc, d) => acc + (d.percent || 0), 0) / (competencyList.length || 1)
+    );
+    const avgCourse = Math.round(
+      courseList.reduce((acc, c) => acc + (c.percent || 0), 0) / total
+    );
+    let basePercent = (avgCompetency * 0.4) + (avgCourse * 0.6);
+
+    // Live Quiz Performance Impact:
+    // Low score (<60%, especially <40%) directly penalizes overall progress;
+    // High score (>=60%, especially >=80%) significantly boosts overall progress.
+    if (quizAttempts && quizAttempts.length > 0) {
+      const validScores = quizAttempts.filter((q) => q.score != null);
+      if (validScores.length > 0) {
+        const totalScore = validScores.reduce((acc, q) => acc + Number(q.score), 0);
+        const totalPossible = validScores.reduce((acc, q) => acc + (Number(q.totalQuestions) || 5), 0);
+        const overallQuizPct = totalPossible > 0 ? (totalScore / totalPossible) * 100 : 50;
+
+        let quizDelta = 0;
+        if (overallQuizPct >= 80) quizDelta = 4;
+        else if (overallQuizPct >= 60) quizDelta = 2;
+        else if (overallQuizPct >= 40) quizDelta = -2;
+        else quizDelta = -4;
+
+        basePercent = Math.max(5, Math.min(100, basePercent + quizDelta));
+      }
+    }
+    const overallPercent = Math.round(basePercent);
+
+    return {
+      month: "This Quarter",
+      percent: overallPercent,
+      completed,
+      inProgress,
+      notStarted,
+    };
+  }, [courseList, competencyList, quizAttempts]);
+
   // Helper to dynamically update StatsGrid cards
-  const updateDashboardStats = useCallback((overallReadiness, courses = [], certs = []) => {
-    const completedCount = courses.filter((c) => c.percent === 100 || c.status === "Completed").length;
-    const inProgressCount = courses.filter((c) => c.percent > 0 && c.percent < 100).length;
-    const totalHours = Math.round(completedCount * 18 + inProgressCount * 6 + (certs.length * 8));
+  const updateDashboardStats = useCallback((overallReadiness, courses, certs) => {
+    const currentCourses = courses || courseListRef.current || [];
+    const currentCerts = certs || certificateListRef.current || [];
+    const completedCount = currentCourses.filter((c) => c.percent === 100 || c.status === "Completed").length;
+    const inProgressCount = currentCourses.filter((c) => c.percent > 0 && c.percent < 100).length;
+    const computedHours = Math.round(completedCount * 18 + inProgressCount * 6 + (currentCerts.length * 8));
+    const totalHours = progressDataRef.current?.totalHours != null ? progressDataRef.current.totalHours : computedHours;
+    const readinessVal = overallReadiness != null ? Math.round(overallReadiness) : 25;
 
     setStats([
       {
         id: "overall-readiness",
         label: "Overall Cadre Readiness",
-        value: `${overallReadiness || 84}%`,
+        value: `${readinessVal}%`,
         caption: "Benchmarked against MoSPI Standards",
         icon: "TrendingUp",
         color: "blue",
-        progress: overallReadiness || 84,
+        progress: readinessVal,
       },
       {
         id: "courses-completed",
         label: "Accredited Modules",
-        value: `${completedCount + 4}`,
-        caption: `${inProgressCount || 2} in progress on iGOT & NSSTA`,
+        value: `${completedCount}`,
+        caption: `${inProgressCount} in progress on iGOT & NSSTA`,
         icon: "BookOpen",
         color: "orange",
       },
       {
         id: "learning-hours",
         label: "Verified Training Hours",
-        value: `${totalHours + 38}h`,
+        value: `${totalHours}h`,
         caption: "Continuous Professional Development",
         icon: "Zap",
         color: "green",
@@ -221,7 +322,7 @@ function Dashboard() {
       {
         id: "certificates-earned",
         label: "Verified Certifications",
-        value: `${certs.length}`,
+        value: `${currentCerts.length}`,
         caption: "MoSPI & Karmayogi Accredited",
         icon: "Trophy",
         color: "purple",
@@ -240,14 +341,25 @@ function Dashboard() {
         const recCourses = data.recommendedCourses || [];
         if (recCourses.length > 0) {
           const colorList = ["blue", "orange", "green", "purple"];
-          const formatted = recCourses.map((c, i) => ({
-            ...c,
-            color: colorList[i % colorList.length],
-            percent: Math.min(85, Math.max(10, Math.round((c.matchScore || 0.4) * 100))),
-            status: i === 0 ? "In Progress" : i < 3 ? "Recommended" : "Available",
-          }));
+          const currentCerts = certificateListRef.current || [];
+          const certTitles = new Set(currentCerts.map((c) => c.title?.toLowerCase().trim()));
+          const completedIds = new Set(progressDataRef.current?.completedCourseIds || []);
+          const inProgressIds = new Set(progressDataRef.current?.inProgressCourseIds || []);
+
+          const formatted = recCourses.map((c, i) => {
+            const isCompleted = completedIds.has(c.id) || certTitles.has(c.title?.toLowerCase().trim());
+            const isInProg = inProgressIds.has(c.id);
+
+            return {
+              ...c,
+              color: colorList[i % colorList.length],
+              percent: isCompleted ? 100 : isInProg ? 50 : 0,
+              status: isCompleted ? "Completed" : isInProg ? "In Progress" : "Available",
+            };
+          });
 
           setCourseList(formatted);
+          courseListRef.current = formatted;
 
           // Top 4 in continue learning
           setContinueCourses(
@@ -292,6 +404,7 @@ function Dashboard() {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           setCertificateList(data);
+          certificateListRef.current = data;
         }
       }
     } catch (err) {
@@ -307,13 +420,32 @@ function Dashboard() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data && data.completedCourseIds) {
-          setCourseList((prev) =>
-            prev.map((c) =>
-              data.completedCourseIds.includes(c.id)
-                ? { ...c, percent: 100, status: "Completed" }
-                : c
-            )
+        if (data) {
+          setProgressData(data);
+          progressDataRef.current = data;
+          const completedIds = new Set(data.completedCourseIds || []);
+          const inProgressIds = new Set(data.inProgressCourseIds || []);
+
+          setCourseList((prev) => {
+            const updated = prev.map((c) => {
+              if (completedIds.has(c.id)) {
+                return { ...c, percent: 100, status: "Completed" };
+              }
+              if (inProgressIds.has(c.id)) {
+                return { ...c, percent: 50, status: "In Progress" };
+              }
+              return c;
+            });
+            courseListRef.current = updated;
+            return updated;
+          });
+
+          setContinueCourses((prev) =>
+            prev.map((c) => {
+              if (completedIds.has(c.id)) return { ...c, percent: 100, tag: "Completed" };
+              if (inProgressIds.has(c.id)) return { ...c, percent: 50, tag: "In Progress" };
+              return c;
+            })
           );
         }
       }
@@ -337,6 +469,112 @@ function Dashboard() {
     }
   }, []);
 
+  // Helper to fetch User's saved Quiz Attempts from MongoDB
+  const fetchQuizAttempts = useCallback(async (token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/quiz/attempts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.attempts) {
+          setQuizAttempts(data.attempts);
+        }
+      }
+    } catch (err) {
+      console.warn("[App] Quiz attempts load note:", err.message);
+    }
+  }, []);
+
+  // Centralized function to apply recalibrated profile across all UI widgets
+  const applyRecalibratedProfile = useCallback((data, explicitCourses, explicitCerts) => {
+    if (!data) return;
+    setGapModalData(data);
+
+    const currentCourses = explicitCourses || courseListRef.current;
+    const currentCerts = explicitCerts || certificateListRef.current;
+
+    if (data.domainScores) {
+      const domainMap = {
+        statistical: { name: "Statistical Analysis", icon: "BarChart3", color: "blue" },
+        technical: { name: "Technical & Analytics", icon: "Monitor", color: "orange" },
+        digitalGovernance: { name: "Digital Governance", icon: "PieChart", color: "green" },
+        behavioural: { name: "Behavioural & Leadership", icon: "MessageSquare", color: "purple" },
+      };
+
+      const newSkillGaps = Object.entries(data.domainScores).map(([k, val]) => {
+        const pct = Math.round((val / 5) * 100);
+        const meta = domainMap[k] || { name: k, icon: "BarChart3", color: "blue" };
+        return {
+          id: k,
+          name: meta.name,
+          percent: pct,
+          status: pct >= 75 ? "Strong" : pct >= 50 ? "Average" : "Needs Improvement",
+          icon: meta.icon,
+          color: meta.color,
+        };
+      });
+
+      setSkillGapsList(newSkillGaps);
+
+      setCompetencyList((prev) =>
+        prev.map((dom) => {
+          const raw = data.domainScores[dom.id];
+          const score = raw != null ? Math.round((raw / 5) * 100) : dom.percent;
+          return {
+            ...dom,
+            percent: score,
+            status: score >= 75 ? "Strong" : score >= 50 ? "Average" : "Needs Improvement",
+          };
+        })
+      );
+    }
+
+    if (data.subCompetencies && data.subCompetencies.length > 0) {
+      const domainLabelMap = {
+        statistical: "Statistical",
+        technical: "Technical",
+        digitalGovernance: "Digital Governance",
+        behavioural: "Behavioural",
+      };
+      setDetailedGaps(
+        data.subCompetencies.map((g, idx) => ({
+          id: `sg-${idx}`,
+          skill: g.subCompetency,
+          domain: domainLabelMap[g.domain] || g.domain || "Statistical",
+          currentLevel: g.current,
+          requiredLevel: g.required,
+          gap: g.gap,
+        }))
+      );
+    } else if (data.skillGaps) {
+      const domainLabelMap = {
+        statistical: "Statistical Analysis",
+        technical: "Technical & Analytics",
+        digitalGovernance: "Digital Governance",
+        behavioural: "Behavioural & Leadership",
+      };
+      setDetailedGaps(
+        data.skillGaps.map((g, idx) => ({
+          id: `sg-${idx}`,
+          skill: domainLabelMap[g.skillName] || g.skillName,
+          domain: domainLabelMap[g.skillName] || "Statistical",
+          currentLevel: g.currentLevel,
+          requiredLevel: g.requiredLevel,
+          gap: g.gap,
+        }))
+      );
+    }
+
+    if (data.highestGap) {
+      setRecommendedPathData(generateDynamicPathFromGap(data.highestGap));
+    }
+
+    if (data.overallReadiness != null) {
+      updateDashboardStats(data.overallReadiness, currentCourses, currentCerts);
+    }
+  }, [updateDashboardStats]);
+
   // Helper to fetch live competency gap analysis from Python ML service
   const fetchCompetencyData = useCallback(async (token) => {
     try {
@@ -345,79 +583,22 @@ function Dashboard() {
       });
       if (res.ok) {
         const data = await res.json();
-        setGapModalData(data);
-        if (data.domainScores) {
-          const domainMap = {
-            statistical: { name: "Statistical Analysis", icon: "BarChart3", color: "blue" },
-            technical: { name: "Technical & Analytics", icon: "Monitor", color: "orange" },
-            digitalGovernance: { name: "Digital Governance", icon: "PieChart", color: "green" },
-            behavioural: { name: "Behavioural & Leadership", icon: "MessageSquare", color: "purple" },
-          };
-
-          const newSkillGaps = Object.entries(data.domainScores).map(([k, val]) => {
-            const pct = Math.round((val / 5) * 100);
-            const meta = domainMap[k] || { name: k, icon: "BarChart3", color: "blue" };
-            return {
-              id: k,
-              name: meta.name,
-              percent: pct,
-              status: pct >= 75 ? "Strong" : pct >= 50 ? "Average" : "Needs Improvement",
-              icon: meta.icon,
-              color: meta.color,
-            };
-          });
-
-          setSkillGapsList(newSkillGaps);
-
-          setCompetencyList((prev) =>
-            prev.map((dom) => {
-              const score = data.domainScores[dom.id] != null ? Math.round((data.domainScores[dom.id] / 5) * 100) : dom.percent;
-              return {
-                ...dom,
-                percent: score,
-                status: score >= 75 ? "Strong" : score >= 50 ? "Average" : "Needs Improvement",
-              };
-            })
-          );
-        }
-
-        if (data.subCompetencies && data.subCompetencies.length > 0) {
-          const domainLabelMap = {
-            statistical: "Statistical",
-            technical: "Technical",
-            digitalGovernance: "Digital Governance",
-            behavioural: "Behavioural",
-          };
-          setDetailedGaps(
-            data.subCompetencies.map((g, idx) => ({
-              id: `sg-${idx}`,
-              skill: g.subCompetency,
-              domain: domainLabelMap[g.domain] || g.domain || "Statistical",
-              currentLevel: g.current,
-              requiredLevel: g.required,
-              gap: g.gap,
-            }))
-          );
-        }
-
-        if (data.highestGap) {
-          setRecommendedPathData(generateDynamicPathFromGap(data.highestGap));
-        }
-
-        // Dynamically update StatsGrid with real readiness score
-        updateDashboardStats(data.overallReadiness, initialAllCourses, initialCertificates);
+        applyRecalibratedProfile(data);
       }
     } catch (err) {
       console.warn("[App] Competency data load note:", err.message);
     }
-  }, []);
+  }, [applyRecalibratedProfile]);
 
-  // Sync user profile & load initial data
+  // Sync user profile & load initial data exactly once per login session
   useEffect(() => {
+    if (!clerkUser?.id) return;
+    if (initializedUserRef.current === clerkUser.id) return;
+    initializedUserRef.current = clerkUser.id;
+
     async function initUserAndML() {
       try {
-        const token = await getToken();
-        if (!token) return;
+        const token = (await getToken()) || "dev-test-token";
 
         // 1. Fetch User Profile from MongoDB if it exists
         let existingProfile = null;
@@ -444,13 +625,13 @@ function Dashboard() {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              name: user.name,
+              name: officerName,
               email: user.email,
-              designation: "Assistant Director",
+              designation: officerDesignation,
               department: "National Statistical Office (NSO)",
-              experienceYears: 4,
-              qualifications: ["Master in Statistics", "PG Diploma in Data Analytics"],
-              pastTrainings: ["iGOT Digital Governance", "Statistical Sampling Methods"],
+              experienceYears: 0,
+              qualifications: [],
+              pastTrainings: [],
             }),
           });
 
@@ -460,15 +641,16 @@ function Dashboard() {
           }
         }
 
-        // 2. Fetch live data
-        await fetchCompetencyData(token);
-        await fetchMLRecommendations(token);
-        await fetchDocuments(token);
+        // 3. Fetch certificates first so recommendations know what's completed
         await fetchCertificates(token);
+        await fetchMLRecommendations(token);
         await fetchProgress(token);
+        await fetchCompetencyData(token);
+        await fetchDocuments(token);
+        await fetchQuizAttempts(token);
         await fetchAdminAnalytics(token);
 
-        // 3. Verify Database Admin Status
+        // 4. Verify Database Admin Status
         try {
           const emailToCheck = user.email || clerkUser?.primaryEmailAddress?.emailAddress || "";
           const adminCheckRes = await fetch(`${API_BASE_URL}/admin/check-access?clerkId=${clerkUser.id}&email=${encodeURIComponent(emailToCheck)}`, {
@@ -486,10 +668,8 @@ function Dashboard() {
       }
     }
 
-    if (clerkUser) {
-      initUserAndML();
-    }
-  }, [clerkUser, getToken, fetchCompetencyData, fetchMLRecommendations, fetchDocuments, fetchAdminAnalytics, user.name, user.email]);
+    initUserAndML();
+  }, [clerkUser?.id, getToken, fetchCertificates, fetchMLRecommendations, fetchProgress, fetchCompetencyData, fetchDocuments, fetchQuizAttempts, fetchAdminAnalytics, officerName, user.email, officerDesignation]);
 
   // Handler: Upload Document & Generate Quiz
   const handleQuizUpload = async (file) => {
@@ -560,13 +740,88 @@ function Dashboard() {
     }
   };
 
+  // Handler: Generate Quiz Directly from Resource Library Document
+  const handleGenerateQuizFromDoc = async (doc) => {
+    if (!doc) return;
+    setIsGeneratingQuiz(true);
+    const docTitle = doc.originalName || doc.title || "Selected Material";
+    showToast(`Generating official assessment from ${docTitle}...`, "loading");
+
+    try {
+      const token = (await getToken()) || "dev-test-token";
+      let compiledText = "";
+      if (doc.slides && doc.slides.length > 0) {
+        compiledText = doc.slides.map((s) => `${s.title}: ${s.subtitle || ""}. ${(s.points || []).join(". ")}`).join("\n\n");
+      } else if (doc.sections && doc.sections.length > 0) {
+        compiledText = doc.sections.map((s) => `${s.heading}: ${s.content || ""}. ${(s.points || []).join(". ")}`).join("\n\n");
+      } else {
+        compiledText = doc.summary || docTitle;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/quiz/from-resource`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          docId: doc._id,
+          sourceFileName: docTitle,
+          text: compiledText,
+          summary: doc.summary,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate assessment from document.");
+      }
+
+      setActiveQuiz(data);
+      setQuizResult(null);
+      setIsQuizModalOpen(true);
+      showToast(`✨ Assessment generated from "${docTitle}"! Review questions below.`, "success");
+    } catch (err) {
+      console.error("[handleGenerateQuizFromDoc] Error:", err);
+      showToast(err.message || "Failed to generate assessment from material.", "error");
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
+  };
+
+  // Handler: Delete User-Uploaded Document
+  const handleDeleteDocument = async (docId, docTitle = "Document") => {
+    if (!docId) return;
+    showToast(`Deleting "${docTitle}"...`, "loading");
+    try {
+      const token = (await getToken()) || "dev-test-token";
+      const res = await fetch(`${API_BASE_URL}/documents/${docId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete document.");
+      }
+
+      setDocuments((prev) => prev.filter((d) => d._id !== docId));
+      showToast(`🗑️ "${docTitle}" deleted successfully from your library.`, "success");
+    } catch (err) {
+      console.error("[handleDeleteDocument] Error:", err);
+      showToast(err.message || "Failed to delete document.", "error");
+    }
+  };
+
   // Handler: Submit Quiz Answers
   const handleQuizSubmit = async (attemptId, answers) => {
     setIsSubmittingQuiz(true);
     showToast("Evaluating your answers against official rubrics...", "loading");
 
     try {
-      const token = await getToken();
+      const token = (await getToken()) || "dev-test-token";
       const res = await fetch(`${API_BASE_URL}/quiz/submit`, {
         method: "POST",
         headers: {
@@ -583,10 +838,79 @@ function Dashboard() {
       }
 
       setQuizResult(data);
-      showToast(`🏆 Assessment complete! Score: ${data.score}/${data.total} (${data.percentage}%)`, "success");
+      const scorePct = data.percentage != null ? data.percentage : Math.round(((data.score || 0) / (data.total || 5)) * 100);
+      const isPass = scorePct >= 60;
 
-      // Instantly trigger live gap analysis recalculation on quiz submission
-      await handleRunGapAnalysis();
+      // Update quiz attempts list immediately in UI
+      setQuizAttempts((prev) => [
+        {
+          _id: attemptId,
+          sourceFileName: activeQuiz?.sourceFileName || "Document Assessment",
+          score: data.score,
+          totalQuestions: data.total,
+          createdAt: new Date().toISOString(),
+          questions: data.questions || activeQuiz?.questions,
+        },
+        ...prev.filter((a) => a._id !== attemptId),
+      ]);
+
+      if (!isPass) {
+        showToast(`⚠️ Assessment Score: ${data.score}/${data.total} (${scorePct}%). Incorrect answers detected — Competency rating adjusted (-${scorePct < 40 ? "3%" : "2%"})`, "warning");
+        // Calibrated, balanced downward adjustment (not huge wipeout)
+        const drop = scorePct < 40 ? 3 : 2;
+        setCompetencyList((prev) =>
+          prev.map((dom) => {
+            const newPct = Math.max(15, (dom.percent || 20) - drop);
+            return {
+              ...dom,
+              percent: newPct,
+              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+            };
+          })
+        );
+        setSkillGapsList((prev) =>
+          prev.map((dom) => {
+            const newPct = Math.max(15, (dom.percent || 20) - drop);
+            return {
+              ...dom,
+              percent: newPct,
+              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+            };
+          })
+        );
+      } else {
+        showToast(`🏆 Assessment Passed! Score: ${data.score}/${data.total} (${scorePct}%). Demonstrated Competency boosted (+${scorePct >= 80 ? "3%" : "2%"})!`, "success");
+        // Calibrated, balanced upward boost (steady and earned)
+        const boost = scorePct >= 80 ? 3 : 2;
+        setCompetencyList((prev) =>
+          prev.map((dom) => {
+            const newPct = Math.min(98, (dom.percent || 20) + boost);
+            return {
+              ...dom,
+              percent: newPct,
+              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+            };
+          })
+        );
+        setSkillGapsList((prev) =>
+          prev.map((dom) => {
+            const newPct = Math.min(98, (dom.percent || 20) + boost);
+            return {
+              ...dom,
+              percent: newPct,
+              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+            };
+          })
+        );
+      }
+
+      if (data.recalibratedProfile) {
+        applyRecalibratedProfile(data.recalibratedProfile);
+      } else {
+        await handleRunGapAnalysis(false);
+      }
+
+      await fetchQuizAttempts(token);
     } catch (err) {
       console.error("[handleQuizSubmit] Error:", err);
       showToast(err.message || "Failed to submit quiz.", "error");
@@ -596,12 +920,14 @@ function Dashboard() {
   };
 
   // Handler: Run ML Gap Analysis
-  const handleRunGapAnalysis = async () => {
+  const handleRunGapAnalysis = async (openModal = true) => {
     setIsAnalyzing(true);
-    showToast("Running Python Sentence-Transformer ML Gap Analysis...", "loading");
+    if (openModal) {
+      showToast("Running Python Sentence-Transformer ML Gap Analysis...", "loading");
+    }
 
     try {
-      const token = await getToken();
+      const token = (await getToken()) || "dev-test-token";
       const res = await fetch(`${API_BASE_URL}/competency/analyze`, {
         method: "POST",
         headers: {
@@ -615,89 +941,13 @@ function Dashboard() {
         throw new Error(data.error || "Failed to run gap analysis.");
       }
 
-      if (data.domainScores) {
-        const domainMap = {
-          statistical: { name: "Statistical Analysis", icon: "BarChart3", color: "blue" },
-          technical: { name: "Technical & Analytics", icon: "Monitor", color: "orange" },
-          digitalGovernance: { name: "Digital Governance", icon: "PieChart", color: "green" },
-          behavioural: { name: "Behavioural & Leadership", icon: "MessageSquare", color: "purple" },
-        };
-
-        const newSkillGaps = Object.entries(data.domainScores).map(([k, val]) => {
-          const pct = Math.round((val / 5) * 100);
-          const meta = domainMap[k] || { name: k, icon: "BarChart3", color: "blue" };
-          return {
-            id: k,
-            name: meta.name,
-            percent: pct,
-            status: pct >= 75 ? "Strong" : pct >= 50 ? "Average" : "Needs Improvement",
-            icon: meta.icon,
-            color: meta.color,
-          };
-        });
-
-        setSkillGapsList(newSkillGaps);
-
-        setCompetencyList((prev) =>
-          prev.map((dom) => {
-            const raw = data.domainScores[dom.id];
-            const score = raw != null ? Math.round((raw / 5) * 100) : dom.percent;
-            return {
-              ...dom,
-              percent: score,
-              status: score >= 75 ? "Strong" : score >= 50 ? "Average" : "Needs Improvement",
-            };
-          })
-        );
-      }
-
-      if (data.subCompetencies && data.subCompetencies.length > 0) {
-        const domainLabelMap = {
-          statistical: "Statistical",
-          technical: "Technical",
-          digitalGovernance: "Digital Governance",
-          behavioural: "Behavioural",
-        };
-        setDetailedGaps(
-          data.subCompetencies.map((g, idx) => ({
-            id: `sg-${idx}`,
-            skill: g.subCompetency,
-            domain: domainLabelMap[g.domain] || g.domain || "Statistical",
-            currentLevel: g.current,
-            requiredLevel: g.required,
-            gap: g.gap,
-          }))
-        );
-      } else if (data.skillGaps) {
-        const domainLabelMap = {
-          statistical: "Statistical Analysis",
-          technical: "Technical & Analytics",
-          digitalGovernance: "Digital Governance",
-          behavioural: "Behavioural & Leadership",
-        };
-        setDetailedGaps(
-          data.skillGaps.map((g, idx) => ({
-            id: `sg-${idx}`,
-            skill: domainLabelMap[g.skillName] || g.skillName,
-            domain: domainLabelMap[g.skillName] || "Statistical",
-            currentLevel: g.currentLevel,
-            requiredLevel: g.requiredLevel,
-            gap: g.gap,
-          }))
-        );
-      }
-
-      if (data.highestGap) {
-        setRecommendedPathData(generateDynamicPathFromGap(data.highestGap));
-      }
-
-      // Update StatsGrid dynamically
-      updateDashboardStats(data.overallReadiness, courseList, certificateList);
-
+      applyRecalibratedProfile(data, courseListRef.current, certificateListRef.current);
       await fetchMLRecommendations(token);
-      setGapModalData(data);
-      setIsGapModalOpen(true);
-      showToast("🎯 Real-Time Python ML Gap Analysis & Impact Report Ready!", "success");
+
+      if (openModal) {
+        setIsGapModalOpen(true);
+        showToast("🎯 Real-Time Python ML Gap Analysis & Impact Report Ready!", "success");
+      }
     } catch (err) {
       console.error("[handleRunGapAnalysis] Error:", err);
       showToast(err.message || "Gap analysis failed.", "error");
@@ -737,6 +987,81 @@ function Dashboard() {
     }
   };
 
+  // Handler: Complete Learning Pathway & Recalibrate Cadre Readiness (+3% Boost)
+  const handleCompletePathway = async (pathInfo) => {
+    const domainLower = String(pathInfo?.domain || pathInfo?.title || "").toLowerCase();
+    let targetDomainKey = "digitalGovernance";
+    if (domainLower.includes("tech") || domainLower.includes("python") || domainLower.includes("r ") || domainLower.includes("data science")) {
+      targetDomainKey = "technical";
+    } else if (domainLower.includes("stat") || domainLower.includes("survey") || domainLower.includes("account") || domainLower.includes("sample")) {
+      targetDomainKey = "statistical";
+    } else if (domainLower.includes("behav") || domainLower.includes("lead") || domainLower.includes("ethic")) {
+      targetDomainKey = "behavioural";
+    } else {
+      targetDomainKey = "digitalGovernance";
+    }
+
+    // 1. Optimistic domain boost (+4% target, +1% other)
+    setCompetencyList((prev) =>
+      prev.map((d) => {
+        const boost = d.id === targetDomainKey ? 4 : 1;
+        const newPct = Math.min(100, (d.percent || 20) + boost);
+        return {
+          ...d,
+          percent: newPct,
+          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+        };
+      })
+    );
+
+    setSkillGapsList((prev) =>
+      prev.map((s) => {
+        const boost = s.id === targetDomainKey ? 4 : 1;
+        const newPct = Math.min(100, (s.percent || 20) + boost);
+        return {
+          ...s,
+          percent: newPct,
+          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+        };
+      })
+    );
+
+    // 2. Optimistic overall readiness boost (+3%)
+    const currentReadiness = gapModalData?.overallReadiness != null ? gapModalData.overallReadiness : 23;
+    const boostedReadiness = Math.min(100, currentReadiness + 3);
+    updateDashboardStats(boostedReadiness);
+
+    showToast(`🎯 Pathway Mastered: "${pathInfo?.title || 'Cadre Pathway'}"! Overall Readiness boosted (+3%)!`, "success");
+
+    // 3. Persist in MongoDB and run ML recalibration
+    try {
+      const token = (await getToken()) || "dev-test-token";
+      const res = await fetch(`${API_BASE_URL}/learning-path/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          pathId: pathInfo?.pathId,
+          title: pathInfo?.title,
+          domain: pathInfo?.domain,
+          level: pathInfo?.level || 1,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.recalibratedProfile) {
+          applyRecalibratedProfile(data.recalibratedProfile);
+        }
+        await fetchProgress(token);
+      }
+    } catch (err) {
+      console.warn("[App] Complete pathway sync note:", err.message);
+    }
+  };
+
   // Handler: Start Course / Launch Course Modal
   const handleStartCourse = (course) => {
     setActiveCourse(course);
@@ -747,13 +1072,13 @@ function Dashboard() {
   const handleCompleteCourse = async (course) => {
     setIsCourseModalOpen(false);
 
-    setCourseList((prev) =>
-      prev.map((c) =>
-        c.id === course.id
-          ? { ...c, percent: 100, status: "Completed" }
-          : c
-      )
+    const updatedCourses = courseList.map((c) =>
+      c.id === course.id
+        ? { ...c, percent: 100, status: "Completed" }
+        : c
     );
+    setCourseList(updatedCourses);
+    courseListRef.current = updatedCourses;
 
     setContinueCourses((prev) =>
       prev.map((c) =>
@@ -762,7 +1087,7 @@ function Dashboard() {
     );
 
     const tempCert = {
-      id: `cert-${Date.now()}`,
+      _id: `cert-${Date.now()}`,
       title: course.title,
       issuedDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
       domain: course.domain || "Statistical",
@@ -770,44 +1095,104 @@ function Dashboard() {
       regNumber: `NSSTA/ISS/${new Date().getFullYear()}/${Math.floor(10000 + Math.random() * 90000)}`,
     };
 
-    const newCertList = [tempCert, ...certificateList];
+    const newCertList = [tempCert, ...certificateList.filter((c) => c.title !== course.title)];
     setCertificateList(newCertList);
+    certificateListRef.current = newCertList;
+
+    // Immediately boost the corresponding domain competency score dynamically
+    const domainLower = String(course.domain || course.category || course.title || "").toLowerCase();
+    let targetDomainKey = "statistical";
+    if (domainLower.includes("tech") || domainLower.includes("python") || domainLower.includes("r ") || domainLower.includes("data science") || domainLower.includes("ai")) {
+      targetDomainKey = "technical";
+    } else if (domainLower.includes("gov") || domainLower.includes("dpdp") || domainLower.includes("privacy") || domainLower.includes("cyber") || domainLower.includes("digital")) {
+      targetDomainKey = "digitalGovernance";
+    } else if (domainLower.includes("behav") || domainLower.includes("lead") || domainLower.includes("ethic") || domainLower.includes("manage")) {
+      targetDomainKey = "behavioural";
+    } else {
+      targetDomainKey = "statistical";
+    }
+
+    setCompetencyList((prev) =>
+      prev.map((d) => {
+        const boost = d.id === targetDomainKey ? 4 : 1;
+        const newPct = Math.min(100, (d.percent || 20) + boost);
+        return {
+          ...d,
+          percent: newPct,
+          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+        };
+      })
+    );
+
+    setSkillGapsList((prev) =>
+      prev.map((s) => {
+        const boost = s.id === targetDomainKey ? 4 : 1;
+        const newPct = Math.min(100, (s.percent || 20) + boost);
+        return {
+          ...s,
+          percent: newPct,
+          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
+        };
+      })
+    );
+
+    setDetailedGaps((prev) =>
+      prev.map((g) => {
+        if (g.domain?.toLowerCase().includes(targetDomainKey.slice(0, 4))) {
+          const newCurr = Math.min(5.0, Math.round((g.currentLevel + 0.2) * 10) / 10);
+          return {
+            ...g,
+            currentLevel: newCurr,
+            gap: Math.max(0, Math.round((g.requiredLevel - newCurr) * 10) / 10),
+          };
+        }
+        return g;
+      })
+    );
+
+    const currentReadiness = gapModalData?.overallReadiness != null ? gapModalData.overallReadiness : 23;
+    const boostedReadiness = Math.min(100, currentReadiness + 3);
+    updateDashboardStats(boostedReadiness, updatedCourses, newCertList);
 
     // Save permanently in MongoDB backend
     try {
-      const token = await getToken();
-      if (token) {
-        const res = await fetch(`${API_BASE_URL}/progress/complete-course`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            courseId: course.id,
-            durationHours: course.duration_hours || 20,
-            courseTitle: course.title,
-            domain: course.domain,
-          }),
-        });
+      const token = (await getToken()) || "dev-test-token";
+      const res = await fetch(`${API_BASE_URL}/progress/complete-course`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          courseId: course.id,
+          durationHours: course.duration_hours || 20,
+          courseTitle: course.title,
+          domain: course.domain,
+        }),
+      });
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data.certificate) {
-            setCertificateList((prev) => [data.certificate, ...prev.filter((c) => c._id !== data.certificate._id)]);
-          }
-          await fetchCompetencyData(token);
-          await fetchProgress(token);
+      if (res.ok) {
+        const data = await res.json();
+        let finalCertList = newCertList;
+        if (data.certificate) {
+          finalCertList = [data.certificate, ...certificateList.filter((c) => c._id !== data.certificate._id && c.title !== course.title)];
+          setCertificateList(finalCertList);
+          certificateListRef.current = finalCertList;
         }
+        if (data.recalibratedProfile) {
+          applyRecalibratedProfile(data.recalibratedProfile, updatedCourses, finalCertList);
+        }
+        await handleRunGapAnalysis(true);
+        await fetchProgress(token);
+      } else {
+        await handleRunGapAnalysis(true);
       }
     } catch (saveErr) {
       console.warn("[App] Complete course save note:", saveErr.message);
+      await handleRunGapAnalysis(true);
     }
 
-    // Update Stats dynamically
-    updateDashboardStats(gapModalData?.overallReadiness || 86, courseList, newCertList);
-
-    showToast(`🎓 Congratulations! You earned an accredited Certificate in "${course.title}"!`, "success");
+    showToast(`🎓 Congratulations! Course completed & Certificate earned in "${course.title}". Competency boosted!`, "success");
   };
 
   // Handler: View Certificate Modal
@@ -830,7 +1215,10 @@ function Dashboard() {
     showToast("Saving profile and recalibrating ML models...", "loading");
 
     try {
-      const token = await getToken();
+      if (formData.name) localStorage.setItem("algox_user_name", formData.name);
+      if (formData.designation) localStorage.setItem("algox_user_designation", formData.designation);
+
+      const token = (await getToken()) || "dev-test-token";
       const res = await fetch(`${API_BASE_URL}/users/profile`, {
         method: "POST",
         headers: {
@@ -845,9 +1233,13 @@ function Dashboard() {
         throw new Error(data.error || "Failed to update profile.");
       }
 
-      setProfileData(data);
-      showToast("✅ Profile saved! Recalculating AI gap analysis...", "info");
-      await handleRunGapAnalysis();
+      setProfileData((prev) => ({ ...prev, ...formData, ...data }));
+      if (data.recalibratedProfile) {
+        applyRecalibratedProfile(data.recalibratedProfile);
+      } else {
+        await handleRunGapAnalysis(false);
+      }
+      showToast("✅ Profile saved! AI Competency & Gap models recalibrated.", "success");
     } catch (err) {
       console.error("[handleSaveProfile] Error:", err);
       showToast(err.message || "Failed to save profile.", "error");
@@ -870,6 +1262,7 @@ function Dashboard() {
         isSubmitting={isSubmittingQuiz}
         result={quizResult}
         onRunAnalysis={handleRunGapAnalysis}
+        onRetake={() => setQuizResult(null)}
       />
 
       <CourseModal
@@ -877,11 +1270,13 @@ function Dashboard() {
         isOpen={isCourseModalOpen}
         onClose={() => setIsCourseModalOpen(false)}
         onCompleteCourse={handleCompleteCourse}
+        onRunAnalysis={() => handleRunGapAnalysis(true)}
       />
 
       <CertificateModal
         cert={activeCertificate}
         userName={user.name}
+        userDesignation={user.designation}
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}
       />
@@ -991,8 +1386,27 @@ function Dashboard() {
                     onUpload={handleQuizUpload}
                     onGenerateSample={handleGenerateSample}
                     isGenerating={isGeneratingQuiz}
+                    attempts={quizAttempts}
+                    showHistory={false}
+                    onReviewAttempt={(attempt) => {
+                      setActiveQuiz({
+                        attemptId: attempt._id,
+                        sourceFileName: attempt.sourceFileName,
+                        questions: attempt.questions,
+                      });
+                      setQuizResult({
+                        score: attempt.score,
+                        total: attempt.totalQuestions,
+                        percentage: Math.round(((attempt.score || 0) / (attempt.totalQuestions || 5)) * 100),
+                        questions: attempt.questions,
+                      });
+                      setIsQuizModalOpen(true);
+                    }}
                   />
-                  <ProgressWidget summary={initialProgressSummary} />
+                  <ProgressWidget
+                    summary={dynamicProgressSummary}
+                    onViewDetails={() => setActiveNav("progress")}
+                  />
                 </div>
               </div>
 
@@ -1061,6 +1475,8 @@ function Dashboard() {
               domains={competencyList}
               onRunAnalysis={handleRunGapAnalysis}
               isAnalyzing={isAnalyzing}
+              onOpenQuiz={() => setActiveNav("ai-quiz")}
+              onViewCourses={() => setActiveNav("courses")}
             />
           )}
 
@@ -1087,11 +1503,26 @@ function Dashboard() {
           )}
 
           {activeNav === "ai-quiz" && (
-            <div className="max-w-xl mx-auto py-4">
+            <div className="max-w-4xl mx-auto py-4">
               <AIQuizGenerator
                 onUpload={handleQuizUpload}
                 onGenerateSample={handleGenerateSample}
                 isGenerating={isGeneratingQuiz}
+                attempts={quizAttempts}
+                onReviewAttempt={(attempt) => {
+                  setActiveQuiz({
+                    attemptId: attempt._id,
+                    sourceFileName: attempt.sourceFileName,
+                    questions: attempt.questions,
+                  });
+                  setQuizResult({
+                    score: attempt.score,
+                    total: attempt.totalQuestions,
+                    percentage: Math.round(((attempt.score || 0) / (attempt.totalQuestions || 5)) * 100),
+                    questions: attempt.questions,
+                  });
+                  setIsQuizModalOpen(true);
+                }}
               />
             </div>
           )}
@@ -1099,7 +1530,7 @@ function Dashboard() {
           {activeNav === "progress" && (
             <FullProgress
               history={initialProgressHistory}
-              summary={initialProgressSummary}
+              summary={dynamicProgressSummary}
               competencyList={competencyList}
               courses={courseList}
               certificates={certificateList}
@@ -1118,8 +1549,26 @@ function Dashboard() {
 
           {activeNav === "learning-path" && (
             <LearningPathView
-              pathProgress={learningPathProgress}
+              competencyList={competencyList}
+              detailedGaps={detailedGaps}
+              profileData={profileData}
               onStartCourse={handleStartCourse}
+              onCompletePathway={handleCompletePathway}
+              onPathProgressUpdate={(activePathInfo) => {
+                if (activePathInfo) {
+                  setRecommendedPathData((prev) => ({
+                    ...prev,
+                    title: activePathInfo.title || prev.title,
+                    description: activePathInfo.subtitle || prev.description,
+                    steps: activePathInfo.stages?.map((stg, sIdx) => ({
+                      id: sIdx + 1,
+                      title: stg.title,
+                      description: stg.description,
+                      completed: stg.status === "Completed",
+                    })) || prev.steps,
+                  }));
+                }
+              }}
             />
           )}
 
@@ -1138,7 +1587,8 @@ function Dashboard() {
             <ResourceLibrary
               documents={documents}
               onUploadDoc={handleQuizUpload}
-              onGenerateQuizFromDoc={(doc) => handleGenerateSample()}
+              onGenerateQuizFromDoc={handleGenerateQuizFromDoc}
+              onDeleteDoc={handleDeleteDocument}
             />
           )}
 

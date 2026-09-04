@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { requireAuth } from "../middleware/auth.middleware.js";
-import { uploadAndGenerateQuiz, submitQuizAnswers, generateSampleQuiz } from "../controllers/quiz.controller.js";
+import { uploadAndGenerateQuiz, submitQuizAnswers, generateSampleQuiz, generateQuizFromResource, getQuizAttempts } from "../controllers/quiz.controller.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -18,8 +18,10 @@ const upload = multer({
 
 const router = express.Router();
 
+router.get("/attempts", requireAuth, getQuizAttempts);
 router.post("/upload", requireAuth, upload.single("file"), uploadAndGenerateQuiz);
 router.post("/sample", requireAuth, generateSampleQuiz);
+router.post("/from-resource", requireAuth, generateQuizFromResource);
 router.post("/submit", requireAuth, submitQuizAnswers);
 
 export default router;

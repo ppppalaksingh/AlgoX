@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, CheckCircle2, XCircle, Award, ArrowRight, RotateCcw, X, Loader2, BookOpen } from "lucide-react";
 
-export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, isSubmitting, result, onRunAnalysis }) {
+export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, isSubmitting, result, onRunAnalysis, onRetake }) {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentIdx, setCurrentIdx] = useState(0);
+
+  // Automatically reset selections when opening a fresh quiz
+  useEffect(() => {
+    if (isOpen && !result) {
+      setSelectedAnswers({});
+      setCurrentIdx(0);
+    }
+  }, [isOpen, quiz?._id, result]);
 
   if (!isOpen || !quiz) return null;
 
@@ -30,6 +38,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
   const handleReset = () => {
     setSelectedAnswers({});
     setCurrentIdx(0);
+    onRetake?.();
   };
 
   return (
@@ -205,30 +214,75 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                   Review &amp; Explanations
                 </h4>
                 {questions.map((q, idx) => {
-                  const userAns = selectedAnswers[idx];
+                  const evalItem = result?.evaluations?.find((e) => e.questionIndex === idx) || result?.evaluations?.[idx];
+                  const userAns = evalItem?.userAnswer != null && evalItem?.userAnswer !== ""
+                    ? evalItem.userAnswer
+                    : (selectedAnswers[idx] || "Not answered");
+                  
                   const cleanU = userAns ? userAns.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ") : "";
                   const cleanC = q.correctAnswer ? q.correctAnswer.toString().trim().toLowerCase().replace(/^[a-d][\.\)\:\-]\s*/i, "").replace(/\s+/g, " ") : "";
-                  const isCorrect = Boolean(cleanU && cleanC && (cleanU === cleanC || (cleanU.length > 15 && cleanC.length > 15 && (cleanU.includes(cleanC) || cleanC.includes(cleanU)))));
+                  
+                  const isCorrect = evalItem != null ? Boolean(evalItem.isCorrect) : Boolean(cleanU && cleanC && cleanU === cleanC);
+
                   return (
-                    <div key={idx} className="p-3.5 rounded-xl border border-slate-200 text-sm space-y-1.5 bg-white">
-                      <div className="flex items-start gap-2">
+                    <div
+                      key={idx}
+                      className={`p-3.5 rounded-xl border text-sm space-y-1.5 transition-all ${
+                        isCorrect ? "border-emerald-200 bg-emerald-50/30" : "border-rose-200 bg-rose-50/30"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
                         {isCorrect ? (
-                          <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <CheckCircle2 size={15} />
+                          </div>
                         ) : (
-                          <XCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />
+                          <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <XCircle size={15} />
+                          </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-800">{idx + 1}. {q.question}</p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Your answer: <span className={isCorrect ? "text-emerald-600 font-semibold" : "text-rose-600 font-semibold"}>{userAns || "None"}</span>
-                          </p>
-                          {!isCorrect && (
-                            <p className="text-xs text-slate-600">
-                              Correct answer: <span className="text-emerald-600 font-semibold">{q.correctAnswer}</span>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-semibold text-slate-800 text-xs">
+                              Question {idx + 1}
                             </p>
-                          )}
+                            <span
+                              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                                isCorrect
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-rose-100 text-rose-700"
+                              }`}
+                            >
+                              {isCorrect ? "Correct ✓" : "Incorrect ✗"}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-slate-700 mt-1 leading-snug">
+                            {q.question}
+                          </p>
+
+                          <div className="mt-2 text-xs space-y-1">
+                            <p className="text-slate-600">
+                              Your answer:{" "}
+                              <span
+                                className={`font-semibold ${
+                                  isCorrect ? "text-emerald-700" : "text-rose-700 underline"
+                                }`}
+                              >
+                                {userAns}
+                              </span>
+                            </p>
+                            {!isCorrect && (
+                              <p className="text-slate-700">
+                                Correct answer:{" "}
+                                <span className="font-semibold text-emerald-700">
+                                  {q.correctAnswer}
+                                </span>
+                              </p>
+                            )}
+                          </div>
+
                           {q.explanation && (
-                            <p className="text-xs text-slate-400 bg-slate-50 p-2 rounded-lg mt-1 italic">
+                            <p className="text-xs text-slate-500 bg-white/80 border border-slate-100 p-2 rounded-lg mt-2 italic">
                               💡 {q.explanation}
                             </p>
                           )}

@@ -22,7 +22,7 @@ class GapAnalysisResponse(BaseModel):
     matchedDesignation: Optional[str] = None
     department: Optional[str] = None
     experienceYears: Optional[int] = None
-    overallReadiness: Optional[int] = 80
+    overallReadiness: Optional[int] = 25
     domainScores: dict
     domainTargets: Optional[dict] = None
     domainPercentages: Optional[dict] = None

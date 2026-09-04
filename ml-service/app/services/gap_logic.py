@@ -1,6 +1,6 @@
 import json
 import os
-import random
+import re
 
 FRAMEWORK_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "competency_framework.json")
 
@@ -10,8 +10,9 @@ with open(FRAMEWORK_PATH, encoding="utf-8") as f:
 # Keyword mapping for each domain
 DOMAIN_KEYWORDS = {
     "statistical": [
-        "statistic", "sample", "sampling", "survey", "data", "nso", "cpi", "wpi", "gdp", "gva", "census",
-        "econometrics", "mathematics", "plfs", "asi", "sdg", "metadata", "scrutiny", "weights", "laspeyres"
+        "statistic", "statistics", "statistical", "sample", "sampling", "survey", "data", "nso", "cpi", "wpi",
+        "gdp", "gva", "census", "econometric", "econometrics", "economic", "accounts", "mathematics", "plfs",
+        "asi", "sdg", "metadata", "scrutiny", "weights", "laspeyres"
     ],
     "technical": [
         "technical", "python", "r", "sql", "ai", "ml", "gis", "code", "software", "analytics", "database",
@@ -27,6 +28,21 @@ DOMAIN_KEYWORDS = {
     ],
 }
 
+def matches_keywords(text: str, kws: list) -> bool:
+    """Matches keywords with boundary. Short acronyms (len <= 2) require full word boundaries."""
+    if not text or not kws:
+        return False
+    lower_text = str(text).lower()
+    for kw in kws:
+        kw_clean = kw.strip().lower()
+        if len(kw_clean) <= 2:
+            pattern = r'\b' + re.escape(kw_clean) + r'\b'
+        else:
+            pattern = r'\b' + re.escape(kw_clean)
+        if re.search(pattern, lower_text, re.IGNORECASE):
+            return True
+    return False
+
 def estimate_current_level(
     domain: str,
     experience_years: int,
@@ -36,59 +52,76 @@ def estimate_current_level(
     completed_courses: list = None
 ) -> float:
     """
-    Computes real-time dynamic competency level (1.0 to 5.0) based on:
-    - Base years of civil service experience
-    - Academic qualifications & specialization
-    - Verified completed trainings & iGOT credentials
-    - Live quiz performance & continuous assessment scores
+    Computes real-time dynamic, bidirectional competency level (1.0 to 5.0):
+    - Base years of civil service experience: 1.0 to 3.0 scale
+    - Academic qualifications & specialization: +0.25 to +0.60
+    - Past trainings: +0.20 to +0.50
+    - Completed courses & certificates: +0.25 to +1.00
+    - Live Quiz Performance (Bidirectional):
+        * High score (>55%): positive boost up to +0.85
+        * Low score (<55%): negative penalty down to -0.75
     """
-    base = min(1.2 + (experience_years * 0.32), 3.8)
+    # 1. Base level from experience (0 experience starts at entry-level 1.0)
+    exp_years = max(0, int(experience_years or 0))
+    base = 1.0 if exp_years <= 0 else min(1.0 + (exp_years * 0.12), 3.0)
 
     keywords = DOMAIN_KEYWORDS.get(domain, [domain.lower()])
 
-    # Qualifications boost
+    # 2. Qualifications boost (only for verified relevant qualifications)
     qual_bonus = 0.0
     for q in (qualifications or []):
-        q_str = str(q).lower()
-        if any(kw in q_str for kw in keywords):
-            qual_bonus += 0.45
+        if matches_keywords(q, keywords):
+            qual_bonus += 0.35
+    qual_bonus = min(qual_bonus, 0.60)
 
-    # Past trainings boost
+    # 3. Past trainings boost (only for verified relevant past trainings)
     training_bonus = 0.0
     for t in (past_trainings or []):
-        t_str = str(t).lower()
-        if any(kw in t_str for kw in keywords):
-            training_bonus += 0.35
+        if matches_keywords(t, keywords):
+            training_bonus += 0.30
+    training_bonus = min(training_bonus, 0.50)
 
-    # Completed courses & certificates boost
+    # 4. Completed courses & certificates & learning pathways boost (calibrated: exactly 2.5% to 3% overall readiness per item)
     courses_bonus = 0.0
     for c in (completed_courses or []):
-        c_str = str(c).lower()
-        if any(kw in c_str for kw in keywords):
-            courses_bonus += 0.50
+        if matches_keywords(c, keywords):
+            courses_bonus += 0.30
         else:
-            courses_bonus += 0.20
+            courses_bonus += 0.06
+    courses_bonus = min(courses_bonus, 1.80)
 
-    # Live Quiz Performance Impact (Real-time Adaptive ML)
-    quiz_bonus = 0.0
-    if quiz_attempts and len(quiz_attempts) > 0:
-        relevant_scores = []
-        for att in quiz_attempts:
-            source = str(att.get("sourceFileName", "")).lower()
-            score = float(att.get("score", 0) or 0)
-            total = float(att.get("totalQuestions", 5) or 5)
-            pct = (score / max(total, 1)) * 100
+    # 5. Dynamic Bidirectional Quiz Performance Impact (Strictly bounded ±2% to ±3%)
+    quiz_delta = 0.0
+    valid_attempts = [
+        att for att in (quiz_attempts or [])
+        if att.get("score") is not None and str(att.get("score")).strip() != ""
+    ]
+    if valid_attempts:
+        # Prioritize attempts matching this domain
+        domain_attempts = [
+            att for att in valid_attempts
+            if matches_keywords(att.get("sourceFileName", ""), keywords)
+        ]
+        active_attempts = domain_attempts if domain_attempts else valid_attempts
+        latest_attempt = active_attempts[0]
+        try:
+            latest_score = float(latest_attempt.get("score", 0) or 0)
+            latest_total = float(latest_attempt.get("totalQuestions", 5) or 5)
+            latest_pct = (latest_score / max(latest_total, 1.0)) * 100.0
+        except (ValueError, TypeError):
+            latest_pct = 50.0
 
-            # Match quiz domain
-            if any(kw in source for kw in keywords) or len(keywords) > 0:
-                relevant_scores.append(pct)
+        if latest_pct >= 80.0:
+            quiz_delta = 0.10 + ((latest_pct - 80.0) / 20.0) * 0.05  # +0.10 to +0.15 boost (+2% to +3% max)
+        elif latest_pct >= 60.0:
+            quiz_delta = 0.03 + ((latest_pct - 60.0) / 20.0) * 0.04  # +0.03 to +0.07 boost (+1% to +1.5%)
+        elif latest_pct >= 40.0:
+            quiz_delta = -0.05 - ((60.0 - latest_pct) / 20.0) * 0.05  # -0.05 to -0.10 penalty (-1% to -2%)
+        else:
+            quiz_delta = -0.10 - ((40.0 - latest_pct) / 40.0) * 0.06  # -0.10 to -0.16 penalty (-2% to -3%)
 
-        if relevant_scores:
-            avg_quiz_score = sum(relevant_scores) / len(relevant_scores)
-            quiz_bonus = max((avg_quiz_score / 100.0) * 0.85, 0.1)
-
-    total = base + qual_bonus + training_bonus + courses_bonus + quiz_bonus
-    return round(min(max(total, 1.2), 5.0), 1)
+    total = base + qual_bonus + training_bonus + courses_bonus + quiz_delta
+    return round(min(max(total, 1.0), 5.0), 1)
 
 def run_gap_analysis(profile: dict) -> dict:
     designation = profile.get("designation", "Assistant Director")
@@ -136,6 +169,13 @@ def run_gap_analysis(profile: dict) -> dict:
     domain_percentages = {}
     skill_gaps = []
 
+    domain_display_names = {
+        "statistical": "Statistical Analysis",
+        "technical": "Technical & Analytics",
+        "digitalGovernance": "Digital Governance",
+        "behavioural": "Behavioural & Leadership"
+    }
+
     domain_keys = ["statistical", "technical", "digitalGovernance", "behavioural"]
     for domain in domain_keys:
         required = float(required_levels.get(domain, 3.5))
@@ -153,7 +193,7 @@ def run_gap_analysis(profile: dict) -> dict:
 
         gap = round(max(0.0, required - current), 1)
         skill_gaps.append({
-            "skillName": domain,
+            "skillName": domain_display_names.get(domain, domain),
             "currentLevel": current,
             "requiredLevel": required,
             "gap": gap,
@@ -207,11 +247,16 @@ def run_gap_analysis(profile: dict) -> dict:
 
     recent_quiz_info = ""
     if quiz_attempts and len(quiz_attempts) > 0:
-        last_q = quiz_attempts[-1]
+        last_q = quiz_attempts[0] if isinstance(quiz_attempts, list) and len(quiz_attempts) > 0 else {}
         score_val = last_q.get("score", 0)
         tot_val = last_q.get("totalQuestions", 5)
         pct_val = int(round((score_val / max(tot_val, 1)) * 100))
-        recent_quiz_info = f"Latest AI Assessment score of {pct_val}% ({score_val}/{tot_val}) actively incorporated into competency ratings. "
+        if pct_val >= 60:
+            recent_quiz_info = f"Latest assessment score of {pct_val}% ({score_val}/{tot_val}) positively boosted competency ratings. "
+        elif pct_val < 50:
+            recent_quiz_info = f"Latest assessment score of {pct_val}% ({score_val}/{tot_val}) resulted in a performance adjustment, widening growth priorities. "
+        else:
+            recent_quiz_info = f"Latest assessment score: {pct_val}% ({score_val}/{tot_val}). "
 
     if highest_gap_item["gap"] > 0:
         ai_insight = (

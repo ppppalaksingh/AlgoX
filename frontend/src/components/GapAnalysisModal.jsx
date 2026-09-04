@@ -5,10 +5,10 @@ export default function GapAnalysisModal({ isOpen, onClose, analysisData, onStar
   if (!isOpen) return null;
 
   const domainScores = analysisData?.domainScores || {
-    statistical: 4.0,
-    technical: 3.6,
-    digitalGovernance: 2.9,
-    behavioural: 3.2,
+    statistical: 1.2,
+    technical: 1.0,
+    digitalGovernance: 1.0,
+    behavioural: 1.2,
   };
 
   const domainTargets = analysisData?.domainTargets || {
@@ -25,11 +25,11 @@ export default function GapAnalysisModal({ isOpen, onClose, analysisData, onStar
     behavioural: { name: "Behavioural & Leadership", color: "purple" },
   };
 
-  const overallReadiness = analysisData?.overallReadiness ?? 84;
+  const overallReadiness = analysisData?.overallReadiness ?? 25;
   const highestGap = analysisData?.highestGap || {
-    displayName: "Behavioural & Leadership",
-    gap: 0.6,
-    current: 3.2,
+    displayName: "Technical & Analytics",
+    gap: 2.8,
+    current: 1.0,
     required: 3.8,
   };
 

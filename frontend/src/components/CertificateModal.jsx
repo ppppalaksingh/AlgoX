@@ -1,6 +1,6 @@
 import { Award, Download, Printer, X, CheckCircle2, ShieldCheck } from "lucide-react";
 
-export default function CertificateModal({ cert, userName = "Learner", isOpen, onClose }) {
+export default function CertificateModal({ cert, userName = "Palak Singh", userDesignation = "Assistant Director", isOpen, onClose }) {
   if (!isOpen || !cert) return null;
 
   const handlePrint = () => {
@@ -52,11 +52,21 @@ export default function CertificateModal({ cert, userName = "Learner", isOpen, o
               This is proudly presented to
             </p>
 
-            {/* Recipient Name */}
+            {/* Recipient Name & Cadre Designation */}
             <div className="my-4 pb-2 border-b-2 border-slate-300 max-w-md mx-auto">
               <h2 className="text-xl sm:text-2xl font-bold text-blue-900 tracking-wide">
-                {userName}
+                {(() => {
+                  const cleaned = String(userName || "").trim();
+                  if (!cleaned || cleaned === "Assistant Director" || cleaned === "Director" || cleaned.toLowerCase() === String(userDesignation || "").toLowerCase()) {
+                    const localStored = localStorage.getItem("algox_user_name");
+                    return localStored && localStored !== "Assistant Director" ? localStored : "Tarun Gupta";
+                  }
+                  return cleaned;
+                })()}
               </h2>
+              <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">
+                {userDesignation || "Assistant Director"} · MoSPI Cadre
+              </p>
             </div>
 
             {/* Description */}
@@ -81,7 +91,7 @@ export default function CertificateModal({ cert, userName = "Learner", isOpen, o
 
               <div className="text-right">
                 <p className="font-semibold text-slate-700">Credential ID</p>
-                <p className="font-mono text-[11px]">ALGOX-{Math.random().toString(36).substring(2, 8).toUpperCase()}</p>
+                <p className="font-mono text-[11px]">{cert.regNumber || `ALGOX-${(cert._id || cert.title || "CERT").toString().slice(-8).toUpperCase()}`}</p>
               </div>
             </div>
 

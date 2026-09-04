@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { FileText, Eye, Sparkles, UploadCloud, ShieldCheck, X, Presentation, ChevronLeft, ChevronRight, Layers, CheckCircle2, Download, ExternalLink, BookOpen } from "lucide-react";
+import { FileText, Eye, Sparkles, UploadCloud, ShieldCheck, X, Presentation, ChevronLeft, ChevronRight, Layers, CheckCircle2, Download, ExternalLink, BookOpen, Trash2 } from "lucide-react";
 
 export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerateQuizFromDoc, onDeleteDoc }) {
   const [activeDoc, setActiveDoc] = useState(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const defaultResources = [
     {
@@ -166,7 +168,9 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
     },
   ];
 
-  const allDocs = [...documents, ...defaultResources];
+  const userDocs = (documents || []).map((d) => ({ ...d, isUserUploaded: true }));
+  const systemDocs = defaultResources.map((d) => ({ ...d, isUserUploaded: false }));
+  const allDocs = [...userDocs, ...systemDocs];
 
   const formatSize = (bytes) => {
     if (!bytes) return "1.2 MB";
@@ -233,9 +237,20 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
                   <div className={`w-10 h-10 rounded-xl ${isPresentation ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"} flex items-center justify-center font-bold shrink-0`}>
                     {isPresentation ? <Presentation size={20} /> : <FileText size={20} />}
                   </div>
-                  <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${isPresentation ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}>
-                    {isPresentation ? "PPT Slide Deck" : doc.category || "PDF Document"}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                    {doc.isUserUploaded ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                        Your Upload
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                        Official
+                      </span>
+                    )}
+                    <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${isPresentation ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}>
+                      {isPresentation ? "PPT Slide Deck" : doc.category || "PDF Document"}
+                    </span>
+                  </div>
                 </div>
 
                 <p className="text-sm font-bold text-slate-800 line-clamp-1 leading-snug" title={doc.originalName}>
@@ -269,6 +284,21 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
                 >
                   <Sparkles size={13} /> Quiz
                 </button>
+
+                {/* Delete Button: Exclusively visible for user-uploaded materials */}
+                {doc.isUserUploaded && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDocToDelete(doc);
+                    }}
+                    className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 hover:border-rose-200 transition-colors cursor-pointer"
+                    title="Delete this uploaded document"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -292,12 +322,24 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
                 </div>
               </div>
 
-              <button
-                onClick={() => setActiveDoc(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                {activeDoc.isUserUploaded && (
+                  <button
+                    type="button"
+                    onClick={() => setDocToDelete(activeDoc)}
+                    className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer border border-rose-200/60"
+                    title="Delete your uploaded document"
+                  >
+                    <Trash2 size={13} /> Delete Material
+                  </button>
+                )}
+                <button
+                  onClick={() => setActiveDoc(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Content Body */}
@@ -436,6 +478,52 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
                 className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition cursor-pointer"
               >
                 <Sparkles size={14} /> Generate AI Quiz from this Material
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {docToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white max-w-sm w-full rounded-2xl p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+              <Trash2 size={20} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Delete Uploaded Material?</h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Are you sure you want to delete <span className="font-semibold text-slate-700">"{docToDelete.originalName}"</span>? Only this file that you uploaded will be permanently removed from your library.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDocToDelete(null)}
+                className="flex-1 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={async () => {
+                  setIsDeleting(true);
+                  try {
+                    await onDeleteDoc?.(docToDelete._id, docToDelete.originalName);
+                    if (activeDoc?._id === docToDelete._id) {
+                      setActiveDoc(null);
+                    }
+                    setDocToDelete(null);
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                className="flex-1 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs transition cursor-pointer"
+              >
+                {isDeleting ? "Deleting..." : "Yes, Delete"}
               </button>
             </div>
           </div>

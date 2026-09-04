@@ -137,7 +137,7 @@ def _call_gemini_llm(clean_q: str, gemini_key: str):
     from google import genai
     client = genai.Client(api_key=gemini_key)
     prompt = f"{SYSTEM_PROMPT}\n\nUser Question: {clean_q}"
-    for model_name in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']:
+    for model_name in ['gemini-3.6-flash', 'gemini-3.1-pro-preview', 'gemini-3.6-pro']:
         try:
             response = client.models.generate_content(
                 model=model_name,
@@ -169,13 +169,13 @@ def answer_mentor_query(query: str, history: list = None) -> dict:
                 "source": "MoSPI / NSSTA Knowledge Base"
             }
 
-    # 2. Try Gemini with a strict 3.5s timeout thread
+    # 2. Try Gemini with a strict 35.0s timeout thread
     gemini_key = os.getenv("GEMINI_API_KEY")
     if gemini_key:
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_call_gemini_llm, clean_q, gemini_key)
-                llm_response = future.result(timeout=3.5)
+                llm_response = future.result(timeout=35.0)
                 if llm_response:
                     return {
                         "response": llm_response,

@@ -9,6 +9,16 @@ const competencyProfileSchema = new mongoose.Schema(
       digitalGovernance: { type: Number, default: 0 },
       behavioural: { type: Number, default: 0 },
     },
+    domainTargets: {
+      statistical: { type: Number, default: 4.0 },
+      technical: { type: Number, default: 4.0 },
+      digitalGovernance: { type: Number, default: 3.5 },
+      behavioural: { type: Number, default: 3.5 },
+    },
+    overallReadiness: { type: Number, default: 25 },
+    highestGap: { type: mongoose.Schema.Types.Mixed },
+    topStrength: { type: mongoose.Schema.Types.Mixed },
+    aiExecutiveInsight: { type: String },
     skillGaps: [
       {
         skillName: String,
@@ -17,8 +27,17 @@ const competencyProfileSchema = new mongoose.Schema(
         gap: Number,
       },
     ],
+    subCompetencies: [
+      {
+        domain: String,
+        subCompetency: String,
+        current: Number,
+        required: Number,
+        gap: Number,
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 export default mongoose.model("CompetencyProfile", competencyProfileSchema);

@@ -3,8 +3,9 @@
 // ============================================================================
 
 export const currentUser = {
-  name: "Assistant Director",
-  role: "Official",
+  name: "Palak Singh",
+  role: "Assistant Director",
+  designation: "Assistant Director",
   avatarUrl: "",
   notificationsCount: 3,
 };
@@ -14,16 +15,16 @@ export const overviewStats = [
   {
     id: "overall-competency",
     label: "Overall Competency",
-    value: "74%",
+    value: "25%",
     caption: "MoSPI Official Framework",
     icon: "TrendingUp",
     color: "blue",
-    progress: 74,
+    progress: 25,
   },
   {
     id: "skills-identified",
     label: "Skills Mapped",
-    value: 24,
+    value: 4,
     caption: "Across 4 domains",
     icon: "BookOpen",
     color: "green",
@@ -39,7 +40,7 @@ export const overviewStats = [
   {
     id: "courses-completed",
     label: "iGOT / TPAC Completed",
-    value: 8,
+    value: 0,
     caption: "Verified credentials",
     icon: "Trophy",
     color: "purple",
@@ -51,15 +52,15 @@ export const skillGaps = [
   {
     id: "statistical",
     name: "Statistical Analysis",
-    percent: 82,
-    status: "Strong",
+    percent: 25,
+    status: "Needs Improvement",
     icon: "BarChart3",
     color: "blue",
   },
   {
     id: "technical",
     name: "Technical & Analytics",
-    percent: 64,
+    percent: 20,
     status: "Needs Improvement",
     icon: "Monitor",
     color: "orange",
@@ -67,16 +68,16 @@ export const skillGaps = [
   {
     id: "digitalGovernance",
     name: "Digital Governance",
-    percent: 70,
-    status: "Average",
+    percent: 20,
+    status: "Needs Improvement",
     icon: "PieChart",
     color: "green",
   },
   {
     id: "behavioural",
     name: "Behavioural & Leadership",
-    percent: 88,
-    status: "Strong",
+    percent: 25,
+    status: "Needs Improvement",
     icon: "MessageSquare",
     color: "purple",
   },
@@ -105,10 +106,10 @@ export const recommendedPath = {
 // "Your Progress" donut widget
 export const progressSummary = {
   month: "This Quarter",
-  percent: 74,
-  completed: 8,
-  inProgress: 4,
-  notStarted: 3,
+  percent: 25,
+  completed: 0,
+  inProgress: 0,
+  notStarted: 6,
 };
 
 // "Continue Learning" course cards
@@ -116,8 +117,8 @@ export const continueLearningCourses = [
   {
     id: "course-1",
     title: "Planning and Designing of Large Scale Sample Surveys",
-    tag: "NSSTA TPAC",
-    percent: 75,
+    tag: "In Progress",
+    percent: 60,
     color: "blue",
     domain: "Statistical",
   },
@@ -125,25 +126,25 @@ export const continueLearningCourses = [
     id: "course-2",
     title: "Python Training for Statisticians",
     tag: "In Progress",
-    percent: 45,
+    percent: 35,
     color: "orange",
     domain: "Technical",
   },
   {
     id: "course-3",
     title: "Cybersecurity & DPDP Compliance in Government",
-    tag: "iGOT Module",
-    percent: 30,
+    tag: "In Progress",
+    percent: 20,
     color: "green",
     domain: "Digital Governance",
   },
   {
     id: "course-4",
-    title: "Leadership & Change Management for Civil Services",
-    tag: "Completed",
-    percent: 100,
+    title: "Handling Large Scale Data & Data Analysis using R",
+    tag: "Available",
+    percent: 0,
     color: "purple",
-    domain: "Behavioural",
+    domain: "Technical",
   },
 ];
 
@@ -176,8 +177,8 @@ export const allCourses = [
     level: "Advanced",
     duration: "One week",
     institute: "NSSTA, Greater Noida",
-    percent: 100,
-    status: "Completed",
+    percent: 60,
+    status: "In Progress",
     color: "blue",
     source_type: "TPAC"
   },
@@ -189,7 +190,7 @@ export const allCourses = [
     level: "Intermediate",
     duration: "One week",
     institute: "C R Rao AIMSC, Hyderabad",
-    percent: 45,
+    percent: 35,
     status: "In Progress",
     color: "orange",
     source_type: "TPAC"
@@ -203,7 +204,7 @@ export const allCourses = [
     level: "Beginner",
     duration: "2h 42m",
     igotLink: "https://portal.igotkarmayogi.gov.in/app/toc/do_1144751221174108161801/overview",
-    percent: 30,
+    percent: 20,
     status: "In Progress",
     color: "green",
     source_type: "iGOT"
@@ -216,8 +217,8 @@ export const allCourses = [
     domain: "Digital Governance",
     level: "Beginner",
     duration: "1h 50m",
-    percent: 100,
-    status: "Completed",
+    percent: 0,
+    status: "Available",
     color: "purple",
     source_type: "iGOT"
   },
@@ -242,39 +243,20 @@ export const allCourses = [
     level: "Advanced",
     duration: "Two weeks",
     institute: "National Statistical Systems Training Academy (NSSTA)",
-    percent: 100,
-    status: "Completed",
+    percent: 0,
+    status: "Available",
     color: "orange",
     source_type: "TPAC"
   }
 ];
 
-export const certificates = [
-  {
-    id: "cert-1",
-    title: "Planning and Designing of Large Scale Sample Surveys",
-    issuedDate: "14 January 2026",
-    domain: "Statistical",
-  },
-  {
-    id: "cert-2",
-    title: "Data Privacy and DPDP Act in Governance",
-    issuedDate: "28 February 2026",
-    domain: "Digital Governance",
-  },
-  {
-    id: "cert-3",
-    title: "National Accounts Statistics & SNA 2008 Guidelines",
-    issuedDate: "05 August 2025",
-    domain: "Statistical",
-  },
-];
+export const certificates = [];
 
 export const competencyDomains = [
-  { id: "statistical", name: "Statistical Competencies", percent: 82, status: "Strong", icon: "BarChart3", color: "blue" },
-  { id: "technical", name: "Technical Competencies", percent: 64, status: "Needs Improvement", icon: "Monitor", color: "orange" },
-  { id: "digitalGovernance", name: "Digital Governance", percent: 70, status: "Average", icon: "PieChart", color: "green" },
-  { id: "behavioural", name: "Behavioural & Leadership", percent: 88, status: "Strong", icon: "MessageSquare", color: "purple" },
+  { id: "statistical", name: "Statistical Competencies", percent: 25, status: "Needs Improvement", icon: "BarChart3", color: "blue" },
+  { id: "technical", name: "Technical Competencies", percent: 20, status: "Needs Improvement", icon: "Monitor", color: "orange" },
+  { id: "digitalGovernance", name: "Digital Governance", percent: 20, status: "Needs Improvement", icon: "PieChart", color: "green" },
+  { id: "behavioural", name: "Behavioural & Leadership", percent: 25, status: "Needs Improvement", icon: "MessageSquare", color: "purple" },
 ];
 
 export const progressHistory = [

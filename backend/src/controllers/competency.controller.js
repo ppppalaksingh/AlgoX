@@ -8,15 +8,18 @@ import { getGapAnalysis } from "../services/mlService.js";
 
 async function getOrCreateUser(clerkId) {
   let user = await User.findOne({ clerkId });
+  if (!user && (clerkId === "user_dev_officer_test" || clerkId === "officer-default" || !clerkId)) {
+    user = await User.findOne().sort({ updatedAt: -1 });
+  }
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: "Assistant Director",
+      name: "Palak Singh",
       designation: "Assistant Director",
       department: "National Statistical Office (NSO)",
-      experienceYears: 4,
-      qualifications: ["Master in Statistics", "Civil Services Foundation"],
-      pastTrainings: ["iGOT Basics", "Statistical Sampling Methods"],
+      experienceYears: 0,
+      qualifications: [],
+      pastTrainings: [],
     });
   }
   return user;
@@ -26,23 +29,33 @@ export const runGapAnalysis = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
 
-    // Fetch live user activities (quiz scores, documents, certificates, progress)
-    const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
+    // Fetch live user activities (only finished quiz attempts with scores, documents, certificates, progress)
+    const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
+      .sort({ createdAt: -1 })
+      .limit(10);
     const certificates = await Certificate.find({ userId: user._id }).sort({ createdAt: -1 });
     const progress = await UserProgress.findOne({ userId: user._id });
 
-    const completedCourses = [
-      ...(user.pastTrainings || []),
-      ...(certificates.map((c) => `${c.title} (${c.domain || 'Statistical'})`)),
-      ...(progress?.completedCourseIds || []),
-    ];
+    const certTitles = new Set();
+    const completedCourses = [...(user.pastTrainings || [])];
+    for (const c of certificates) {
+      if (c.title && !certTitles.has(c.title.toLowerCase().trim())) {
+        certTitles.add(c.title.toLowerCase().trim());
+        completedCourses.push(`${c.title} (${c.domain || 'Statistical'})`);
+      }
+    }
+    for (const cId of (progress?.completedCourseIds || [])) {
+      if (!certTitles.has(String(cId).toLowerCase().trim())) {
+        completedCourses.push(String(cId));
+      }
+    }
 
     const gapResult = await getGapAnalysis({
       designation: user.designation || "Assistant Director",
       department: user.department || "National Statistical Office (NSO)",
-      experienceYears: user.experienceYears || 4,
-      qualifications: user.qualifications?.length ? user.qualifications : ["Master in Statistics"],
-      pastTrainings: user.pastTrainings?.length ? user.pastTrainings : ["Statistical Sampling Methods"],
+      experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+      qualifications: user.qualifications || [],
+      pastTrainings: user.pastTrainings || [],
       quizAttempts: quizAttempts.map((q) => ({
         sourceFileName: q.sourceFileName,
         score: q.score,
@@ -63,7 +76,7 @@ export const runGapAnalysis = async (req, res) => {
         aiExecutiveInsight: gapResult.aiExecutiveInsight,
         domainTargets: gapResult.domainTargets,
       },
-      { upsert: true, returnDocument: "after" }
+      { upsert: true, new: true }
     );
 
     res.json({
@@ -79,22 +92,32 @@ export const runGapAnalysis = async (req, res) => {
 export const getMyCompetencyProfile = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
-    const quizAttempts = await QuizAttempt.find({ userId: user._id }).sort({ createdAt: -1 }).limit(10);
+    const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
+      .sort({ createdAt: -1 })
+      .limit(10);
     const certificates = await Certificate.find({ userId: user._id }).sort({ createdAt: -1 });
     const progress = await UserProgress.findOne({ userId: user._id });
 
-    const completedCourses = [
-      ...(user.pastTrainings || []),
-      ...(certificates.map((c) => `${c.title} (${c.domain || 'Statistical'})`)),
-      ...(progress?.completedCourseIds || []),
-    ];
+    const certTitles = new Set();
+    const completedCourses = [...(user.pastTrainings || [])];
+    for (const c of certificates) {
+      if (c.title && !certTitles.has(c.title.toLowerCase().trim())) {
+        certTitles.add(c.title.toLowerCase().trim());
+        completedCourses.push(`${c.title} (${c.domain || 'Statistical'})`);
+      }
+    }
+    for (const cId of (progress?.completedCourseIds || [])) {
+      if (!certTitles.has(String(cId).toLowerCase().trim())) {
+        completedCourses.push(String(cId));
+      }
+    }
 
     const gapResult = await getGapAnalysis({
       designation: user.designation || "Assistant Director",
       department: user.department || "National Statistical Office (NSO)",
-      experienceYears: user.experienceYears || 4,
-      qualifications: user.qualifications || ["Master in Statistics"],
-      pastTrainings: user.pastTrainings || ["Statistical Sampling Methods"],
+      experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+      qualifications: user.qualifications || [],
+      pastTrainings: user.pastTrainings || [],
       quizAttempts: quizAttempts.map((q) => ({
         sourceFileName: q.sourceFileName,
         score: q.score,
@@ -103,7 +126,25 @@ export const getMyCompetencyProfile = async (req, res) => {
       completedCourses,
     });
 
-    res.json(gapResult);
+    const profile = await CompetencyProfile.findOneAndUpdate(
+      { userId: user._id },
+      {
+        domainScores: gapResult.domainScores,
+        skillGaps: gapResult.skillGaps,
+        subCompetencies: gapResult.subCompetencies,
+        overallReadiness: gapResult.overallReadiness,
+        highestGap: gapResult.highestGap,
+        topStrength: gapResult.topStrength,
+        aiExecutiveInsight: gapResult.aiExecutiveInsight,
+        domainTargets: gapResult.domainTargets,
+      },
+      { upsert: true, new: true }
+    );
+
+    res.json({
+      ...gapResult,
+      profileId: profile._id,
+    });
   } catch (err) {
     console.error("[competency.controller] getMyCompetencyProfile error:", err.message);
     res.status(500).json({ error: err.message });
