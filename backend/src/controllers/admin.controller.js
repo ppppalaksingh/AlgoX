@@ -127,26 +127,35 @@ export const getAllOfficialsData = async (req, res) => {
     // Map DB users first
     const dbOfficials = dbUsers.map((u) => {
       const prof = profiles.find((p) => String(p.userId) === String(u._id));
+      const topGap = prof?.highestGap?.displayName || prof?.highestGap?.domain || "Python for Survey Scrutiny";
+      const compScore = prof?.overallReadiness != null
+        ? prof.overallReadiness
+        : prof?.domainScores?.statistical
+        ? Math.round(((prof.domainScores.statistical + prof.domainScores.technical + prof.domainScores.digitalGovernance + prof.domainScores.behavioural) / 20) * 100)
+        : 75;
+
       return {
-        id: u._id,
-        employee_id: u.clerkId?.substring(0, 8) || "EMP-LIVE",
+        id: String(u._id),
+        employee_id: u.clerkId?.substring(0, 10) || "EMP-LIVE",
         name: u.name || "Official",
         email: u.email || `${u.name?.toLowerCase().replace(/\s+/g, ".")}@mospi.gov.in`,
         designation: u.designation || "Assistant Director",
         department: u.department || "National Statistical Office (NSO)",
         cadre: u.department?.includes("Field") ? "Field Operations Division (FOD)" : "Indian Statistical Service (ISS)",
-        experienceYears: u.experienceYears || 4,
+        experienceYears: u.experienceYears || 0,
         state: "New Delhi",
-        overallCompetency: prof?.domainScores?.statistical ? Math.round(((prof.domainScores.statistical + prof.domainScores.technical + prof.domainScores.digitalGovernance + prof.domainScores.behavioural) / 20) * 100) : 78,
+        overallCompetency: compScore,
         domainScores: prof?.domainScores ? {
           statistical: Math.round((prof.domainScores.statistical / 5) * 100),
           technical: Math.round((prof.domainScores.technical / 5) * 100),
           digitalGovernance: Math.round((prof.domainScores.digitalGovernance / 5) * 100),
           behavioural: Math.round((prof.domainScores.behavioural / 5) * 100),
-        } : { statistical: 84, technical: 68, digitalGovernance: 72, behavioural: 88 },
-        topSkillGap: "Python for Data Scrutiny",
-        coursesCompleted: u.pastTrainings?.length || 5,
+        } : { statistical: 80, technical: 65, digitalGovernance: 70, behavioural: 85 },
+        topSkillGap: topGap,
+        coursesCompleted: u.pastTrainings?.length || 0,
         status: "Active",
+        isLiveUser: true,
+        createdAt: u.createdAt,
       };
     });
 

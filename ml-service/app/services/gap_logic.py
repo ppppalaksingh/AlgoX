@@ -3,9 +3,17 @@ import os
 import re
 
 FRAMEWORK_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "competency_framework.json")
+MOSPI_COMP_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "mospi_competencies.json")
 
 with open(FRAMEWORK_PATH, encoding="utf-8") as f:
     COMPETENCY_FRAMEWORK = json.load(f)
+
+try:
+    with open(MOSPI_COMP_PATH, encoding="utf-8") as f:
+        _comps = json.load(f)
+        COMPETENCY_ID_MAP = {c["competency_id"]: c["domain"].lower() for c in _comps if "competency_id" in c}
+except Exception:
+    COMPETENCY_ID_MAP = {}
 
 # Keyword mapping for each domain
 DOMAIN_KEYWORDS = {
@@ -127,15 +135,23 @@ def run_gap_analysis(profile: dict) -> dict:
     designation = profile.get("designation", "Assistant Director")
     department = profile.get("department", "National Statistical Office (NSO)")
     
-    # 1. Match Framework Designation
+    # 1. Match Framework Designation (exact first, then longest matching key)
     matched_key = None
     required_levels = None
     
     for desig_key, reqs in COMPETENCY_FRAMEWORK.items():
-        if desig_key.lower() in designation.lower() or designation.lower() in desig_key.lower():
+        if desig_key.strip().lower() == designation.strip().lower():
             matched_key = desig_key
             required_levels = reqs
             break
+
+    if not required_levels:
+        sorted_keys = sorted(COMPETENCY_FRAMEWORK.keys(), key=len, reverse=True)
+        for desig_key in sorted_keys:
+            if desig_key.lower() in designation.lower() or designation.lower() in desig_key.lower():
+                matched_key = desig_key
+                required_levels = COMPETENCY_FRAMEWORK[desig_key]
+                break
 
     if not required_levels:
         matched_key = "Assistant Director"
@@ -205,11 +221,26 @@ def run_gap_analysis(profile: dict) -> dict:
     sub_competencies = required_levels.get("subCompetencies", {})
     sub_gaps = []
     for sub_name, req_score in sub_competencies.items():
-        matched_domain = "statistical"
-        for d, kws in DOMAIN_KEYWORDS.items():
-            if any(kw in sub_name.lower() for kw in kws):
-                matched_domain = d
-                break
+        matched_domain = None
+        # Check if there is an official MoSPI code like CMP031
+        cmp_match = re.search(r'CMP\d{3}', sub_name)
+        if cmp_match and cmp_match.group(0) in COMPETENCY_ID_MAP:
+            raw_dom = COMPETENCY_ID_MAP[cmp_match.group(0)]
+            if raw_dom in ["digital governance", "digitalgovernance"]:
+                matched_domain = "digitalGovernance"
+            elif raw_dom in ["behavioural", "behavioral"]:
+                matched_domain = "behavioural"
+            elif raw_dom in ["technical"]:
+                matched_domain = "technical"
+            else:
+                matched_domain = "statistical"
+
+        if not matched_domain:
+            matched_domain = "statistical"
+            for d, kws in DOMAIN_KEYWORDS.items():
+                if matches_keywords(sub_name, kws):
+                    matched_domain = d
+                    break
         
         # Sub-score derived from parent domain level
         curr_sub = round(min(max(domain_scores[matched_domain] - 0.1, 1.0), 5.0), 1)

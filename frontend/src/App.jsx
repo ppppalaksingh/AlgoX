@@ -82,6 +82,7 @@ function Dashboard() {
   const [profileData, setProfileData] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [adminAnalyticsData, setAdminAnalyticsData] = useState(null);
+  const [adminOfficialsList, setAdminOfficialsList] = useState([]);
   const [isAdminInDB, setIsAdminInDB] = useState(false);
   const [quizAttempts, setQuizAttempts] = useState([]);
   const [progressData, setProgressData] = useState(null);
@@ -485,15 +486,28 @@ function Dashboard() {
     }
   }, []);
 
-  // Helper to fetch Admin Analytics
+  // Helper to fetch Admin Analytics & Live Officials Directory
   const fetchAdminAnalytics = useCallback(async (token) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/analytics`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const [analyticsRes, officialsRes] = await Promise.allSettled([
+        fetch(`${API_BASE_URL}/admin/analytics`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/admin/officials`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      if (analyticsRes.status === "fulfilled" && analyticsRes.value.ok) {
+        const data = await analyticsRes.value.json();
         setAdminAnalyticsData(data);
+      }
+
+      if (officialsRes.status === "fulfilled" && officialsRes.value.ok) {
+        const data = await officialsRes.value.json();
+        if (data.officials) {
+          setAdminOfficialsList(data.officials);
+        }
       }
     } catch (err) {
       console.warn("[App] Admin analytics load note:", err.message);
@@ -1602,7 +1616,14 @@ function Dashboard() {
 
           {activeNav === "admin-dashboard" && (
             isAdminInDB ? (
-              <AdminDashboard adminData={adminAnalyticsData} />
+              <AdminDashboard
+                adminData={adminAnalyticsData}
+                officials={adminOfficialsList}
+                onRefreshOfficials={async () => {
+                  const token = (await getToken()) || "dev-test-token";
+                  await fetchAdminAnalytics(token);
+                }}
+              />
             ) : (
               <div className="max-w-2xl mx-auto py-12 text-center bg-white rounded-3xl border border-slate-200 p-8 shadow-xs space-y-4">
                 <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">

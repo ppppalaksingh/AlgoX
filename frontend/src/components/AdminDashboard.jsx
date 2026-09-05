@@ -6,13 +6,22 @@ import {
   Eye, UserCheck, Send, X, ExternalLink
 } from "lucide-react";
 
-export default function AdminDashboard({ adminData, onAssignTraining, onInspectOfficial }) {
+export default function AdminDashboard({
+  adminData,
+  officials = [],
+  onRefreshOfficials,
+  onAssignTraining,
+  onInspectOfficial,
+}) {
   const [activeTab, setActiveTab] = useState("officials"); // 'officials' | 'overview' | 'heatmap' | 'predictive' | 'batch'
   const [selectedDivision, setSelectedDivision] = useState("all");
   const [officialSearch, setOfficialSearch] = useState("");
   const [selectedOfficialModal, setSelectedOfficialModal] = useState(null);
   const [assignmentModal, setAssignmentModal] = useState(null);
   const [assignedSuccessToast, setAssignedSuccessToast] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const ITEMS_PER_PAGE = 25;
 
   const [batchNomination, setBatchNomination] = useState({
     cadre: "Subordinate Statistical Service (SSS)",
@@ -22,8 +31,8 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
   });
   const [isNominated, setIsNominated] = useState(false);
 
-  // Mock list of all officials across Indian Statistical System
-  const allOfficialsList = [
+  // Fallback mock list if API not yet populated
+  const fallbackOfficialsList = [
     {
       id: "off-001",
       name: "Dr. Rajesh K. Sharma",
@@ -124,14 +133,30 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
     },
   ];
 
-  const summary = adminData?.summary || {
-    totalOfficials: 4850,
-    activeLearners: 3920,
-    overallCompetencyScore: 74.5,
-    totalTrainingHours: 142800,
-    coursesCompleted: 18450,
-    certificationsIssued: 9620,
-    avgSkillGapReduction: "24.8%",
+  // Dynamic live dataset if provided from MongoDB & MoSPI catalog
+  const allOfficialsList = officials && officials.length > 0 ? officials : fallbackOfficialsList;
+  const liveUsersCount = allOfficialsList.filter((o) => o.isLiveUser).length;
+
+  const isRealData = Boolean(officials && officials.length > 0);
+  const calculatedAvgCompetency = isRealData
+    ? (
+        allOfficialsList.reduce((acc, o) => acc + (Number(o.overallCompetency) || 0), 0) /
+        (allOfficialsList.length || 1)
+      ).toFixed(1)
+    : 74.5;
+
+  const calculatedActiveLearners = isRealData
+    ? allOfficialsList.filter((o) => o.coursesCompleted > 0 || o.status === "Active").length
+    : 3920;
+
+  const summary = {
+    totalOfficials: isRealData ? allOfficialsList.length : adminData?.summary?.totalOfficials || 4850,
+    activeLearners: isRealData ? calculatedActiveLearners : adminData?.summary?.activeLearners || 3920,
+    overallCompetencyScore: isRealData ? Number(calculatedAvgCompetency) : adminData?.summary?.overallCompetencyScore || 74.5,
+    totalTrainingHours: adminData?.summary?.totalTrainingHours || 142800,
+    coursesCompleted: adminData?.summary?.coursesCompleted || 18450,
+    certificationsIssued: adminData?.summary?.certificationsIssued || 9620,
+    avgSkillGapReduction: adminData?.summary?.avgSkillGapReduction || "24.8%",
   };
 
   const cadres = adminData?.cadres || [
@@ -175,14 +200,32 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
   };
 
   const filteredOfficials = allOfficialsList.filter((o) => {
+    const q = officialSearch.toLowerCase().trim();
     const matchesSearch =
-      o.name.toLowerCase().includes(officialSearch.toLowerCase()) ||
-      o.designation.toLowerCase().includes(officialSearch.toLowerCase()) ||
-      o.department.toLowerCase().includes(officialSearch.toLowerCase()) ||
-      o.email.toLowerCase().includes(officialSearch.toLowerCase());
-    const matchesDiv = selectedDivision === "all" || o.cadre === selectedDivision;
+      !q ||
+      (o.name || "").toLowerCase().includes(q) ||
+      (o.designation || "").toLowerCase().includes(q) ||
+      (o.department || "").toLowerCase().includes(q) ||
+      (o.email || "").toLowerCase().includes(q) ||
+      (o.cadre || "").toLowerCase().includes(q);
+
+    let matchesDiv = true;
+    if (selectedDivision === "all") {
+      matchesDiv = true;
+    } else if (selectedDivision === "live") {
+      matchesDiv = Boolean(o.isLiveUser);
+    } else {
+      matchesDiv = o.cadre === selectedDivision;
+    }
+
     return matchesSearch && matchesDiv;
   });
+
+  const totalPages = Math.ceil(filteredOfficials.length / ITEMS_PER_PAGE) || 1;
+  const paginatedOfficials = filteredOfficials.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="space-y-6">
@@ -215,6 +258,23 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {onRefreshOfficials && (
+              <button
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  try {
+                    await onRefreshOfficials();
+                  } finally {
+                    setTimeout(() => setIsRefreshing(false), 800);
+                  }
+                }}
+                disabled={isRefreshing}
+                className="px-4 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <Sparkles size={15} className={isRefreshing ? "animate-spin text-emerald-400" : "text-emerald-400"} />
+                {isRefreshing ? "Syncing..." : "Sync Live Users"}
+              </button>
+            )}
             <button
               onClick={() => window.print()}
               className="px-4 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 cursor-pointer"
@@ -293,14 +353,21 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
               {/* Filter */}
               <select
                 value={selectedDivision}
-                onChange={(e) => setSelectedDivision(e.target.value)}
+                onChange={(e) => {
+                  setSelectedDivision(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="px-3 py-2 rounded-xl border border-white/[0.08] text-xs font-semibold bg-[#0c101d] text-slate-200 outline-none cursor-pointer"
               >
-                <option value="all">All Cadres</option>
+                <option value="all">All Cadres ({allOfficialsList.length})</option>
+                {liveUsersCount > 0 && (
+                  <option value="live">🟢 Live Registered Users ({liveUsersCount})</option>
+                )}
                 <option value="Indian Statistical Service (ISS)">ISS Cadre</option>
                 <option value="Subordinate Statistical Service (SSS)">SSS Cadre</option>
                 <option value="Data Processing Cadre (DPD)">DPD Cadre</option>
                 <option value="State DES Deputed Officers">State DES</option>
+                <option value="Field Operations Division (FOD)">Field Operations (FOD)</option>
               </select>
             </div>
           </div>
@@ -319,52 +386,97 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04] font-medium">
-                {filteredOfficials.map((off) => (
-                  <tr key={off.id} className="hover:bg-white/[0.02] transition">
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-white">{off.name}</p>
-                      <p className="text-xs text-slate-500">{off.email}</p>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <p className="font-semibold text-slate-300 text-xs">{off.designation}</p>
-                      <p className="text-[11px] text-slate-500">{off.department}</p>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-300 border border-white/[0.08]">
-                        {off.cadre}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span className="font-extrabold text-blue-400 text-sm">{off.overallCompetency}%</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-lg border border-amber-500/25">
-                        <AlertTriangle size={11} /> {off.topSkillGap}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setSelectedOfficialModal(off)}
-                          className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-bold transition flex items-center gap-1 border border-blue-500/20 cursor-pointer"
-                          title="Drill-down into competency profile"
-                        >
-                          <Eye size={13} /> Inspect Profile
-                        </button>
-                        <button
-                          onClick={() => setAssignmentModal(off)}
-                          className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-md shadow-blue-600/30 cursor-pointer"
-                          title="Assign mandatory TPAC / iGOT course"
-                        >
-                          <Send size={12} /> Assign Module
-                        </button>
-                      </div>
+                {paginatedOfficials.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-400 text-xs">
+                      No officials match the current search or cadre filter.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  paginatedOfficials.map((off) => (
+                    <tr key={off.id || off.employee_id} className="hover:bg-white/[0.02] transition">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-white">{off.name}</p>
+                          {off.isLiveUser && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 tracking-wider uppercase">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live User
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500">{off.email}</p>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <p className="font-semibold text-slate-300 text-xs">{off.designation}</p>
+                        <p className="text-[11px] text-slate-500">{off.department}</p>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-300 border border-white/[0.08]">
+                          {off.cadre}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="font-extrabold text-blue-400 text-sm">{off.overallCompetency}%</span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-lg border border-amber-500/25">
+                          <AlertTriangle size={11} /> {off.topSkillGap}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => setSelectedOfficialModal(off)}
+                            className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-bold transition flex items-center gap-1 border border-blue-500/20 cursor-pointer"
+                            title="Drill-down into competency profile"
+                          >
+                            <Eye size={13} /> Inspect Profile
+                          </button>
+                          <button
+                            onClick={() => setAssignmentModal(off)}
+                            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-md shadow-blue-600/30 cursor-pointer"
+                            title="Assign mandatory TPAC / iGOT course"
+                          >
+                            <Send size={12} /> Assign Module
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination bar */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/[0.06] text-xs text-slate-400">
+              <div>
+                Showing <span className="text-white font-bold">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> to{" "}
+                <span className="text-white font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOfficials.length)}</span> of{" "}
+                <span className="text-white font-bold">{filteredOfficials.length}</span> officials
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-slate-300 font-semibold cursor-pointer"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1 text-white font-bold bg-white/[0.06] rounded-lg border border-white/[0.08]">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-slate-300 font-semibold cursor-pointer"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -394,19 +506,19 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="bg-blue-500/10 p-3.5 rounded-2xl border border-blue-500/20 text-center">
                   <p className="text-xs text-blue-300 font-semibold">Statistical</p>
-                  <p className="text-xl font-extrabold text-blue-400 mt-1">{selectedOfficialModal.domainScores.statistical}%</p>
+                  <p className="text-xl font-extrabold text-blue-400 mt-1">{selectedOfficialModal.domainScores?.statistical ?? 75}%</p>
                 </div>
                 <div className="bg-orange-500/10 p-3.5 rounded-2xl border border-orange-500/20 text-center">
                   <p className="text-xs text-orange-300 font-semibold">Technical</p>
-                  <p className="text-xl font-extrabold text-orange-400 mt-1">{selectedOfficialModal.domainScores.technical}%</p>
+                  <p className="text-xl font-extrabold text-orange-400 mt-1">{selectedOfficialModal.domainScores?.technical ?? 65}%</p>
                 </div>
                 <div className="bg-emerald-500/10 p-3.5 rounded-2xl border border-emerald-500/20 text-center">
                   <p className="text-xs text-emerald-300 font-semibold">Digital Gov</p>
-                  <p className="text-xl font-extrabold text-emerald-400 mt-1">{selectedOfficialModal.domainScores.digitalGovernance}%</p>
+                  <p className="text-xl font-extrabold text-emerald-400 mt-1">{selectedOfficialModal.domainScores?.digitalGovernance ?? 70}%</p>
                 </div>
                 <div className="bg-purple-500/10 p-3.5 rounded-2xl border border-purple-500/20 text-center">
                   <p className="text-xs text-purple-300 font-semibold">Leadership</p>
-                  <p className="text-xl font-extrabold text-purple-400 mt-1">{selectedOfficialModal.domainScores.behavioural}%</p>
+                  <p className="text-xl font-extrabold text-purple-400 mt-1">{selectedOfficialModal.domainScores?.behavioural ?? 80}%</p>
                 </div>
               </div>
             </div>
