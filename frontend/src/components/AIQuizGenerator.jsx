@@ -46,123 +46,130 @@ export default function AIQuizGenerator({
   return (
     <div className="space-y-8">
       {/* Upload Box Card */}
-      <div className="bg-[#0f1422]/80 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] space-y-5 relative overflow-hidden">
+      <div className="bg-[#0f1422]/80 backdrop-blur-xl border border-white/[0.08] p-5 sm:p-7 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] space-y-5 relative overflow-hidden">
         {/* Top edge glow sheen */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1">
                 <Sparkles size={11} className="text-purple-400" /> AI Question Generator
               </span>
               <span className="text-[11px] text-slate-400">Gemini 3.6 Flash &amp; MoSPI NLP</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
               Civil Services Assessment Generator
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl leading-relaxed">
-              Upload your PPT, PDF, or document. The AI extracts the exact concepts and builds challenging, randomized multiple-choice examination questions.
+            <p className="text-xs text-slate-400 mt-0.5 max-w-2xl leading-relaxed">
+              Upload your PPT, PDF, or document. The AI extracts concepts and synthesizes randomized, official-standard examination questions.
             </p>
           </div>
 
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.35)] border border-white/20">
-            <Bot size={24} />
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.35)] border border-white/20">
+            <Bot size={20} />
           </div>
         </div>
 
-        {/* Drag & Drop Zone */}
-        <label
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragging(false);
-            handleFiles(e.dataTransfer.files);
-          }}
-          className={`flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed rounded-2xl p-8 sm:p-10 cursor-pointer transition-all duration-200 ${
-            isDragging
-              ? "border-indigo-500 bg-indigo-500/10 scale-[0.99]"
-              : "border-white/10 hover:border-indigo-500/40 hover:bg-white/[0.02] bg-black/25"
-          }`}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".pdf,.ppt,.pptx,.docx,.txt,.csv"
-            className="hidden"
-            disabled={isGenerating}
-            onChange={(e) => handleFiles(e.target.files)}
-          />
+        {/* 2-Column Responsive Studio Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+          {/* Drag & Drop Zone */}
+          <div className="lg:col-span-7">
+            <label
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                handleFiles(e.dataTransfer.files);
+              }}
+              className={`flex items-center gap-3.5 border-2 border-dashed rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-200 ${
+                isDragging
+                  ? "border-indigo-500 bg-indigo-500/10 scale-[0.99]"
+                  : "border-white/10 hover:border-indigo-500/40 hover:bg-white/[0.02] bg-black/25"
+              }`}
+            >
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".pdf,.ppt,.pptx,.docx,.txt,.csv"
+                className="hidden"
+                disabled={isGenerating}
+                onChange={(e) => handleFiles(e.target.files)}
+              />
 
-          {isGenerating ? (
-            <div className="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-              <Loader2 size={30} className="animate-spin" />
-            </div>
-          ) : fileName ? (
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-              <CheckCircle2 size={30} />
-            </div>
-          ) : (
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 text-indigo-400 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
-              <UploadCloud size={28} />
-            </div>
-          )}
+              {isGenerating ? (
+                <div className="w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                  <Loader2 size={22} className="animate-spin" />
+                </div>
+              ) : fileName ? (
+                <div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                  <CheckCircle2 size={22} />
+                </div>
+              ) : (
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                  <UploadCloud size={22} />
+                </div>
+              )}
 
-          <div>
-            <p className="text-sm font-bold text-white">
-              {isGenerating
-                ? "Extracting concepts & synthesizing questions..."
-                : fileName
-                ? fileName
-                : "Click or drag your Presentation or Document here"}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              Supports PPT, PPTX, PDF, DOCX, TXT (Extracts exact slide content)
-            </p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-bold text-white truncate">
+                  {isGenerating
+                    ? "Extracting concepts & synthesizing questions..."
+                    : fileName
+                    ? fileName
+                    : "Click or drag your Presentation / Document here"}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Supports PPT, PPTX, PDF, DOCX, TXT (Extracts slide content)
+                </p>
+              </div>
+            </label>
           </div>
 
-          <div className="flex items-center gap-2.5 text-xs text-slate-400 pt-1 flex-wrap justify-center">
-            <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
-              5 High-Impact MCQs
-            </span>
-            <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
-              MoSPI Cadre Standards
-            </span>
-            <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
-              Auto Saved to Database
-            </span>
+          {/* Action Buttons & Features */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-3">
+            <div className="flex items-center gap-2 text-[11px] text-slate-400 flex-wrap">
+              <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
+                5 MCQs
+              </span>
+              <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
+                MoSPI Standards
+              </span>
+              <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
+                Auto Saved
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2.5">
+              <button
+                onClick={() => inputRef.current?.click()}
+                disabled={isGenerating}
+                className="w-full sm:flex-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-60 transition-all text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.35)] cursor-pointer"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" /> Analyzing Slide Content...
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud size={14} /> Upload &amp; Generate Quiz
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={onGenerateSample}
+                disabled={isGenerating}
+                className="w-full sm:w-auto px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <Sparkles size={14} className="text-purple-400" /> MoSPI Sample
+              </button>
+            </div>
           </div>
-        </label>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <button
-            onClick={() => inputRef.current?.click()}
-            disabled={isGenerating}
-            className="w-full sm:flex-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-60 transition-all text-white text-xs sm:text-sm font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 size={16} className="animate-spin" /> Analyzing Slide Content...
-              </>
-            ) : (
-              <>
-                <UploadCloud size={16} /> Choose File &amp; Generate Assessment
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={onGenerateSample}
-            disabled={isGenerating}
-            className="w-full sm:w-auto px-5 py-3 bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white text-xs sm:text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            <Sparkles size={15} className="text-purple-400" /> Try Official MoSPI Sample
-          </button>
         </div>
       </div>
 

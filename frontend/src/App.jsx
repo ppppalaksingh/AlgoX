@@ -1373,9 +1373,9 @@ function Dashboard() {
               {/* Stats Overview */}
               <StatsGrid stats={stats} />
 
-              {/* Core 3-Column Action Grid */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-                <div className="xl:col-span-1">
+              {/* Core 3-Column Balanced Telemetry & Roadmap Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                <div className="lg:col-span-1 h-full">
                   <SkillGapOverview
                     skills={skillGapsList}
                     onViewDetails={() => setIsGapModalOpen(true)}
@@ -1383,7 +1383,7 @@ function Dashboard() {
                     isAnalyzing={isAnalyzing}
                   />
                 </div>
-                <div className="xl:col-span-1">
+                <div className="lg:col-span-1 h-full">
                   <RecommendedPath
                     path={recommendedPathData}
                     onStart={handleStartLearningPath}
@@ -1391,28 +1391,7 @@ function Dashboard() {
                     isStarting={isStartingPath}
                   />
                 </div>
-                <div className="xl:col-span-1 space-y-6">
-                  <AIQuizGenerator
-                    onUpload={handleQuizUpload}
-                    onGenerateSample={handleGenerateSample}
-                    isGenerating={isGeneratingQuiz}
-                    attempts={quizAttempts}
-                    showHistory={false}
-                    onReviewAttempt={(attempt) => {
-                      setActiveQuiz({
-                        attemptId: attempt._id,
-                        sourceFileName: attempt.sourceFileName,
-                        questions: attempt.questions,
-                      });
-                      setQuizResult({
-                        score: attempt.score,
-                        total: attempt.totalQuestions,
-                        percentage: Math.round(((attempt.score || 0) / (attempt.totalQuestions || 5)) * 100),
-                        questions: attempt.questions,
-                      });
-                      setIsQuizModalOpen(true);
-                    }}
-                  />
+                <div className="lg:col-span-1 h-full">
                   <ProgressWidget
                     summary={dynamicProgressSummary}
                     onViewDetails={() => setActiveNav("progress")}
@@ -1420,11 +1399,34 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* Continue Learning */}
+              {/* Continue Learning (Courses) - Prominently Displayed Directly Below Telemetry */}
               <ContinueLearning
                 courses={continueCourses}
                 onViewAll={() => setActiveNav("courses")}
                 onStartCourse={handleStartCourse}
+              />
+
+              {/* Civil Services Assessment Studio */}
+              <AIQuizGenerator
+                onUpload={handleQuizUpload}
+                onGenerateSample={handleGenerateSample}
+                isGenerating={isGeneratingQuiz}
+                attempts={quizAttempts}
+                showHistory={false}
+                onReviewAttempt={(attempt) => {
+                  setActiveQuiz({
+                    attemptId: attempt._id,
+                    sourceFileName: attempt.sourceFileName,
+                    questions: attempt.questions,
+                  });
+                  setQuizResult({
+                    score: attempt.score,
+                    total: attempt.totalQuestions,
+                    percentage: Math.round(((attempt.score || 0) / (attempt.totalQuestions || 5)) * 100),
+                    questions: attempt.questions,
+                  });
+                  setIsQuizModalOpen(true);
+                }}
               />
             </>
           )}
