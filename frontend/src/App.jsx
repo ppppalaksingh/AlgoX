@@ -1280,7 +1280,7 @@ function Dashboard() {
   };
 
   return (
-    <div className={`flex min-h-screen font-sans antialiased relative overflow-x-hidden transition-colors duration-300 ${
+    <div className={`min-h-screen flex flex-col font-sans antialiased relative overflow-x-hidden transition-colors duration-300 ${
       isDarkMode
         ? "bg-[#120a2e] text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200"
         : "bg-[#faf7f2] text-[#1e143e] selection:bg-[#5925dc]/20 selection:text-[#5925dc]"

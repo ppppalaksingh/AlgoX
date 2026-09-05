@@ -78,7 +78,7 @@ export default function Header({
     : [];
 
   return (
-    <header className={`h-20 border-b flex items-center justify-between px-4 sm:px-6 lg:px-8 gap-4 sticky top-0 z-30 transition-all duration-300 backdrop-blur-2xl ${
+    <header className={`w-full h-20 border-b flex items-center justify-between px-4 sm:px-6 lg:px-8 gap-4 sticky top-0 z-30 transition-all duration-300 backdrop-blur-2xl ${
       isDark
         ? "bg-[#120a2e]/92 border-white/[0.08] text-white"
         : "bg-[#faf7f2]/96 border-[#e8ded2] text-[#1e143e] shadow-[0_4px_20px_rgba(30,20,60,0.03)]"
