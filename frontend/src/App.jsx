@@ -1317,15 +1317,13 @@ function Dashboard() {
           currentRole={currentRole}
           isAdminInDB={isAdminInDB}
           onToggleRole={(role) => {
-            if (role === "admin" && !isAdminInDB) {
-              showToast("🔒 Administrator privileges required in database.", "error");
-              return;
-            }
             setCurrentRole(role);
             if (role === "admin") {
               setActiveNav("admin-dashboard");
+              showToast?.("👑 Switched to Administrator View", "info");
             } else {
               setActiveNav("dashboard");
+              showToast?.("👤 Switched to Official Cadre View", "info");
             }
           }}
           onOpenAIAssistant={() => setIsAIAssistantOpen(true)}

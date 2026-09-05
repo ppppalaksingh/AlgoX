@@ -20,8 +20,8 @@ export default function Sidebar({
   isAdminInDB = false,
 }) {
   const visibleNavItems = sidebarNavItems.filter((item) => {
-    // If not a database-verified admin OR in learner role, hide admin-dashboard
-    if ((!isAdminInDB || currentRole === "learner") && item.id === "admin-dashboard") {
+    // If currently in learner role, hide admin-dashboard
+    if (currentRole === "learner" && item.id === "admin-dashboard") {
       return false;
     }
     return true;

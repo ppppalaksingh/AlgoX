@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, Search, Bell, ChevronDown, User, LogOut, ShieldCheck, Sparkles, Bot, Building2, ExternalLink } from "lucide-react";
+import { Menu, Search, Bell, ChevronDown, User, LogOut, ShieldCheck, Sparkles, Bot, Building2, ExternalLink, Sun, Moon } from "lucide-react";
 import { useClerk } from "@clerk/clerk-react";
 
 export default function Header({
@@ -20,6 +20,34 @@ export default function Header({
   const [searchQuery, setSearchQuery] = useState("");
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("algox_theme") !== "light";
+  });
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("algox_theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("algox_theme", "light");
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("algox_theme");
+    if (savedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      setIsDarkMode(true);
+    }
+  }, []);
 
   const profileRef = useRef(null);
   const notifRef = useRef(null);
@@ -78,36 +106,29 @@ export default function Header({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Role Switcher Pill — Strictly protected by Database Admin Verification */}
-        {isAdminInDB ? (
-          <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/[0.08]">
-            <button
-              onClick={() => onToggleRole?.("learner")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                currentRole === "learner"
-                  ? "bg-white/[0.1] text-white shadow-xs border border-white/10"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <User size={13} /> Official
-            </button>
-            <button
-              onClick={() => onToggleRole?.("admin")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                currentRole === "admin"
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(99,102,241,0.4)]"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <Building2 size={13} /> Admin
-            </button>
-          </div>
-        ) : (
-          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 text-xs font-semibold">
-            <User size={13} className="text-indigo-400" />
-            <span>Official Cadre</span>
-          </div>
-        )}
+        {/* Role Switcher Pill (Official ↔ Admin Toggle) */}
+        <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/[0.08]">
+          <button
+            onClick={() => onToggleRole?.("learner")}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentRole === "learner"
+                ? "bg-white/[0.1] text-white shadow-xs border border-white/10"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <User size={13} /> Official
+          </button>
+          <button
+            onClick={() => onToggleRole?.("admin")}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentRole === "admin"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(99,102,241,0.4)]"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Building2 size={13} /> Admin
+          </button>
+        </div>
 
         {/* Karmayogi Sahayak AI Assistant Quick Button */}
         <button
@@ -117,6 +138,25 @@ export default function Header({
         >
           <Bot size={15} />
           <span>AI Sahayak</span>
+        </button>
+
+        {/* Theme Toggle (Dark / Light) */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 sm:px-2.5 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] cursor-pointer transition-all border border-white/[0.08] flex items-center gap-1.5 shadow-2xs"
+          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDarkMode ? (
+            <>
+              <Moon size={16} className="text-indigo-400" />
+              <span className="text-[11px] font-bold hidden md:inline">Dark</span>
+            </>
+          ) : (
+            <>
+              <Sun size={16} className="text-amber-400" />
+              <span className="text-[11px] font-bold hidden md:inline">Light</span>
+            </>
+          )}
         </button>
 
         {/* Global Search with Real-time Dropdown */}
