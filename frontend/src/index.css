@@ -1,67 +1,287 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
-    --bg-dark: #090b10;
-    --bg-surface: #0f131c;
-    --bg-surface-elevated: #141926;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(99, 102, 241, 0.35);
+    --font-serif: "Fraunces", "Newsreader", "Playfair Display", Georgia, serif;
+    --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
+    
+    /* ========================================================
+       NAJABA LIGHT THEME: Warm Alabaster Ivory & Dark Espresso
+       (Exactly matching najaba.ai/what we assess)
+       ======================================================== */
+    --najaba-bg: #faf7f2;
+    --najaba-surface: #ffffff;
+    --najaba-surface-subtle: #f6f1e9;
+    --najaba-surface-hover: #ede6da;
+    --najaba-border: #e8ded2;
+    --najaba-border-subtle: #efe8de;
+    --najaba-text-primary: #1e143e;
+    --najaba-text-secondary: #4a3e65;
+    --najaba-text-muted: #7e7298;
+    --najaba-primary: #5925dc;
+    --najaba-accent-gold: #e2ac52;
+    --najaba-accent-terracotta: #de7a58;
+    --najaba-hero-bg: #faf7f2;
+    --najaba-hero-border: #e8ded2;
+    --najaba-hero-shadow: 0 10px 30px -10px rgba(30, 20, 60, 0.05);
+    --najaba-card-shadow: 0 8px 24px -6px rgba(30, 20, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+    --najaba-header-bg: rgba(250, 247, 242, 0.94);
+    --najaba-sidebar-bg: #faf7f2;
+  }
+
+  html.dark {
+    /* ========================================================
+       NAJABA DARK THEME: Velvet Cosmic Royal Violet
+       (Exactly matching najaba.ai/tri factor)
+       ======================================================== */
+    --najaba-bg: #120a2e;
+    --najaba-surface: #1b1242;
+    --najaba-surface-subtle: rgba(27, 18, 66, 0.7);
+    --najaba-surface-hover: #241958;
+    --najaba-border: rgba(167, 139, 250, 0.16);
+    --najaba-border-subtle: rgba(167, 139, 250, 0.08);
+    --najaba-text-primary: #ffffff;
+    --najaba-text-secondary: #d4cfe6;
+    --najaba-text-muted: #9d94b8;
+    --najaba-primary: #5925dc;
+    --najaba-accent-gold: #e2ac52;
+    --najaba-accent-terracotta: #de7a58;
+    --najaba-hero-bg: linear-gradient(135deg, #1d1246 0%, #160d38 50%, #100928 100%);
+    --najaba-hero-border: rgba(167, 139, 250, 0.22);
+    --najaba-hero-shadow: 0 20px 50px rgba(10, 5, 25, 0.7);
+    --najaba-card-shadow: 0 15px 35px -10px rgba(10, 5, 25, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    --najaba-header-bg: rgba(18, 10, 46, 0.94);
+    --najaba-sidebar-bg: #100829;
   }
 
   body {
     margin: 0;
-    font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-sans);
+    background-color: var(--najaba-bg);
+    color: var(--najaba-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #090b10;
-    color: #e2e8f0;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
-/* Light Theme Mode Adaptations */
+/* =========================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================= */
+.font-serif {
+  font-family: var(--font-serif) !important;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+.font-sans {
+  font-family: var(--font-sans) !important;
+}
+
+/* =========================================================
+   NAJABA CARD & CONTAINER UTILITIES
+   ========================================================= */
+.najaba-card {
+  background: var(--najaba-surface) !important;
+  border: 1px solid var(--najaba-border) !important;
+  box-shadow: var(--najaba-card-shadow) !important;
+  color: var(--najaba-text-primary);
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.najaba-card:hover {
+  transform: translateY(-2px);
+}
+html.dark .najaba-card:hover {
+  border-color: rgba(226, 172, 82, 0.45) !important;
+  box-shadow: 0 20px 40px -10px rgba(10, 5, 25, 0.8), 0 0 25px -5px rgba(124, 58, 237, 0.25) !important;
+}
+html:not(.dark) .najaba-card:hover {
+  border-color: #5925dc !important;
+  box-shadow: 0 20px 35px -10px rgba(89, 37, 220, 0.12), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.najaba-hero {
+  background: var(--najaba-hero-bg) !important;
+  border: 1px solid var(--najaba-hero-border) !important;
+  box-shadow: var(--najaba-hero-shadow) !important;
+  border-radius: 1.75rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.najaba-surface-subtle {
+  background: var(--najaba-surface-subtle) !important;
+  border: 1px solid var(--najaba-border-subtle) !important;
+}
+
+.najaba-text {
+  color: var(--najaba-text-primary) !important;
+}
+
+.najaba-subtext {
+  color: var(--najaba-text-secondary) !important;
+}
+
+.najaba-muted {
+  color: var(--najaba-text-muted) !important;
+}
+
+/* =========================================================
+   NAJABA SIGNATURE BUTTONS & PILLS
+   ========================================================= */
+.btn-najaba-gold {
+  background-color: #e2ac52 !important;
+  color: #120a2e !important;
+  font-weight: 800;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(226, 172, 82, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-najaba-gold:hover {
+  background-color: #d69f44 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(226, 172, 82, 0.45);
+}
+
+.btn-najaba-purple {
+  background-color: #5925dc !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 0 4px 20px rgba(89, 37, 220, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-najaba-purple:hover {
+  background-color: #4a1bc7 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(89, 37, 220, 0.5);
+}
+
+.btn-najaba-ghost {
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+html.dark .btn-najaba-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.04);
+}
+html.dark .btn-najaba-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+html:not(.dark) .btn-najaba-ghost {
+  border: 1px solid #e8ded2 !important;
+  color: #1e143e !important;
+  background: #ffffff;
+}
+html:not(.dark) .btn-najaba-ghost:hover {
+  background: #f6f1e9;
+  border-color: #5925dc !important;
+}
+
+/* =========================================================
+   COMPREHENSIVE DUAL-THEME OVERRIDES FOR LEGACY / DASHBOARD CLASSES
+   ========================================================= */
+
+/* Dark Mode Global Overrides */
+html.dark body {
+  background-color: #120a2e !important;
+  color: #f3f0ff !important;
+}
+
+html.dark .bg-\[\#07090e\],
+html.dark .bg-\[\#090b10\],
+html.dark .bg-\[\#0b0e17\] {
+  background-color: #120a2e !important;
+}
+
+html.dark .bg-\[\#0f1422\],
+html.dark .bg-\[\#0f131c\],
+html.dark .bg-\[\#0a0d14\],
+html.dark .bg-\[\#1b1242\],
+html.dark .bg-\[\#0f1420\] {
+  background-color: #1b1242 !important;
+}
+
+html.dark aside {
+  background-color: #100829 !important;
+  border-color: rgba(167, 139, 250, 0.14) !important;
+}
+
+html.dark header {
+  background-color: rgba(18, 10, 46, 0.94) !important;
+  border-color: rgba(167, 139, 250, 0.14) !important;
+}
+
+/* Light Mode Global Overrides */
 html:not(.dark) body {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+  background-color: #faf7f2 !important;
+  color: #1e143e !important;
 }
 
-html:not(.dark) .glass-card,
-html:not(.dark) .glass-card-interactive {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+html:not(.dark) .bg-\[\#07090e\],
+html:not(.dark) .bg-\[\#090b10\],
+html:not(.dark) .bg-\[\#0b0e17\] {
+  background-color: #faf7f2 !important;
 }
 
-html:not(.dark) .glass-panel {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+html:not(.dark) .bg-\[\#0f1422\],
+html:not(.dark) .bg-\[\#0f1422\]\/80,
+html:not(.dark) .bg-\[\#0f131c\],
+html:not(.dark) .bg-\[\#0a0d14\],
+html:not(.dark) .bg-\[\#1b1242\],
+html:not(.dark) .bg-\[\#1b1242\]\/80,
+html:not(.dark) .bg-\[\#0f1420\],
+html:not(.dark) .bg-\[\#0f1420\]\/95 {
+  background-color: #ffffff !important;
+  border-color: #e8ded2 !important;
+  box-shadow: 0 8px 24px -6px rgba(30, 20, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
 
-html:not(.dark) .glass-dropdown {
-  background: rgba(255, 255, 255, 0.98) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15) !important;
+html:not(.dark) aside {
+  background-color: #faf7f2 !important;
+  border-color: #e8ded2 !important;
 }
 
+html:not(.dark) header {
+  background-color: rgba(250, 247, 242, 0.94) !important;
+  border-color: #e8ded2 !important;
+  box-shadow: 0 4px 20px rgba(30, 20, 60, 0.04) !important;
+}
+
+/* In Light Mode, text colors transform to luxurious dark ink */
 html:not(.dark) .text-white {
-  color: #0f172a !important;
+  color: #1e143e !important;
 }
 
-html:not(.dark) .text-slate-400 {
-  color: #64748b !important;
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200 {
+  color: #271a4f !important;
 }
 
 html:not(.dark) .text-slate-300 {
-  color: #334155 !important;
+  color: #4a3e65 !important;
 }
 
-html:not(.dark) .bg-\[\#090b10\],
-html:not(.dark) .bg-\[\#0a0d14\],
-html:not(.dark) .bg-\[\#0f1422\],
-html:not(.dark) .bg-\[\#0f131c\] {
-  background-color: #ffffff !important;
+html:not(.dark) .text-slate-400 {
+  color: #635777 !important;
+}
+
+html:not(.dark) .text-slate-500 {
+  color: #887d9c !important;
+}
+
+/* In Light Mode, subtle inner boxes switch to warm ivory surfaces */
+html:not(.dark) .border-white\/\[0\.08\],
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-white\/\[0\.06\],
+html:not(.dark) .border-white\/\[0\.05\],
+html:not(.dark) .border-white\/20,
+html:not(.dark) .border-white\/\[0\.04\] {
+  border-color: #e8ded2 !important;
 }
 
 html:not(.dark) .bg-white\/\[0\.02\],
@@ -69,23 +289,24 @@ html:not(.dark) .bg-white\/\[0\.03\],
 html:not(.dark) .bg-white\/\[0\.04\],
 html:not(.dark) .bg-white\/\[0\.05\],
 html:not(.dark) .bg-white\/\[0\.06\],
-html:not(.dark) .bg-white\/\[0\.07\] {
-  background-color: rgba(0, 0, 0, 0.03) !important;
+html:not(.dark) .bg-white\/\[0\.08\],
+html:not(.dark) .bg-white\/10 {
+  background-color: #f6f1e9 !important;
 }
 
-html:not(.dark) .border-white\/\[0\.08\],
-html:not(.dark) .border-white\/\[0\.07\],
-html:not(.dark) .border-white\/\[0\.06\],
-html:not(.dark) .border-white\/10,
-html:not(.dark) .border-white\/\[0\.04\] {
-  border-color: rgba(0, 0, 0, 0.08) !important;
+html:not(.dark) .bg-black\/25,
+html:not(.dark) .bg-black\/30,
+html:not(.dark) .bg-black\/40,
+html:not(.dark) .bg-black\/70 {
+  background-color: #ede6da !important;
 }
 
+/* Hide ambient glow spheres in light mode to keep it ultra crisp */
 html:not(.dark) .ambient-glow-blue,
-html:not(.dark) .ambient-glow-purple {
+html:not(.dark) .ambient-glow-purple,
+html:not(.dark) .hero-ambient-glow {
   display: none !important;
 }
-
 
 /* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
@@ -94,92 +315,23 @@ html:not(.dark) .ambient-glow-purple {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 19, 28, 0.6);
+  background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.25);
   border-radius: 9999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5);
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(126, 114, 152, 0.25);
+  border-radius: 9999px;
 }
 
-/* Glassmorphism & Surface Utilities */
-.glass-card {
-  background: rgba(15, 19, 28, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 172, 82, 0.6);
 }
 
-.glass-card-interactive {
-  background: rgba(15, 19, 28, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #5925dc;
 }
-
-.glass-card-interactive:hover {
-  border-color: rgba(99, 102, 241, 0.35);
-  transform: translateY(-2px);
-  box-shadow: 0 20px 35px -15px rgba(0, 0, 0, 0.7), 0 0 25px -5px rgba(99, 102, 241, 0.15);
-}
-
-.glass-panel {
-  background: rgba(13, 17, 24, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-dropdown {
-  background: rgba(15, 19, 28, 0.95);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
-}
-
-/* Ambient Radial Glow */
-.ambient-glow-blue {
-  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, rgba(9, 11, 16, 0) 70%);
-}
-
-.ambient-glow-purple {
-  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.12) 0%, rgba(9, 11, 16, 0) 70%);
-}
-
-/* Gradient Text */
-.text-gradient-white {
-  background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-primary {
-  background: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #c084fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Shimmer pulse for AI status */
-@keyframes ai-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.05);
-  }
-}
-
-.animate-ai-pulse {
-  animation: ai-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-

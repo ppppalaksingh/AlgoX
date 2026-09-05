@@ -58,7 +58,7 @@ export default function AIQuizGenerator({
               </span>
               <span className="text-[11px] text-slate-400">Gemini 3.6 Flash &amp; MoSPI NLP</span>
             </div>
-            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+            <h2 className="text-lg sm:text-xl font-extrabold text-white font-serif tracking-tight">
               Civil Services Assessment Generator
             </h2>
             <p className="text-xs text-slate-400 mt-0.5 max-w-2xl leading-relaxed">
@@ -66,7 +66,7 @@ export default function AIQuizGenerator({
             </p>
           </div>
 
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.35)] border border-white/20">
+          <div className="w-10 h-10 rounded-2xl bg-[#5925dc] text-white flex items-center justify-center shrink-0 shadow-[0_4px_16px_rgba(89,37,220,0.4)] border border-white/20">
             <Bot size={20} />
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function AIQuizGenerator({
               <button
                 onClick={() => inputRef.current?.click()}
                 disabled={isGenerating}
-                className="w-full sm:flex-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-60 transition-all text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.35)] cursor-pointer"
+                className="w-full sm:flex-1 btn-najaba-purple disabled:opacity-60 transition-all text-xs font-bold py-2.5 px-5 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isGenerating ? (
                   <>
@@ -164,9 +164,9 @@ export default function AIQuizGenerator({
               <button
                 onClick={onGenerateSample}
                 disabled={isGenerating}
-                className="w-full sm:w-auto px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/20 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
               >
-                <Sparkles size={14} className="text-purple-400" /> MoSPI Sample
+                <Sparkles size={14} className="text-[#e2ac52]" /> MoSPI Sample
               </button>
             </div>
           </div>

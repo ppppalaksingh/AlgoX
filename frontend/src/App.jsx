@@ -85,6 +85,36 @@ function Dashboard() {
   const [quizAttempts, setQuizAttempts] = useState([]);
   const [progressData, setProgressData] = useState(null);
 
+  // Najaba Theme Toggle State
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("algox_theme") !== "light";
+  });
+
+  const toggleTheme = useCallback(() => {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("algox_theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("algox_theme", "light");
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("algox_theme");
+    if (savedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      setIsDarkMode(true);
+    }
+  }, []);
+
   // Synchronized refs to avoid cyclic hook dependencies
   const courseListRef = useRef(courseList);
   useEffect(() => {
@@ -1249,10 +1279,18 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex bg-[#07090e] min-h-screen font-sans antialiased text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200 relative overflow-x-hidden">
+    <div className={`flex min-h-screen font-sans antialiased relative overflow-x-hidden transition-colors duration-300 ${
+      isDarkMode
+        ? "bg-[#120a2e] text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200"
+        : "bg-[#faf7f2] text-[#1e143e] selection:bg-[#5925dc]/20 selection:text-[#5925dc]"
+    }`}>
       {/* Ambient background glows */}
-      <div className="absolute top-0 right-1/4 w-[700px] h-[500px] bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/3 left-10 w-[500px] h-[400px] bg-gradient-to-tr from-purple-600/10 via-indigo-500/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
+      {isDarkMode && (
+        <>
+          <div className="absolute top-0 right-1/4 w-[700px] h-[500px] bg-gradient-to-b from-purple-600/15 via-indigo-600/10 to-transparent rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute bottom-1/3 left-10 w-[500px] h-[400px] bg-gradient-to-tr from-violet-600/15 via-[#e2ac52]/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
+        </>
+      )}
 
       {/* Toast Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
@@ -1308,6 +1346,7 @@ function Dashboard() {
         onClose={() => setSidebarOpen(false)}
         currentRole={currentRole}
         isAdminInDB={isAdminInDB}
+        isDarkMode={isDarkMode}
       />
 
       <div className="flex-1 min-w-0 flex flex-col relative z-10">
@@ -1333,45 +1372,171 @@ function Dashboard() {
           onSelectSearchResult={handleStartCourse}
           notifications={notifications}
           onClearNotifications={() => setNotifications([])}
+          isDarkMode={isDarkMode}
+          onToggleTheme={toggleTheme}
         />
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-7 max-w-7xl w-full mx-auto">
           {activeNav === "dashboard" && (
             <>
-              {/* Welcome Hero Banner */}
-              <div className="flex items-center justify-between flex-wrap gap-4 p-5 sm:p-6 rounded-3xl bg-[#0f1422]/70 backdrop-blur-xl border border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-                      Cadre Dashboard
-                    </span>
-                    <span className="text-[11px] text-slate-400">
-                      Indian Statistical Service &amp; SSS
-                    </span>
+              {/* Najaba-style Tri-Factor Hero Stage */}
+              <div className={`relative overflow-hidden rounded-3xl p-6 sm:p-9 transition-all duration-300 border ${
+                isDarkMode
+                  ? "bg-gradient-to-br from-[#1d1246] via-[#160d38] to-[#100928] border-[#3d297a]/50 shadow-[0_20px_50px_rgba(15,8,35,0.7)]"
+                  : "bg-white border-[#e8ded2] shadow-[0_10px_30px_-10px_rgba(30,20,60,0.06)]"
+              }`}>
+                {/* Background ambient lighting */}
+                {isDarkMode ? (
+                  <>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#5925dc]/20 rounded-full blur-[100px] pointer-events-none" />
+                    <div className="absolute bottom-0 left-10 w-72 h-72 bg-[#e2ac52]/10 rounded-full blur-[90px] pointer-events-none" />
+                  </>
+                ) : (
+                  <div className="absolute -top-20 -right-20 w-80 h-80 bg-[#5925dc]/5 rounded-full blur-[80px] pointer-events-none" />
+                )}
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                  {/* Left Column: Editorial Headline & Actions */}
+                  <div className="lg:col-span-7 space-y-4">
+                    {/* Najaba Eyebrow Pill */}
+                    <div className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold tracking-wider ${
+                      isDarkMode
+                        ? "bg-white/[0.06] border border-white/10 text-[#e2ac52]"
+                        : "bg-[#faf7f2] border border-[#e8ded2] text-[#de7a58] shadow-xs"
+                    }`}>
+                      <Sparkles size={13} className={isDarkMode ? "text-[#e2ac52]" : "text-[#de7a58]"} />
+                      <span>THE TRI-FACTOR CADRE INTELLIGENCE</span>
+                    </div>
+
+                    <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold font-serif tracking-tight leading-[1.15] ${
+                      isDarkMode ? "text-white" : "text-[#1e143e]"
+                    }`}>
+                      {isDarkMode 
+                        ? "The behavioral intelligence layer that skills data cannot see."
+                        : "Every skill that matters, measured the way work actually happens."}
+                    </h1>
+
+                    <p className={`text-xs sm:text-sm leading-relaxed max-w-xl ${
+                      isDarkMode ? "text-[#d4cfe6]" : "text-[#4a3e65]"
+                    }`}>
+                      One unified capacity framework, three operational lenses on how an officer actually delivers:
+                      <strong className={isDarkMode ? "text-white font-semibold" : "text-[#1e143e] font-semibold"}> Core Statistical Rigor</strong>, 
+                      <strong className={isDarkMode ? "text-white font-semibold" : "text-[#1e143e] font-semibold"}> Edge AI &amp; Analytics</strong>, and 
+                      <strong className={isDarkMode ? "text-white font-semibold" : "text-[#1e143e] font-semibold"}> Digital Governance Drive</strong>.
+                      Normed for Indian Statistical Service &amp; SSS cadre.
+                    </p>
+
+                    {/* Cadre Greeting Chip */}
+                    <div className={`pt-1 flex items-center gap-2 text-xs ${
+                      isDarkMode ? "text-slate-300" : "text-[#635777]"
+                    }`}>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>Cadre Officer: <strong className={`font-semibold ${isDarkMode ? "text-white" : "text-[#1e143e]"}`}>{user.name}</strong> ({user.designation} · {user.department})</span>
+                    </div>
+
+                    {/* Najaba Signature Action Buttons */}
+                    <div className="flex flex-wrap items-center gap-3.5 pt-2">
+                      <button
+                        onClick={handleRunGapAnalysis}
+                        disabled={isAnalyzing}
+                        className={`px-6 py-3 text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
+                          isDarkMode ? "btn-najaba-gold" : "btn-najaba-purple"
+                        }`}
+                      >
+                        <Sparkles size={15} />
+                        <span>{isAnalyzing ? "Recalibrating Tri-Factor..." : "Begin Tri-Factor Assessment"}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setIsAIAssistantOpen(true)}
+                        className={`px-6 py-3 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                          isDarkMode
+                            ? "text-white border border-white/20 hover:bg-white/[0.08]"
+                            : "text-[#1e143e] bg-white border border-[#e8ded2] hover:bg-[#faf7f2]"
+                        }`}
+                      >
+                        <Bot size={15} />
+                        <span>Karmayogi Sahayak</span>
+                      </button>
+
+                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full border hidden sm:inline-block ${
+                        isDarkMode
+                          ? "text-indigo-300/80 bg-white/[0.04] border-white/[0.08]"
+                          : "text-[#5925dc] bg-[#5925dc]/8 border-[#5925dc]/20"
+                      }`}>
+                        MoSPI · NSSTA TPAC Accredited
+                      </span>
+                    </div>
                   </div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
-                    Good Day, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">{user.name}</span>! 👋
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-                    Personalized iGOT Karmayogi &amp; NSSTA TPAC pathways powered by real-time AI Sentence-Transformer models.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <button
-                    onClick={() => setIsAIAssistantOpen(true)}
-                    className="flex items-center gap-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 border border-white/10 px-4 py-2.5 rounded-xl transition-all shadow-[0_0_18px_rgba(99,102,241,0.35)] cursor-pointer"
-                  >
-                    <Bot size={15} /> Karmayogi Sahayak
-                  </button>
-                  <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2.5 rounded-xl shadow-xs">
-                    <Sparkles size={14} className="text-emerald-400" /> NSSTA Verified
-                  </span>
+
+                  {/* Right Column: Najaba Signature Planetary Orbital Triad Graphic */}
+                  <div className="lg:col-span-5 flex items-center justify-center relative py-4 lg:py-0">
+                    <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
+                      {/* Orbital Concentric Circles */}
+                      <div className={`absolute inset-0 rounded-full border animate-[spin_60s_linear_infinite] ${
+                        isDarkMode ? "border-white/[0.08]" : "border-[#e2d7c8]"
+                      }`} />
+                      <div className={`absolute inset-6 rounded-full border border-dashed animate-[spin_40s_linear_infinite_reverse] ${
+                        isDarkMode ? "border-[#5925dc]/30" : "border-[#5925dc]/25"
+                      }`} />
+                      <div className={`absolute inset-14 rounded-full border ${
+                        isDarkMode ? "border-white/[0.06]" : "border-[#e8ded2]"
+                      }`} />
+
+                      {/* Center Node (Najaba 'N' / AlgoX 'A') */}
+                      <div className={`w-16 h-16 rounded-full flex flex-col items-center justify-center z-20 transition-all ${
+                        isDarkMode
+                          ? "bg-[#120a2e] border-2 border-[#e2ac52]/60 shadow-[0_0_30px_rgba(226,172,82,0.3)]"
+                          : "bg-[#5925dc] border-2 border-white shadow-[0_4px_20px_rgba(89,37,220,0.35)]"
+                      }`}>
+                        <span className={`font-serif font-black text-2xl tracking-tighter ${
+                          isDarkMode ? "text-[#e2ac52]" : "text-white"
+                        }`}>A</span>
+                        <span className={`text-[7px] font-black uppercase tracking-widest -mt-1 ${
+                          isDarkMode ? "text-slate-400" : "text-indigo-200"
+                        }`}>AlgoX</span>
+                      </div>
+
+                      {/* Orbital Node 1: CORE (Top - Purple) */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center group cursor-pointer">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#5925dc] text-white flex flex-col items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)] border border-white/20 group-hover:scale-110 transition-transform">
+                          <span className="text-[10px] font-black tracking-wider">CORE</span>
+                          <span className="text-[8px] opacity-80">Survey</span>
+                        </div>
+                        <span className={`text-[9px] font-bold mt-1 opacity-90 ${
+                          isDarkMode ? "text-indigo-200" : "text-[#1e143e]"
+                        }`}>Statistical Analysis</span>
+                      </div>
+
+                      {/* Orbital Node 2: EDGE (Bottom-Left - Terracotta) */}
+                      <div className="absolute bottom-2 left-2 flex flex-col items-center group cursor-pointer">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#de7a58] to-[#c2410c] text-white flex flex-col items-center justify-center shadow-[0_0_20px_rgba(222,122,88,0.4)] border border-white/20 group-hover:scale-110 transition-transform">
+                          <span className="text-[10px] font-black tracking-wider">EDGE</span>
+                          <span className="text-[8px] opacity-80">Python</span>
+                        </div>
+                        <span className={`text-[9px] font-bold mt-1 opacity-90 ${
+                          isDarkMode ? "text-amber-200" : "text-[#de7a58]"
+                        }`}>Tech &amp; AI NLP</span>
+                      </div>
+
+                      {/* Orbital Node 3: DRIVE (Bottom-Right - Warm Gold) */}
+                      <div className="absolute bottom-2 right-2 flex flex-col items-center group cursor-pointer">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#e2ac52] to-[#d97706] text-[#19103c] flex flex-col items-center justify-center shadow-[0_0_20px_rgba(226,172,82,0.4)] border border-white/20 group-hover:scale-110 transition-transform">
+                          <span className="text-[10px] font-black tracking-wider">DRIVE</span>
+                          <span className="text-[8px] opacity-80 font-bold">DPDP</span>
+                        </div>
+                        <span className={`text-[9px] font-bold mt-1 opacity-90 ${
+                          isDarkMode ? "text-[#e2ac52]" : "text-[#b4771e]"
+                        }`}>Digital Governance</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Stats Overview */}
-              <StatsGrid stats={stats} />
+              <StatsGrid stats={stats} isDarkMode={isDarkMode} />
 
               {/* Core 3-Column Balanced Telemetry & Roadmap Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
@@ -1381,6 +1546,7 @@ function Dashboard() {
                     onViewDetails={() => setIsGapModalOpen(true)}
                     onRunAnalysis={handleRunGapAnalysis}
                     isAnalyzing={isAnalyzing}
+                    isDarkMode={isDarkMode}
                   />
                 </div>
                 <div className="lg:col-span-1 h-full">
@@ -1389,12 +1555,14 @@ function Dashboard() {
                     onStart={handleStartLearningPath}
                     onViewFullPath={() => setActiveNav("learning-path")}
                     isStarting={isStartingPath}
+                    isDarkMode={isDarkMode}
                   />
                 </div>
                 <div className="lg:col-span-1 h-full">
                   <ProgressWidget
                     summary={dynamicProgressSummary}
                     onViewDetails={() => setActiveNav("progress")}
+                    isDarkMode={isDarkMode}
                   />
                 </div>
               </div>
@@ -1404,6 +1572,7 @@ function Dashboard() {
                 courses={continueCourses}
                 onViewAll={() => setActiveNav("courses")}
                 onStartCourse={handleStartCourse}
+                isDarkMode={isDarkMode}
               />
 
               {/* Civil Services Assessment Studio */}
