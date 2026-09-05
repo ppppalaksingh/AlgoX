@@ -44,6 +44,8 @@ export const getRecommendedCourses = async (req, res) => {
     const { source, domain, topN } = req.query;
 
     const { data } = await axios.post(`${ML_BASE_URL}/recommendations`, {
+      designation: user?.designation || "Assistant Director",
+      serviceCadre: user?.department || "National Statistical Office (NSO)",
       domainScores: profile.domainScores,
       skillGaps: profile.skillGaps,
       sourceFilter: source || null,

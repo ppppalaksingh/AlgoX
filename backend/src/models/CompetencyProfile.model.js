@@ -12,8 +12,8 @@ const competencyProfileSchema = new mongoose.Schema(
     domainTargets: {
       statistical: { type: Number, default: 4.0 },
       technical: { type: Number, default: 4.0 },
-      digitalGovernance: { type: Number, default: 3.5 },
-      behavioural: { type: Number, default: 3.5 },
+      digitalGovernance: { type: Number, default: 3.0 },
+      behavioural: { type: Number, default: 4.0 },
     },
     overallReadiness: { type: Number, default: 25 },
     highestGap: { type: mongoose.Schema.Types.Mixed },

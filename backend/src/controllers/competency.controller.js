@@ -16,6 +16,7 @@ async function getOrCreateUser(clerkId) {
       clerkId: clerkId || "officer-default",
       name: "Palak Singh",
       designation: "Assistant Director",
+      post: "Statistical Officer",
       department: "National Statistical Office (NSO)",
       experienceYears: 0,
       qualifications: [],
@@ -31,8 +32,9 @@ export const runGapAnalysis = async (req, res) => {
 
     // If body contains profile updates (e.g. changed designation / role from Profile), persist them
     if (req.body && Object.keys(req.body).length > 0) {
-      const { designation, department, experienceYears, qualifications, pastTrainings, name } = req.body;
+      const { designation, post, jobRole, department, experienceYears, qualifications, pastTrainings, name } = req.body;
       if (designation) user.designation = designation;
+      if (post || jobRole) user.post = post || jobRole;
       if (department) user.department = department;
       if (name) user.name = name;
       if (experienceYears != null) user.experienceYears = Number(experienceYears);
@@ -64,16 +66,29 @@ export const runGapAnalysis = async (req, res) => {
 
     const gapResult = await getGapAnalysis({
       designation: req.body?.designation || user.designation || "Assistant Director",
+      post: req.body?.post || req.body?.jobRole || user.post || "Statistical Officer",
       department: req.body?.department || user.department || "National Statistical Office (NSO)",
       experienceYears: req.body?.experienceYears != null ? Number(req.body.experienceYears) : (user.experienceYears != null ? Number(user.experienceYears) : 0),
       qualifications: req.body?.qualifications || user.qualifications || [],
       pastTrainings: req.body?.pastTrainings || user.pastTrainings || [],
-      quizAttempts: quizAttempts.map((q) => ({
-        sourceFileName: q.sourceFileName,
-        score: q.score,
-        totalQuestions: q.totalQuestions,
-      })),
-      completedCourses,
+      quizAttempts: (req.body?.quizAttempts != null)
+        ? req.body.quizAttempts
+        : quizAttempts.map((q) => {
+            const questionTopics = (q.questions || [])
+              .map((item) => `${item.question || ""} ${item.explanation || ""}`)
+              .join(" ");
+            return {
+              sourceFileName: q.sourceFileName,
+              score: q.score,
+              totalQuestions: q.totalQuestions,
+              domain: q.domain || "",
+              title: q.title || "",
+              questionTopics,
+            };
+          }),
+      completedCourses: (req.body?.completedCourses != null)
+        ? req.body.completedCourses
+        : completedCourses,
     });
 
     const profile = await CompetencyProfile.findOneAndUpdate(
@@ -126,15 +141,24 @@ export const getMyCompetencyProfile = async (req, res) => {
 
     const gapResult = await getGapAnalysis({
       designation: user.designation || "Assistant Director",
+      post: user.post || "Statistical Officer",
       department: user.department || "National Statistical Office (NSO)",
       experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
       qualifications: user.qualifications || [],
       pastTrainings: user.pastTrainings || [],
-      quizAttempts: quizAttempts.map((q) => ({
-        sourceFileName: q.sourceFileName,
-        score: q.score,
-        totalQuestions: q.totalQuestions,
-      })),
+      quizAttempts: quizAttempts.map((q) => {
+        const questionTopics = (q.questions || [])
+          .map((item) => `${item.question || ""} ${item.explanation || ""}`)
+          .join(" ");
+        return {
+          sourceFileName: q.sourceFileName,
+          score: q.score,
+          totalQuestions: q.totalQuestions,
+          domain: q.domain || "",
+          title: q.title || "",
+          questionTopics,
+        };
+      }),
       completedCourses,
     });
 

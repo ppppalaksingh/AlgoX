@@ -21,9 +21,9 @@
     }
   },
   "Additional Director General": {
-    "statistical": 4.6,
+    "statistical": 4.7,
     "technical": 4.1,
-    "digitalGovernance": 4.4,
+    "digitalGovernance": 4.5,
     "behavioural": 4.7,
     "subCompetencies": {
       "Survey Design (CMP001)": 4.8,
@@ -44,7 +44,7 @@
   "Director": {
     "statistical": 4.5,
     "technical": 4.2,
-    "digitalGovernance": 4.2,
+    "digitalGovernance": 4.3,
     "behavioural": 4.5,
     "subCompetencies": {
       "Survey Design (CMP001)": 4.6,
@@ -63,9 +63,9 @@
   },
   "Joint Director": {
     "statistical": 4.3,
-    "technical": 4.2,
+    "technical": 4.3,
     "digitalGovernance": 4.0,
-    "behavioural": 4.3,
+    "behavioural": 4.2,
     "subCompetencies": {
       "Survey Design (CMP001)": 4.5,
       "Sampling Techniques (CMP002)": 4.5,

@@ -22,7 +22,7 @@ export default function RecommendedPath({ path, onStart, onViewFullPath, isStart
           <div className="flex items-center gap-2">
             <span className={`text-[10px] font-bold uppercase tracking-widest ${
               isDarkMode ? "text-indigo-400" : "text-[#5925dc]"
-            }`}>Target Roadmap</span>
+            }`}>NSSTA &amp; iGOT Roadmap</span>
             <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
               isDarkMode
                 ? "bg-indigo-500/15 text-indigo-300 border-indigo-500/30"

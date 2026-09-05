@@ -1,38 +1,56 @@
 from pydantic import BaseModel
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 
 class UserProfileInput(BaseModel):
     designation: str
+    post: Optional[str] = "Statistical Officer"
     department: Optional[str] = None
     experienceYears: Optional[int] = 0
+    experience_years: Optional[int] = None
     qualifications: Optional[List[str]] = []
     pastTrainings: Optional[List[str]] = []
+    past_trainings: Optional[List[str]] = None
     quizAttempts: Optional[List[dict]] = []
-    completedCourses: Optional[List[str]] = []
+    quiz_attempts: Optional[List[dict]] = None
+    completedCourses: Optional[List[Any]] = []
+    completed_courses: Optional[List[Any]] = None
 
 class SkillGap(BaseModel):
+    id: Optional[str] = None
     skillName: str
     currentLevel: float
     requiredLevel: float
     gap: float
-    percent: Optional[int] = None
+    percent: Optional[Union[int, float]] = None
     status: Optional[str] = None
+    domain: Optional[str] = None
+    competencyType: Optional[str] = None
+    nsstaCategory: Optional[str] = None
+    categoryCode: Optional[str] = None
 
 class GapAnalysisResponse(BaseModel):
     matchedDesignation: Optional[str] = None
+    serviceCadre: Optional[str] = None
     department: Optional[str] = None
+    post: Optional[str] = None
     experienceYears: Optional[int] = None
-    overallReadiness: Optional[int] = 25
+    overallReadiness: Optional[Union[int, float]] = 25
+    roleProfile: Optional[dict] = None
+    alignmentFlow: Optional[dict] = None
+    benchmarkDisclaimer: Optional[str] = None
     domainScores: dict
     domainTargets: Optional[dict] = None
     domainPercentages: Optional[dict] = None
     skillGaps: List[SkillGap]
     subCompetencies: Optional[List[dict]] = None
-    highestGap: Optional[dict] = None
-    topStrength: Optional[dict] = None
+    highestGap: Optional[Any] = None
+    topStrength: Optional[Any] = None
     aiExecutiveInsight: Optional[str] = None
 
 class RecommendationRequest(BaseModel):
+    designation: Optional[str] = None
+    serviceCadre: Optional[str] = None
+    post: Optional[str] = None
     domainScores: Optional[dict] = None
     skillGaps: Optional[List[SkillGap]] = []
     sourceFilter: Optional[str] = None

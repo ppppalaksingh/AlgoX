@@ -205,6 +205,19 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                     <span className="text-3xl font-extrabold text-emerald-400">{result.percentage}%</span>
                     <p className="text-xs text-slate-400 mt-0.5">Overall Score</p>
                   </div>
+                  {result?.recalibratedProfile?.overallReadiness != null && (
+                    <>
+                      <div className="w-px h-10 bg-white/[0.08]" />
+                      <div>
+                        <span className="text-3xl font-extrabold text-amber-400">
+                          {Number(result.recalibratedProfile.overallReadiness) % 1 === 0
+                            ? `${result.recalibratedProfile.overallReadiness}%`
+                            : `${Number(result.recalibratedProfile.overallReadiness).toFixed(1)}%`}
+                        </span>
+                        <p className="text-xs text-slate-400 mt-0.5">Updated Readiness</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

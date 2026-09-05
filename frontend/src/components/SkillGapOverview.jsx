@@ -1,17 +1,27 @@
-import { BarChart3, PieChart, Monitor, MessageSquare, ArrowRight, Sparkles, Loader2 } from "lucide-react";
+import { BarChart3, PieChart, Monitor, MessageSquare, ArrowRight, Sparkles, Loader2, Info } from "lucide-react";
 import { getColor } from "../data/colorMap";
-import { MOSPI_CADRES } from "./ProfileView";
+import { MOSPI_CADRES, SERVICE_CADRE_MAP } from "./ProfileView";
 
 const ICONS = { BarChart3, PieChart, Monitor, MessageSquare };
 
+const DOMAIN_TYPE_MAP = {
+  statistical: "Domain-specific",
+  technical: "Functional",
+  digitalGovernance: "Functional",
+  behavioural: "Behavioural",
+};
+
 function statusBadgeClasses(status) {
-  if (status === "Strong" || status === "Excellent") {
+  if (status === "Target Met" || status === "Strong" || status === "Excellent") {
     return "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30";
   }
-  if (status === "Average") {
+  if (status === "Low") {
+    return "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30";
+  }
+  if (status === "Moderate" || status === "Average") {
     return "bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30";
   }
-  return "bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30"; // Needs Improvement
+  return "bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30"; // Critical or Needs Improvement
 }
 
 export default function SkillGapOverview({
@@ -23,6 +33,8 @@ export default function SkillGapOverview({
   currentDesignation = "Assistant Director",
   onCadreChange,
 }) {
+  const currentService = SERVICE_CADRE_MAP?.[currentDesignation] || "Indian Statistical Service (ISS)";
+
   return (
     <div className={`p-6 rounded-3xl relative overflow-hidden flex flex-col justify-between h-full border transition-all duration-300 ${
       isDarkMode
@@ -37,7 +49,12 @@ export default function SkillGapOverview({
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <span className="text-[10px] font-bold text-[#de7a58] uppercase tracking-widest block mb-0.5">Competency Benchmark (SIH 101)</span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-[10px] font-bold text-[#de7a58] uppercase tracking-widest block">MoSPI / NSSTA Matrix</span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
+                {currentService.includes("SSS") ? "SSS Cadre" : "ISS Cadre"}
+              </span>
+            </div>
             <h3 className={`font-extrabold text-lg font-serif tracking-tight ${
               isDarkMode ? "text-white" : "text-[#1e143e]"
             }`}>Skill Gap Overview</h3>
@@ -87,14 +104,19 @@ export default function SkillGapOverview({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <p className={`text-xs font-semibold truncate ${
-                      isDarkMode ? "text-slate-200" : "text-[#1e143e]"
-                    }`}>{skill.name}</p>
+                  <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <p className={`text-xs font-semibold truncate ${
+                        isDarkMode ? "text-slate-200" : "text-[#1e143e]"
+                      }`}>{skill.name}</p>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 shrink-0">
+                        {DOMAIN_TYPE_MAP[skill.id] || "Functional"}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
                       {skill.target != null && (
                         <span className="text-[10px] text-slate-400 font-mono">
-                          ({(skill.current != null ? Number(skill.current).toFixed(1) : "2.0")} / req {Number(skill.target).toFixed(1)})
+                          ({(skill.current != null ? Number(skill.current).toFixed(2) : "1.00")} / req {Number(skill.target).toFixed(1)})
                         </span>
                       )}
                       <span className={`text-xs font-bold font-mono ${
@@ -123,27 +145,34 @@ export default function SkillGapOverview({
         </div>
       </div>
 
-      <button
-        onClick={onRunAnalysis}
-        disabled={isAnalyzing}
-        className={`mt-5 w-full py-2.5 rounded-full text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50 ${
-          isDarkMode
-            ? "btn-najaba-gold"
-            : "btn-najaba-purple"
-        }`}
-      >
-        {isAnalyzing ? (
-          <>
-            <Loader2 size={14} className="animate-spin" />
-            <span>Analyzing MoSPI Standards...</span>
-          </>
-        ) : (
-          <>
-            <Sparkles size={14} />
-            <span>Recalibrate Competency Gap</span>
-          </>
-        )}
-      </button>
+      <div className="mt-4 space-y-2">
+        <button
+          onClick={onRunAnalysis}
+          disabled={isAnalyzing}
+          className={`w-full py-2.5 rounded-full text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50 ${
+            isDarkMode
+              ? "btn-najaba-gold"
+              : "btn-najaba-purple"
+          }`}
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              <span>Analyzing MoSPI Standards...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles size={14} />
+              <span>Recalibrate Competency Gap</span>
+            </>
+          )}
+        </button>
+
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 px-1">
+          <Info size={12} className="text-amber-400 shrink-0" />
+          <span className="truncate">Prototype calibration benchmarks (1.0–5.0) for algorithmic testing.</span>
+        </div>
+      </div>
     </div>
   );
 }

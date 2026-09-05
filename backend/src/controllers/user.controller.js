@@ -8,11 +8,16 @@ import { getGapAnalysis } from "../services/mlService.js";
 // Called once after signup or profile update to build the official's profile
 export const createOrUpdateProfile = async (req, res) => {
   try {
-    const { name, email, designation, department, experienceYears, qualifications, pastTrainings } = req.body;
+    const { name, email, designation, post, jobRole, department, experienceYears, qualifications, pastTrainings } = req.body;
+    const resolvedPost = post || jobRole || "Statistical Officer";
+
+    const expY = (experienceYears !== undefined && experienceYears !== null && !isNaN(Number(experienceYears)))
+      ? Number(experienceYears)
+      : 0;
 
     const user = await User.findOneAndUpdate(
       { clerkId: req.userId },
-      { name, email, designation, department, experienceYears, qualifications, pastTrainings },
+      { name, email, designation, post: resolvedPost, department, experienceYears: expY, qualifications, pastTrainings },
       { upsert: true, new: true }
     );
 
@@ -33,15 +38,24 @@ export const createOrUpdateProfile = async (req, res) => {
 
       const gapResult = await getGapAnalysis({
         designation: user.designation || "Assistant Director",
+        post: user.post || resolvedPost,
         department: user.department || "National Statistical Office (NSO)",
-        experienceYears: user.experienceYears || 0,
+        experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
         qualifications: user.qualifications || [],
         pastTrainings: user.pastTrainings || [],
-        quizAttempts: quizAttempts.map((q) => ({
-          sourceFileName: q.sourceFileName,
-          score: q.score,
-          totalQuestions: q.totalQuestions,
-        })),
+        quizAttempts: quizAttempts.map((q) => {
+          const questionTopics = (q.questions || [])
+            .map((item) => `${item.question || ""} ${item.explanation || ""}`)
+            .join(" ");
+          return {
+            sourceFileName: q.sourceFileName,
+            score: q.score,
+            totalQuestions: q.totalQuestions,
+            domain: q.domain || "",
+            title: q.title || "",
+            questionTopics,
+          };
+        }),
         completedCourses,
       });
 

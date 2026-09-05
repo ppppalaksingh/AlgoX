@@ -183,6 +183,11 @@ function Dashboard() {
     localStorage.getItem("algox_user_designation") ||
     "Assistant Director";
 
+  const officerPost =
+    profileData?.post ||
+    localStorage.getItem("algox_user_post") ||
+    "Statistical Officer";
+
   const getCleanOfficerName = (raw) => {
     if (!raw) return "";
     const trimmed = String(raw).trim();
@@ -215,6 +220,7 @@ function Dashboard() {
   const user = {
     name: officerName,
     designation: officerDesignation,
+    post: officerPost,
     email: profileData?.email || clerkUser?.primaryEmailAddress?.emailAddress || "officer@mospi.gov.in",
     notificationsCount: notifications.length,
   };
@@ -323,17 +329,19 @@ function Dashboard() {
     const inProgressCount = currentCourses.filter((c) => c.percent > 0 && c.percent < 100).length;
     const computedHours = Math.round(completedCount * 18 + inProgressCount * 6 + (currentCerts.length * 8));
     const totalHours = progressDataRef.current?.totalHours != null ? progressDataRef.current.totalHours : computedHours;
-    const readinessVal = overallReadiness != null ? Math.round(overallReadiness) : 25;
+    const numReadiness = overallReadiness != null ? Number(overallReadiness) : 26.5;
+    const roundedReadiness = Math.round(numReadiness * 10) / 10;
+    const readinessFormatted = roundedReadiness % 1 === 0 ? `${roundedReadiness}%` : `${roundedReadiness.toFixed(1)}%`;
 
     setStats([
       {
         id: "overall-readiness",
         label: "Overall Cadre Readiness",
-        value: `${readinessVal}%`,
+        value: readinessFormatted,
         caption: "Benchmarked against MoSPI Standards",
         icon: "TrendingUp",
         color: "blue",
-        progress: readinessVal,
+        progress: roundedReadiness,
       },
       {
         id: "courses-completed",
@@ -551,13 +559,21 @@ function Dashboard() {
         const target = (data.domainTargets && data.domainTargets[k]) ? Number(data.domainTargets[k]) : 4.0;
         const pct = Math.min(100, Math.round((val / target) * 100));
         const meta = domainMap[k] || { name: k, icon: "BarChart3", color: "blue" };
+        const gap = Math.max(0, parseFloat((target - val).toFixed(2)));
+        let status = "Moderate";
+        if (gap === 0) status = "Target Met";
+        else if (gap <= 0.50) status = "Low";
+        else if (gap <= 1.00) status = "Moderate";
+        else status = "Critical";
+
         return {
           id: k,
           name: meta.name,
           percent: pct,
           target,
           current: val,
-          status: pct >= 80 ? "Strong" : pct >= 55 ? "Average" : "Needs Improvement",
+          gap,
+          status,
           icon: meta.icon,
           color: meta.color,
         };
@@ -570,12 +586,21 @@ function Dashboard() {
           const raw = data.domainScores[dom.id];
           const target = (data.domainTargets && data.domainTargets[dom.id]) ? Number(data.domainTargets[dom.id]) : 4.0;
           const score = raw != null ? Math.min(100, Math.round((raw / target) * 100)) : dom.percent;
+          const curVal = raw != null ? raw : (dom.current != null ? dom.current : 2.0);
+          const gap = Math.max(0, parseFloat((target - curVal).toFixed(2)));
+          let status = "Moderate";
+          if (gap === 0) status = "Target Met";
+          else if (gap <= 0.50) status = "Low";
+          else if (gap <= 1.00) status = "Moderate";
+          else status = "Critical";
+
           return {
             ...dom,
             percent: score,
             target,
-            current: raw,
-            status: score >= 80 ? "Strong" : score >= 55 ? "Average" : "Needs Improvement",
+            current: curVal,
+            gap,
+            status,
           };
         })
       );
@@ -634,7 +659,7 @@ function Dashboard() {
       });
       if (res.ok) {
         const data = await res.json();
-        applyRecalibratedProfile(data);
+        applyRecalibratedProfile(data, courseListRef.current, certificateListRef.current);
       }
     } catch (err) {
       console.warn("[App] Competency data load note:", err.message);
@@ -679,6 +704,7 @@ function Dashboard() {
               name: officerName,
               email: user.email,
               designation: officerDesignation,
+              post: officerPost,
               department: "National Statistical Office (NSO)",
               experienceYears: 0,
               qualifications: [],
@@ -906,62 +932,21 @@ function Dashboard() {
       ]);
 
       if (!isPass) {
-        showToast(`⚠️ Assessment Score: ${data.score}/${data.total} (${scorePct}%). Incorrect answers detected — Competency rating adjusted (-${scorePct < 40 ? "3%" : "2%"})`, "warning");
-        // Calibrated, balanced downward adjustment (not huge wipeout)
-        const drop = scorePct < 40 ? 3 : 2;
-        setCompetencyList((prev) =>
-          prev.map((dom) => {
-            const newPct = Math.max(15, (dom.percent || 20) - drop);
-            return {
-              ...dom,
-              percent: newPct,
-              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-            };
-          })
-        );
-        setSkillGapsList((prev) =>
-          prev.map((dom) => {
-            const newPct = Math.max(15, (dom.percent || 20) - drop);
-            return {
-              ...dom,
-              percent: newPct,
-              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-            };
-          })
-        );
+        showToast(`⚠️ Assessment Score: ${data.score}/${data.total} (${scorePct}%). Review weak areas and retake to strengthen verified competency.`, "warning");
       } else {
-        showToast(`🏆 Assessment Passed! Score: ${data.score}/${data.total} (${scorePct}%). Demonstrated Competency boosted (+${scorePct >= 80 ? "3%" : "2%"})!`, "success");
-        // Calibrated, balanced upward boost (steady and earned)
-        const boost = scorePct >= 80 ? 3 : 2;
-        setCompetencyList((prev) =>
-          prev.map((dom) => {
-            const newPct = Math.min(98, (dom.percent || 20) + boost);
-            return {
-              ...dom,
-              percent: newPct,
-              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-            };
-          })
-        );
-        setSkillGapsList((prev) =>
-          prev.map((dom) => {
-            const newPct = Math.min(98, (dom.percent || 20) + boost);
-            return {
-              ...dom,
-              percent: newPct,
-              status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-            };
-          })
-        );
+        showToast(`🏆 Assessment Passed! Score: ${data.score}/${data.total} (${scorePct}%). Verified competency calibrated against MoSPI standard!`, "success");
       }
 
       if (data.recalibratedProfile) {
-        applyRecalibratedProfile(data.recalibratedProfile);
+        applyRecalibratedProfile(data.recalibratedProfile, courseListRef.current, certificateListRef.current);
       } else {
         await handleRunGapAnalysis(false);
       }
 
+      // Re-fetch authoritative competency profile to guarantee full sync across all views & calculations
+      await fetchCompetencyData(token);
       await fetchQuizAttempts(token);
+      await fetchMLRecommendations(token);
     } catch (err) {
       console.error("[handleQuizSubmit] Error:", err);
       showToast(err.message || "Failed to submit quiz.", "error");
@@ -979,20 +964,30 @@ function Dashboard() {
 
     try {
       const token = (await getToken()) || "dev-test-token";
-      const payload = overrideData || {
+      const basePayload = {
         designation: profileData?.designation || localStorage.getItem("algox_user_designation") || user.designation || "Assistant Director",
+        post: profileData?.post || localStorage.getItem("algox_user_post") || user.post || "Statistical Officer",
         department: profileData?.department || "National Statistical Office (NSO)",
-        experienceYears: profileData?.experienceYears != null ? profileData.experienceYears : 0,
+        experienceYears: profileData?.experienceYears != null 
+          ? Number(profileData.experienceYears) 
+          : (localStorage.getItem("algox_user_experience_years") != null ? Number(localStorage.getItem("algox_user_experience_years")) : 0),
         qualifications: profileData?.qualifications || [],
         pastTrainings: profileData?.pastTrainings || [],
         name: profileData?.name || user.name || "Tarun Gupta",
       };
+      const payload = overrideData ? { ...basePayload, ...overrideData } : basePayload;
 
       if (payload.designation) {
         localStorage.setItem("algox_user_designation", payload.designation);
       }
+      if (payload.post) {
+        localStorage.setItem("algox_user_post", payload.post);
+      }
       if (payload.name) {
         localStorage.setItem("algox_user_name", payload.name);
+      }
+      if (payload.experienceYears !== undefined && payload.experienceYears !== null) {
+        localStorage.setItem("algox_user_experience_years", payload.experienceYears);
       }
 
       const res = await fetch(`${API_BASE_URL}/competency/analyze`, {
@@ -1014,6 +1009,7 @@ function Dashboard() {
         ...prev,
         ...payload,
         designation: data.matchedDesignation || payload.designation,
+        post: payload.post || prev?.post || "Statistical Officer",
       }));
 
       applyRecalibratedProfile(data, courseListRef.current, certificateListRef.current);
@@ -1062,51 +1058,9 @@ function Dashboard() {
     }
   };
 
-  // Handler: Complete Learning Pathway & Recalibrate Cadre Readiness (+3% Boost)
+  // Handler: Complete Learning Pathway & Record Progress
   const handleCompletePathway = async (pathInfo) => {
-    const domainLower = String(pathInfo?.domain || pathInfo?.title || "").toLowerCase();
-    let targetDomainKey = "digitalGovernance";
-    if (domainLower.includes("tech") || domainLower.includes("python") || domainLower.includes("r ") || domainLower.includes("data science")) {
-      targetDomainKey = "technical";
-    } else if (domainLower.includes("stat") || domainLower.includes("survey") || domainLower.includes("account") || domainLower.includes("sample")) {
-      targetDomainKey = "statistical";
-    } else if (domainLower.includes("behav") || domainLower.includes("lead") || domainLower.includes("ethic")) {
-      targetDomainKey = "behavioural";
-    } else {
-      targetDomainKey = "digitalGovernance";
-    }
-
-    // 1. Optimistic domain boost (+4% target, +1% other)
-    setCompetencyList((prev) =>
-      prev.map((d) => {
-        const boost = d.id === targetDomainKey ? 4 : 1;
-        const newPct = Math.min(100, (d.percent || 20) + boost);
-        return {
-          ...d,
-          percent: newPct,
-          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-        };
-      })
-    );
-
-    setSkillGapsList((prev) =>
-      prev.map((s) => {
-        const boost = s.id === targetDomainKey ? 4 : 1;
-        const newPct = Math.min(100, (s.percent || 20) + boost);
-        return {
-          ...s,
-          percent: newPct,
-          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-        };
-      })
-    );
-
-    // 2. Optimistic overall readiness boost (+3%)
-    const currentReadiness = gapModalData?.overallReadiness != null ? gapModalData.overallReadiness : 23;
-    const boostedReadiness = Math.min(100, currentReadiness + 3);
-    updateDashboardStats(boostedReadiness);
-
-    showToast(`🎯 Pathway Mastered: "${pathInfo?.title || 'Cadre Pathway'}"! Overall Readiness boosted (+3%)!`, "success");
+    showToast(`🎯 Pathway Mastered: "${pathInfo?.title || 'Cadre Pathway'}"! Take the domain assessment quiz to test and verify competency gains.`, "success");
 
     // 3. Persist in MongoDB and run ML recalibration
     try {
@@ -1174,60 +1128,9 @@ function Dashboard() {
     setCertificateList(newCertList);
     certificateListRef.current = newCertList;
 
-    // Immediately boost the corresponding domain competency score dynamically
-    const domainLower = String(course.domain || course.category || course.title || "").toLowerCase();
-    let targetDomainKey = "statistical";
-    if (domainLower.includes("tech") || domainLower.includes("python") || domainLower.includes("r ") || domainLower.includes("data science") || domainLower.includes("ai")) {
-      targetDomainKey = "technical";
-    } else if (domainLower.includes("gov") || domainLower.includes("dpdp") || domainLower.includes("privacy") || domainLower.includes("cyber") || domainLower.includes("digital")) {
-      targetDomainKey = "digitalGovernance";
-    } else if (domainLower.includes("behav") || domainLower.includes("lead") || domainLower.includes("ethic") || domainLower.includes("manage")) {
-      targetDomainKey = "behavioural";
-    } else {
-      targetDomainKey = "statistical";
-    }
-
-    setCompetencyList((prev) =>
-      prev.map((d) => {
-        const boost = d.id === targetDomainKey ? 4 : 1;
-        const newPct = Math.min(100, (d.percent || 20) + boost);
-        return {
-          ...d,
-          percent: newPct,
-          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-        };
-      })
-    );
-
-    setSkillGapsList((prev) =>
-      prev.map((s) => {
-        const boost = s.id === targetDomainKey ? 4 : 1;
-        const newPct = Math.min(100, (s.percent || 20) + boost);
-        return {
-          ...s,
-          percent: newPct,
-          status: newPct >= 75 ? "Strong" : newPct >= 50 ? "Average" : "Needs Improvement",
-        };
-      })
-    );
-
-    setDetailedGaps((prev) =>
-      prev.map((g) => {
-        if (g.domain?.toLowerCase().includes(targetDomainKey.slice(0, 4))) {
-          const newCurr = Math.min(5.0, Math.round((g.currentLevel + 0.2) * 10) / 10);
-          return {
-            ...g,
-            currentLevel: newCurr,
-            gap: Math.max(0, Math.round((g.requiredLevel - newCurr) * 10) / 10),
-          };
-        }
-        return g;
-      })
-    );
-
+    // Update dashboard metrics with updated course and cert lists
     const currentReadiness = gapModalData?.overallReadiness != null ? gapModalData.overallReadiness : 23;
-    const boostedReadiness = Math.min(100, currentReadiness + 3);
-    updateDashboardStats(boostedReadiness, updatedCourses, newCertList);
+    updateDashboardStats(currentReadiness, updatedCourses, newCertList);
 
     // Save permanently in MongoDB backend
     try {
@@ -1257,17 +1160,13 @@ function Dashboard() {
         if (data.recalibratedProfile) {
           applyRecalibratedProfile(data.recalibratedProfile, updatedCourses, finalCertList);
         }
-        await handleRunGapAnalysis(true);
         await fetchProgress(token);
-      } else {
-        await handleRunGapAnalysis(true);
       }
     } catch (saveErr) {
       console.warn("[App] Complete course save note:", saveErr.message);
-      await handleRunGapAnalysis(true);
     }
 
-    showToast(`🎓 Congratulations! Course completed & Certificate earned in "${course.title}". Competency boosted!`, "success");
+    showToast(`🎓 Course completed & Certificate earned in "${course.title}". Take the domain assessment quiz to test and verify competency gains!`, "success");
   };
 
   // Handler: View Certificate Modal
@@ -1292,6 +1191,10 @@ function Dashboard() {
     try {
       if (formData.name) localStorage.setItem("algox_user_name", formData.name);
       if (formData.designation) localStorage.setItem("algox_user_designation", formData.designation);
+      if (formData.post) localStorage.setItem("algox_user_post", formData.post);
+      if (formData.experienceYears !== undefined && formData.experienceYears !== null) {
+        localStorage.setItem("algox_user_experience_years", formData.experienceYears);
+      }
 
       const token = (await getToken()) || "dev-test-token";
       const res = await fetch(`${API_BASE_URL}/users/profile`, {

@@ -60,9 +60,37 @@ const DOMAIN_DESCRIPTIONS = {
   behavioural: "Administrative leadership & civil service integrity: evidence-based policy formulation, field team supervision, ethics, and stakeholder communication.",
 };
 
+const DOMAIN_TAXONOMY = {
+  statistical: {
+    type: "Domain-specific Competency",
+    typeColor: "bg-blue-500/15 text-blue-300 border-blue-500/25",
+    nsstaCategory: "Official Statistics & Survey Methodologies",
+    nsstaCode: "NSSTA-DOM-100",
+  },
+  technical: {
+    type: "Functional Competency",
+    typeColor: "bg-indigo-500/15 text-indigo-300 border-indigo-500/25",
+    nsstaCategory: "Statistical Computing & Modern Analytics",
+    nsstaCode: "NSSTA-FNC-200",
+  },
+  digitalGovernance: {
+    type: "Functional Competency",
+    typeColor: "bg-purple-500/15 text-purple-300 border-purple-500/25",
+    nsstaCategory: "Digital Government, Data Security & Public Administration",
+    nsstaCode: "NSSTA-FNC-300",
+  },
+  behavioural: {
+    type: "Behavioural Competency",
+    typeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/25",
+    nsstaCategory: "Management, Leadership & Workplace Effectiveness",
+    nsstaCode: "NSSTA-BEH-400",
+  },
+};
+
 function statusBadgeClasses(status) {
-  if (status === "Strong" || status === "Excellent") return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
-  if (status === "Average") return "bg-amber-500/15 text-amber-300 border-amber-500/30";
+  if (status === "Target Met" || status === "Strong" || status === "Excellent") return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+  if (status === "Low") return "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
+  if (status === "Moderate" || status === "Average") return "bg-amber-500/15 text-amber-300 border-amber-500/30";
   return "bg-rose-500/15 text-rose-300 border-rose-500/30 font-semibold";
 }
 
@@ -82,10 +110,10 @@ export default function MyCompetencies({
   const [showInfoModal, setShowInfoModal] = useState(true);
 
   const safeDomains = (domains && domains.length > 0) ? domains : [
-    { id: "statistical", name: "Statistical Competencies", percent: 82, status: "Strong", icon: "BarChart3", color: "blue" },
-    { id: "technical", name: "Technical Competencies", percent: 64, status: "Average", icon: "Monitor", color: "orange" },
-    { id: "digitalGovernance", name: "Digital Governance", percent: 70, status: "Average", icon: "PieChart", color: "green" },
-    { id: "behavioural", name: "Behavioural & Leadership", percent: 88, status: "Strong", icon: "MessageSquare", color: "purple" },
+    { id: "statistical", name: "Statistical Analysis", percent: 82, status: "Moderate", icon: "BarChart3", color: "blue" },
+    { id: "technical", name: "Technical & Analytics", percent: 64, status: "Moderate", icon: "Monitor", color: "orange" },
+    { id: "digitalGovernance", name: "Digital Governance", percent: 70, status: "Moderate", icon: "PieChart", color: "green" },
+    { id: "behavioural", name: "Behavioural & Leadership", percent: 88, status: "Moderate", icon: "MessageSquare", color: "purple" },
   ];
 
   return (
@@ -197,6 +225,40 @@ export default function MyCompetencies({
         </div>
       )}
 
+      {/* MoSPI & NSSTA Alignment Pipeline Ribbon */}
+      <div className="bg-[#0c101d]/90 rounded-3xl p-5 border border-indigo-500/20 backdrop-blur-xl relative overflow-hidden shadow-lg space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
+            <Layers size={12} className="text-indigo-400" /> MoSPI &amp; NSSTA Official Competency Architecture
+          </span>
+          <span className="text-[11px] font-semibold text-slate-400">
+            5-Level Cadre Progression Framework
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] text-slate-300 pb-1 font-medium scrollbar-thin">
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white shrink-0 font-semibold">MoSPI (Ministry)</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white shrink-0 font-semibold">NSO (Department)</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-indigo-300 shrink-0">Cadre/Service</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-indigo-300 shrink-0">Designation (Level)</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-300 shrink-0 font-bold">Post / Job Role</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 shrink-0 font-bold">Required Competencies</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-indigo-300 shrink-0">Current Competency</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-amber-300 shrink-0 font-semibold">Competency Gap</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-emerald-300 shrink-0 font-semibold">NSSTA / iGOT Pathway</span>
+          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+          <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 shrink-0 font-bold">Updated Competency</span>
+        </div>
+      </div>
+
       {/* 4 Domain Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {safeDomains.map((domain) => {
@@ -205,6 +267,7 @@ export default function MyCompetencies({
           const skillTags = domain.skills || DEFAULT_DOMAIN_SKILLS[domain.id] || DEFAULT_DOMAIN_SKILLS.statistical;
           const tier = getProficiencyTier(domain.percent || 50);
           const description = DOMAIN_DESCRIPTIONS[domain.id] || DOMAIN_DESCRIPTIONS.statistical;
+          const taxonomy = DOMAIN_TAXONOMY[domain.id] || DOMAIN_TAXONOMY.statistical;
 
           return (
             <div
@@ -218,9 +281,16 @@ export default function MyCompetencies({
                     <div className={`w-12 h-12 rounded-2xl ${color.bg} ${color.text} flex items-center justify-center shrink-0 border border-white/10 shadow-lg group-hover:scale-105 transition-transform`}>
                       <Icon size={22} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="text-base font-bold text-white leading-tight">{domain.name}</h3>
-                      <p className="text-xs text-slate-400">MoSPI Cadre Benchmark: 85%</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border whitespace-nowrap ${taxonomy.typeColor}`}>
+                          {taxonomy.type}
+                        </span>
+                        <span className="text-[10px] text-slate-400 truncate" title={taxonomy.nsstaCategory}>
+                          NSSTA: {taxonomy.nsstaCode}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -255,16 +325,19 @@ export default function MyCompetencies({
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
-                    <span>Cadre Gap: {Math.max(0, 85 - domain.percent)}% to Benchmark</span>
+                    <span>Current: <strong className="text-white font-mono">{domain.current != null ? Number(domain.current).toFixed(2) : "1.00"}</strong> / req {domain.target != null ? Number(domain.target).toFixed(1) : "4.0"}</span>
                     <span className="text-emerald-400/80">Verified via AI &amp; NSO</span>
                   </div>
                 </div>
 
                 {/* Mapped Key Competencies */}
                 <div className="space-y-2">
-                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    Key Cadre Competencies Mapped
-                  </p>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-extrabold uppercase tracking-wider text-slate-400">
+                      Key Cadre Competencies Mapped
+                    </span>
+                    <span className="text-slate-500 font-mono text-[10px]">{taxonomy.nsstaCategory}</span>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {skillTags.map((skill, sIdx) => (
                       <span
@@ -283,7 +356,7 @@ export default function MyCompetencies({
                 <button
                   type="button"
                   onClick={() => onOpenQuiz?.(domain.id)}
-                  className="flex-1 px-3 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer border border-blue-500/20"
+                  className="flex-1 px-3 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer border border-blue-500/20 shadow-xs"
                 >
                   <Zap size={13} /> Boost with AI Quiz
                 </button>
@@ -299,6 +372,14 @@ export default function MyCompetencies({
             </div>
           );
         })}
+      </div>
+
+      {/* Prototype Calibration Benchmark Disclaimer */}
+      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+        <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-200/90 leading-relaxed">
+          <strong>Prototype Calibration Benchmarks:</strong> Numerical target values (1.0–5.0) are calibrated for algorithmic demonstration and prototype evaluation; they are not official statutory MoSPI numerical quotas.
+        </p>
       </div>
     </div>
   );

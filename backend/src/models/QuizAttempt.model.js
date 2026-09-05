@@ -4,6 +4,8 @@ const quizAttemptSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     sourceFileName: String,
+    domain: { type: String, default: "" },
+    title: { type: String, default: "" },
     questions: [
       {
         question: String,

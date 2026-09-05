@@ -733,11 +733,19 @@ export const submitQuizAnswers = async (req, res) => {
           experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
           qualifications: user.qualifications || [],
           pastTrainings: user.pastTrainings || [],
-          quizAttempts: quizAttempts.map((q) => ({
-            sourceFileName: q.sourceFileName,
-            score: q.score,
-            totalQuestions: q.totalQuestions,
-          })),
+          quizAttempts: quizAttempts.map((q) => {
+            const questionTopics = (q.questions || [])
+              .map((item) => `${item.question || ""} ${item.explanation || ""}`)
+              .join(" ");
+            return {
+              sourceFileName: q.sourceFileName,
+              score: q.score,
+              totalQuestions: q.totalQuestions,
+              domain: q.domain || "",
+              title: q.title || "",
+              questionTopics,
+            };
+          }),
           completedCourses,
         });
 

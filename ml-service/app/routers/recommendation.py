@@ -11,7 +11,10 @@ def recommendations(req: RecommendationRequest):
         gaps,
         top_n=req.topN or 140,
         source_filter=req.sourceFilter,
-        domain_filter=req.domainFilter
+        domain_filter=req.domainFilter,
+        designation=req.designation,
+        service_cadre=req.serviceCadre,
+        post=req.post
     )
     return {"recommendedCourses": courses}
 

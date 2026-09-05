@@ -13,9 +13,9 @@ export default function GapAnalysisModal({ isOpen, onClose, analysisData, onStar
 
   const domainTargets = analysisData?.domainTargets || {
     statistical: 4.0,
-    technical: 3.8,
-    digitalGovernance: 3.5,
-    behavioural: 3.8,
+    technical: 4.0,
+    digitalGovernance: 3.0,
+    behavioural: 4.0,
   };
 
   const domainMeta = {
@@ -25,12 +25,12 @@ export default function GapAnalysisModal({ isOpen, onClose, analysisData, onStar
     behavioural: { name: "Behavioural & Leadership", color: "purple" },
   };
 
-  const overallReadiness = analysisData?.overallReadiness ?? 25;
+  const overallReadiness = analysisData?.overallReadiness ?? 26.7;
   const highestGap = analysisData?.highestGap || {
     displayName: "Technical & Analytics",
-    gap: 2.8,
+    gap: 3.0,
     current: 1.0,
-    required: 3.8,
+    required: 4.0,
   };
 
   const topStrength = analysisData?.topStrength || {
@@ -58,8 +58,19 @@ export default function GapAnalysisModal({ isOpen, onClose, analysisData, onStar
             </div>
             <h2 className="text-xl font-extrabold tracking-tight text-white mt-1">AI Competency &amp; Gap Impact Report</h2>
             <p className="text-xs text-slate-400">
-              Evaluated for: <strong className="text-white">{user?.name || "Officer"}</strong> • {analysisData?.matchedDesignation || "Assistant Director"} ({analysisData?.department || "NSO"})
+              Evaluated for: <strong className="text-white">{user?.name || "Officer"}</strong> • {analysisData?.matchedDesignation || user?.designation || "Assistant Director"} {analysisData?.post || user?.post ? `• ${analysisData?.post || user?.post}` : ""} ({analysisData?.department || "NSO"})
             </p>
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium overflow-x-auto pt-1">
+              <span className="text-slate-300">MoSPI (Ministry)</span>
+              <span>→</span>
+              <span className="text-slate-300">NSO (Department)</span>
+              <span>→</span>
+              <span className="text-slate-300">{analysisData?.serviceCadre || "Cadre"}</span>
+              <span>→</span>
+              <span className="text-indigo-300 font-semibold">{analysisData?.matchedDesignation || user?.designation || "Assistant Director"}</span>
+              <span>→</span>
+              <span className="text-blue-300 font-semibold">{analysisData?.post || user?.post || "Statistical Officer"}</span>
+            </div>
           </div>
 
           <button
@@ -190,6 +201,9 @@ export default function GapAnalysisModal({ isOpen, onClose, analysisData, onStar
             </h4>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
               {aiInsight}
+            </p>
+            <p className="text-[10px] text-amber-300/80 pt-1 border-t border-amber-500/20">
+              * Note: Numerical target matrix levels (1–5) are based on prototype role-responsibility assumptions for demonstration and do not constitute statutory MoSPI service rules.
             </p>
           </div>
         </div>
