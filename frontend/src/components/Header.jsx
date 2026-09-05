@@ -6,6 +6,7 @@ import {
 import { useClerk } from "@clerk/clerk-react";
 
 export default function Header({
+  activeNav = "dashboard",
   user,
   currentRole = "learner", // 'learner' | 'admin'
   isAdminInDB = false,
@@ -126,41 +127,39 @@ export default function Header({
         </div>
       </div>
 
-      {/* Center: Editorial Nav Links (Najaba signature style) */}
+      {/* Center: Editorial Nav Links (Najaba signature style with dynamic active underline) */}
       <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-semibold shrink-0 whitespace-nowrap">
-        <button
-          onClick={() => onNavigate?.("dashboard")}
-          className={`transition-colors relative py-1 cursor-pointer shrink-0 ${
-            isDark ? "text-white" : "text-[#1e143e] font-bold"
-          }`}
-        >
-          <span>The Tri-Factor</span>
-          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-[#de7a58] rounded-full" />
-        </button>
-        <button
-          onClick={() => onNavigate?.("competencies")}
-          className={`transition-colors cursor-pointer shrink-0 ${
-            isDark ? "text-slate-300 hover:text-white" : "text-[#635777] hover:text-[#1e143e]"
-          }`}
-        >
-          What We Assess
-        </button>
-        <button
-          onClick={() => onNavigate?.("courses")}
-          className={`transition-colors cursor-pointer shrink-0 ${
-            isDark ? "text-slate-300 hover:text-white" : "text-[#635777] hover:text-[#1e143e]"
-          }`}
-        >
-          Official Courses
-        </button>
-        <button
-          onClick={() => onNavigate?.("virtual-lab")}
-          className={`transition-colors cursor-pointer shrink-0 ${
-            isDark ? "text-slate-300 hover:text-white" : "text-[#635777] hover:text-[#1e143e]"
-          }`}
-        >
-          Simulations &amp; Lab
-        </button>
+        {[
+          { id: "dashboard", label: "The Tri-Factor" },
+          { id: "competencies", label: "What We Assess" },
+          { id: "courses", label: "Official Courses" },
+          { id: "virtual-lab", label: "Simulations & Lab" },
+        ].map((item) => {
+          const isActive =
+            activeNav === item.id ||
+            (item.id === "dashboard" && (activeNav === "learning-path" || activeNav === "profile" || activeNav === "quiz-generator"));
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => onNavigate?.(item.id)}
+              className={`transition-all relative py-1 cursor-pointer shrink-0 ${
+                isActive
+                  ? isDark
+                    ? "text-white font-bold"
+                    : "text-[#1e143e] font-bold"
+                  : isDark
+                    ? "text-slate-400 hover:text-white"
+                    : "text-[#635777] hover:text-[#1e143e]"
+              }`}
+            >
+              <span>{item.label}</span>
+              {isActive && (
+                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-[#de7a58] rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(222,122,88,0.5)]" />
+              )}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Right: Role Switcher, Language, Najaba Theme Toggle, Search & CTA */}

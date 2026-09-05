@@ -1366,6 +1366,7 @@ function Dashboard() {
 
       {/* Header - Stays sticky at top, full width, zero text overlapping */}
       <Header
+        activeNav={activeNav}
         user={user}
         currentRole={currentRole}
         isAdminInDB={isAdminInDB}
