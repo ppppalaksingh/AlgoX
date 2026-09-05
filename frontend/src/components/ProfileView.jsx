@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import { User, Building2, Briefcase, Award, Sparkles, CheckCircle2, Loader2, BookOpen, ShieldCheck } from "lucide-react";
 
+export const MOSPI_CADRES = [
+  "Junior Statistical Officer (JSO)",
+  "Statistical Officer (SO)",
+  "Senior Statistical Officer (SSO)",
+  "Assistant Director",
+  "Deputy Director",
+  "Joint Director",
+  "Director",
+  "Additional Director General",
+  "Director General",
+];
+
 const getCleanOfficerName = (raw, desig) => {
   if (!raw) return "";
   const trimmed = String(raw).trim();
@@ -61,18 +73,27 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
     setFormData((prev) => ({ ...prev, [field]: val }));
   };
 
+  const getPayload = () => ({
+    name: formData.name,
+    email: formData.email,
+    designation: formData.designation,
+    department: formData.department,
+    experienceYears: formData.experienceYears !== "" && !isNaN(Number(formData.experienceYears)) ? Number(formData.experienceYears) : 0,
+    qualifications: typeof formData.qualifications === "string"
+      ? formData.qualifications.split(",").map((s) => s.trim()).filter(Boolean)
+      : (formData.qualifications || []),
+    pastTrainings: typeof formData.pastTrainings === "string"
+      ? formData.pastTrainings.split(",").map((s) => s.trim()).filter(Boolean)
+      : (formData.pastTrainings || []),
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      designation: formData.designation,
-      department: formData.department,
-      experienceYears: formData.experienceYears !== "" && !isNaN(Number(formData.experienceYears)) ? Number(formData.experienceYears) : 0,
-      qualifications: formData.qualifications.split(",").map((s) => s.trim()).filter(Boolean),
-      pastTrainings: formData.pastTrainings.split(",").map((s) => s.trim()).filter(Boolean),
-    };
-    onSaveProfile?.(payload);
+    onSaveProfile?.(getPayload());
+  };
+
+  const handleRunAnalysisWithProfile = () => {
+    onRunAnalysis?.(getPayload());
   };
 
   return (
@@ -96,7 +117,8 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
         </div>
 
         <button
-          onClick={onRunAnalysis}
+          type="button"
+          onClick={handleRunAnalysisWithProfile}
           disabled={isAnalyzing}
           className="px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
         >
@@ -148,17 +170,24 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1.5">Designation / Role</label>
+            <label className="text-xs font-semibold text-slate-300 block mb-1.5">Designation / MoSPI Cadre</label>
             <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] rounded-xl px-3.5 py-2.5 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50 transition">
-              <Briefcase size={16} className="text-slate-400" />
-              <input
-                type="text"
+              <Briefcase size={16} className="text-slate-400 shrink-0" />
+              <select
                 value={formData.designation}
                 onChange={(e) => handleChange("designation", e.target.value)}
-                placeholder="e.g. Assistant Director, Statistical Officer"
-                className="w-full text-sm outline-none text-white bg-transparent placeholder:text-slate-600"
-              />
+                className="w-full text-sm outline-none text-white bg-transparent cursor-pointer [&>option]:bg-[#0f1422] [&>option]:text-white"
+              >
+                {MOSPI_CADRES.map((cadre) => (
+                  <option key={cadre} value={cadre}>
+                    {cadre}
+                  </option>
+                ))}
+              </select>
             </div>
+            <p className="text-[11px] text-slate-500 mt-1">
+              Select cadre to recalibrate competency benchmarks (Problem Statement 101).
+            </p>
           </div>
 
           <div>

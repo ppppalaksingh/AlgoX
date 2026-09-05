@@ -205,7 +205,7 @@ def run_gap_analysis(profile: dict) -> dict:
         )
         domain_scores[domain] = current
         domain_targets[domain] = required
-        domain_percentages[domain] = int(round((current / 5.0) * 100))
+        domain_percentages[domain] = min(100, int(round((current / required) * 100)))
 
         gap = round(max(0.0, required - current), 1)
         skill_gaps.append({
@@ -213,7 +213,7 @@ def run_gap_analysis(profile: dict) -> dict:
             "currentLevel": current,
             "requiredLevel": required,
             "gap": gap,
-            "percent": int(round((current / 5.0) * 100)),
+            "percent": min(100, int(round((current / required) * 100))),
             "status": "Target Met ✓" if current >= required else "Moderate Gap" if gap <= 0.8 else "Critical Gap"
         })
 

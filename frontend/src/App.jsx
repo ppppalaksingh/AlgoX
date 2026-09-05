@@ -548,13 +548,16 @@ function Dashboard() {
       };
 
       const newSkillGaps = Object.entries(data.domainScores).map(([k, val]) => {
-        const pct = Math.round((val / 5) * 100);
+        const target = (data.domainTargets && data.domainTargets[k]) ? Number(data.domainTargets[k]) : 4.0;
+        const pct = Math.min(100, Math.round((val / target) * 100));
         const meta = domainMap[k] || { name: k, icon: "BarChart3", color: "blue" };
         return {
           id: k,
           name: meta.name,
           percent: pct,
-          status: pct >= 75 ? "Strong" : pct >= 50 ? "Average" : "Needs Improvement",
+          target,
+          current: val,
+          status: pct >= 80 ? "Strong" : pct >= 55 ? "Average" : "Needs Improvement",
           icon: meta.icon,
           color: meta.color,
         };
@@ -565,11 +568,14 @@ function Dashboard() {
       setCompetencyList((prev) =>
         prev.map((dom) => {
           const raw = data.domainScores[dom.id];
-          const score = raw != null ? Math.round((raw / 5) * 100) : dom.percent;
+          const target = (data.domainTargets && data.domainTargets[dom.id]) ? Number(data.domainTargets[dom.id]) : 4.0;
+          const score = raw != null ? Math.min(100, Math.round((raw / target) * 100)) : dom.percent;
           return {
             ...dom,
             percent: score,
-            status: score >= 75 ? "Strong" : score >= 50 ? "Average" : "Needs Improvement",
+            target,
+            current: raw,
+            status: score >= 80 ? "Strong" : score >= 55 ? "Average" : "Needs Improvement",
           };
         })
       );
@@ -965,7 +971,7 @@ function Dashboard() {
   };
 
   // Handler: Run ML Gap Analysis
-  const handleRunGapAnalysis = async (openModal = true) => {
+  const handleRunGapAnalysis = async (openModal = true, overrideData = null) => {
     setIsAnalyzing(true);
     if (openModal) {
       showToast("Running Python Sentence-Transformer ML Gap Analysis...", "loading");
@@ -973,11 +979,29 @@ function Dashboard() {
 
     try {
       const token = (await getToken()) || "dev-test-token";
+      const payload = overrideData || {
+        designation: profileData?.designation || localStorage.getItem("algox_user_designation") || user.designation || "Assistant Director",
+        department: profileData?.department || "National Statistical Office (NSO)",
+        experienceYears: profileData?.experienceYears != null ? profileData.experienceYears : 0,
+        qualifications: profileData?.qualifications || [],
+        pastTrainings: profileData?.pastTrainings || [],
+        name: profileData?.name || user.name || "Tarun Gupta",
+      };
+
+      if (payload.designation) {
+        localStorage.setItem("algox_user_designation", payload.designation);
+      }
+      if (payload.name) {
+        localStorage.setItem("algox_user_name", payload.name);
+      }
+
       const res = await fetch(`${API_BASE_URL}/competency/analyze`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -986,12 +1010,18 @@ function Dashboard() {
         throw new Error(data.error || "Failed to run gap analysis.");
       }
 
+      setProfileData((prev) => ({
+        ...prev,
+        ...payload,
+        designation: data.matchedDesignation || payload.designation,
+      }));
+
       applyRecalibratedProfile(data, courseListRef.current, certificateListRef.current);
       await fetchMLRecommendations(token);
 
       if (openModal) {
         setIsGapModalOpen(true);
-        showToast("🎯 Real-Time Python ML Gap Analysis & Impact Report Ready!", "success");
+        showToast(`🎯 Real-Time ML Gap Analysis updated for ${data.matchedDesignation || payload.designation}!`, "success");
       }
     } catch (err) {
       console.error("[handleRunGapAnalysis] Error:", err);
@@ -1562,6 +1592,8 @@ function Dashboard() {
                     onRunAnalysis={handleRunGapAnalysis}
                     isAnalyzing={isAnalyzing}
                     isDarkMode={isDarkMode}
+                    currentDesignation={user.designation}
+                    onCadreChange={(newCadre) => handleRunGapAnalysis(false, { designation: newCadre })}
                   />
                 </div>
                 <div className="lg:col-span-1 h-full">
@@ -1781,7 +1813,7 @@ function Dashboard() {
               profileData={profileData}
               onSaveProfile={handleSaveProfile}
               isSaving={isSavingProfile}
-              onRunAnalysis={handleRunGapAnalysis}
+              onRunAnalysis={(overrideData) => handleRunGapAnalysis(true, overrideData)}
               isAnalyzing={isAnalyzing}
             />
           )}

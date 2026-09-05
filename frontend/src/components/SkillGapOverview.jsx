@@ -1,5 +1,6 @@
 import { BarChart3, PieChart, Monitor, MessageSquare, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { getColor } from "../data/colorMap";
+import { MOSPI_CADRES } from "./ProfileView";
 
 const ICONS = { BarChart3, PieChart, Monitor, MessageSquare };
 
@@ -13,7 +14,15 @@ function statusBadgeClasses(status) {
   return "bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30"; // Needs Improvement
 }
 
-export default function SkillGapOverview({ skills, onViewDetails, onRunAnalysis, isAnalyzing, isDarkMode = true }) {
+export default function SkillGapOverview({
+  skills,
+  onViewDetails,
+  onRunAnalysis,
+  isAnalyzing,
+  isDarkMode = true,
+  currentDesignation = "Assistant Director",
+  onCadreChange,
+}) {
   return (
     <div className={`p-6 rounded-3xl relative overflow-hidden flex flex-col justify-between h-full border transition-all duration-300 ${
       isDarkMode
@@ -26,20 +35,43 @@ export default function SkillGapOverview({ skills, onViewDetails, onRunAnalysis,
       }`} />
 
       <div>
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <span className="text-[10px] font-bold text-[#de7a58] uppercase tracking-widest block mb-0.5">Competency Benchmark</span>
+            <span className="text-[10px] font-bold text-[#de7a58] uppercase tracking-widest block mb-0.5">Competency Benchmark (SIH 101)</span>
             <h3 className={`font-extrabold text-lg font-serif tracking-tight ${
               isDarkMode ? "text-white" : "text-[#1e143e]"
             }`}>Skill Gap Overview</h3>
           </div>
-          <button
-            onClick={onViewDetails}
-            className="text-xs text-[#de7a58] hover:opacity-80 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer group"
-          >
-            <span>Details</span>
-            <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {onCadreChange && (
+              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-semibold transition ${
+                isDarkMode ? "bg-white/[0.04] border-white/[0.1] text-slate-300" : "bg-[#f5efe6] border-[#e8ded2] text-[#1e143e]"
+              }`}>
+                <span className="text-slate-400 text-[10px]">Cadre:</span>
+                <select
+                  value={currentDesignation}
+                  onChange={(e) => onCadreChange(e.target.value)}
+                  className={`bg-transparent outline-none cursor-pointer font-bold text-[11px] ${
+                    isDarkMode ? "text-[#e2ac52] [&>option]:bg-[#1b1242] [&>option]:text-white" : "text-[#5925dc] [&>option]:bg-white [&>option]:text-[#1e143e]"
+                  }`}
+                  title="Switch cadre to test dynamic competency recalculation"
+                >
+                  {MOSPI_CADRES.map((cadre) => (
+                    <option key={cadre} value={cadre}>
+                      {cadre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <button
+              onClick={onViewDetails}
+              className="text-xs text-[#de7a58] hover:opacity-80 font-semibold flex items-center gap-1.5 transition-colors cursor-pointer group shrink-0"
+            >
+              <span>Details</span>
+              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -59,11 +91,18 @@ export default function SkillGapOverview({ skills, onViewDetails, onRunAnalysis,
                     <p className={`text-xs font-semibold truncate ${
                       isDarkMode ? "text-slate-200" : "text-[#1e143e]"
                     }`}>{skill.name}</p>
-                    <span className={`text-xs font-bold shrink-0 ml-2 font-mono ${
-                      isDarkMode ? "text-white" : "text-[#1e143e]"
-                    }`}>
-                      {skill.percent}%
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      {skill.target != null && (
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          ({(skill.current != null ? Number(skill.current).toFixed(1) : "2.0")} / req {Number(skill.target).toFixed(1)})
+                        </span>
+                      )}
+                      <span className={`text-xs font-bold font-mono ${
+                        isDarkMode ? "text-white" : "text-[#1e143e]"
+                      }`}>
+                        {skill.percent}%
+                      </span>
+                    </div>
                   </div>
                   <div className={`w-full h-2 rounded-full overflow-hidden ${
                     isDarkMode ? "bg-white/[0.06]" : "bg-[#f1ebd8]"

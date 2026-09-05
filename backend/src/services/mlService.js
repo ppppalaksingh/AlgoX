@@ -35,8 +35,41 @@ function matchesKeywords(text, kwList) {
   });
 }
 
+const MOSPI_CADRE_TARGETS = {
+  "Director General": { statistical: 4.8, technical: 4.0, digitalGovernance: 4.6, behavioural: 4.9 },
+  "Additional Director General": { statistical: 4.6, technical: 4.1, digitalGovernance: 4.4, behavioural: 4.7 },
+  "Director": { statistical: 4.5, technical: 4.2, digitalGovernance: 4.2, behavioural: 4.5 },
+  "Joint Director": { statistical: 4.3, technical: 4.2, digitalGovernance: 4.0, behavioural: 4.3 },
+  "Deputy Director": { statistical: 4.2, technical: 4.2, digitalGovernance: 3.8, behavioural: 4.0 },
+  "Assistant Director": { statistical: 4.0, technical: 3.8, digitalGovernance: 3.5, behavioural: 3.8 },
+  "Senior Statistical Officer (SSO)": { statistical: 3.8, technical: 3.6, digitalGovernance: 3.2, behavioural: 3.5 },
+  "Statistical Officer (SO)": { statistical: 3.5, technical: 3.4, digitalGovernance: 3.0, behavioural: 3.2 },
+  "Junior Statistical Officer (JSO)": { statistical: 3.2, technical: 3.2, digitalGovernance: 2.8, behavioural: 3.0 },
+};
+
 function computeFallbackGapAnalysis(userProfile) {
   const designation = userProfile.designation || "Assistant Director";
+  const desigNorm = String(designation).toLowerCase().trim();
+
+  let matchedCadreKey = "Assistant Director";
+  let targets = MOSPI_CADRE_TARGETS["Assistant Director"];
+
+  for (const [cKey, cTargets] of Object.entries(MOSPI_CADRE_TARGETS)) {
+    const lowerKey = cKey.toLowerCase();
+    if (
+      desigNorm === lowerKey ||
+      desigNorm.includes(lowerKey) ||
+      lowerKey.includes(desigNorm) ||
+      (desigNorm.includes("jso") && lowerKey.includes("junior")) ||
+      (desigNorm.includes("sso") && lowerKey.includes("senior")) ||
+      (desigNorm.includes("dg") && lowerKey.includes("general"))
+    ) {
+      targets = cTargets;
+      matchedCadreKey = cKey;
+      break;
+    }
+  }
+
   const expYears = userProfile.experienceYears !== undefined && userProfile.experienceYears !== null
     ? Math.max(0, Number(userProfile.experienceYears))
     : 0;
@@ -47,13 +80,6 @@ function computeFallbackGapAnalysis(userProfile) {
 
   const round1 = (n) => Math.round(n * 10) / 10;
   const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
-
-  const targets = {
-    statistical: 4.5,
-    technical: 4.2,
-    digitalGovernance: 4.2,
-    behavioural: 4.5,
-  };
 
   const validAttempts = quizAttempts.filter(
     (q) => q.score != null && String(q.score).trim() !== ""
@@ -142,10 +168,13 @@ function computeFallbackGapAnalysis(userProfile) {
   const skillGaps = Object.entries(domainScores).map(([k, curr]) => {
     const req = targets[k];
     const gap = round1(Math.max(0, req - curr));
+    const pct = Math.min(100, Math.round((curr / req) * 100));
     return {
       id: k,
       name: domainNames[k],
-      percent: Math.round((curr / 5) * 100),
+      percent: pct,
+      target: req,
+      current: curr,
       status: gap <= 0 ? "Strong" : gap >= 1.5 ? "Needs Improvement" : "Average",
       icon: k === "statistical" ? "BarChart3" : k === "technical" ? "Monitor" : k === "digitalGovernance" ? "PieChart" : "MessageSquare",
       color: k === "statistical" ? "blue" : k === "technical" ? "orange" : k === "digitalGovernance" ? "green" : "purple",
@@ -170,7 +199,8 @@ function computeFallbackGapAnalysis(userProfile) {
   const overallReadiness = Math.min(100, Math.round((totalCurr / totalReq) * 100));
 
   return {
-    matchedCadre: designation,
+    matchedDesignation: matchedCadreKey,
+    matchedCadre: matchedCadreKey,
     cadreDepartment: userProfile.department || "National Statistical Office (NSO)",
     domainTargets: targets,
     domainScores,
@@ -179,7 +209,7 @@ function computeFallbackGapAnalysis(userProfile) {
     overallReadiness,
     highestGap: skillGaps[0],
     topStrength: skillGaps[skillGaps.length - 1],
-    aiExecutiveInsight: `Based on your official profile as ${designation}: Overall readiness is ${overallReadiness}%. ${recentQuizNote} Your highest development priority is ${skillGaps[0].skillName} with a gap of -${skillGaps[0].gap} level.`,
+    aiExecutiveInsight: `Based on your official profile as ${matchedCadreKey}: Overall readiness is ${overallReadiness}%. ${recentQuizNote} Your highest development priority is ${skillGaps[0].skillName} with a gap of -${skillGaps[0].gap} level against the ${matchedCadreKey} benchmark standard.`,
   };
 }
 

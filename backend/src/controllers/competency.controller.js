@@ -29,6 +29,18 @@ export const runGapAnalysis = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
 
+    // If body contains profile updates (e.g. changed designation / role from Profile), persist them
+    if (req.body && Object.keys(req.body).length > 0) {
+      const { designation, department, experienceYears, qualifications, pastTrainings, name } = req.body;
+      if (designation) user.designation = designation;
+      if (department) user.department = department;
+      if (name) user.name = name;
+      if (experienceYears != null) user.experienceYears = Number(experienceYears);
+      if (qualifications) user.qualifications = qualifications;
+      if (pastTrainings) user.pastTrainings = pastTrainings;
+      await user.save();
+    }
+
     // Fetch live user activities (only finished quiz attempts with scores, documents, certificates, progress)
     const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
       .sort({ createdAt: -1 })
@@ -51,11 +63,11 @@ export const runGapAnalysis = async (req, res) => {
     }
 
     const gapResult = await getGapAnalysis({
-      designation: user.designation || "Assistant Director",
-      department: user.department || "National Statistical Office (NSO)",
-      experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
-      qualifications: user.qualifications || [],
-      pastTrainings: user.pastTrainings || [],
+      designation: req.body?.designation || user.designation || "Assistant Director",
+      department: req.body?.department || user.department || "National Statistical Office (NSO)",
+      experienceYears: req.body?.experienceYears != null ? Number(req.body.experienceYears) : (user.experienceYears != null ? Number(user.experienceYears) : 0),
+      qualifications: req.body?.qualifications || user.qualifications || [],
+      pastTrainings: req.body?.pastTrainings || user.pastTrainings || [],
       quizAttempts: quizAttempts.map((q) => ({
         sourceFileName: q.sourceFileName,
         score: q.score,
