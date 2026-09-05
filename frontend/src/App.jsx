@@ -66,6 +66,7 @@ function Dashboard() {
   // Navigation & layout
   const [activeNav, setActiveNav] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentRole, setCurrentRole] = useState("learner"); // 'learner' | 'admin'
 
   // App Data States
@@ -1347,6 +1348,7 @@ function Dashboard() {
         currentRole={currentRole}
         isAdminInDB={isAdminInDB}
         isDarkMode={isDarkMode}
+        isCollapsed={sidebarCollapsed}
       />
 
       <div className="flex-1 min-w-0 flex flex-col relative z-10">
@@ -1374,6 +1376,8 @@ function Dashboard() {
           onClearNotifications={() => setNotifications([])}
           isDarkMode={isDarkMode}
           onToggleTheme={toggleTheme}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
         />
 
         {/* Main Content Area */}
@@ -1432,7 +1436,7 @@ function Dashboard() {
                       isDarkMode ? "text-slate-300" : "text-[#635777]"
                     }`}>
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>Cadre Officer: <strong className={`font-semibold ${isDarkMode ? "text-white" : "text-[#1e143e]"}`}>{user.name}</strong> ({user.designation} · {user.department})</span>
+                      <span>Cadre Officer: <strong className={`font-semibold ${isDarkMode ? "text-white" : "text-[#1e143e]"}`}>{user.name}</strong> ({user.designation}{user.department ? ` · ${user.department}` : ""})</span>
                     </div>
 
                     {/* Najaba Signature Action Buttons */}

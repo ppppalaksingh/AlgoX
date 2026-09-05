@@ -19,6 +19,7 @@ export default function Sidebar({
   currentRole = "learner",
   isAdminInDB = false,
   isDarkMode = true,
+  isCollapsed = false,
 }) {
   const visibleNavItems = sidebarNavItems.filter((item) => {
     if (currentRole === "learner" && item.id === "admin-dashboard") {
@@ -38,9 +39,10 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-64 backdrop-blur-2xl flex flex-col shrink-0 z-40 border-r
+        className={`fixed lg:sticky top-0 left-0 h-screen backdrop-blur-2xl flex flex-col shrink-0 z-40 border-r
           transform transition-all duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
+          ${isCollapsed ? "lg:-translate-x-full lg:w-0 lg:opacity-0 pointer-events-none lg:border-none" : "lg:w-64 lg:translate-x-0"}
+          ${isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 lg:w-auto"}
           ${isDarkMode ? "bg-[#100829]/95 text-slate-200 border-white/[0.08]" : "bg-[#faf7f2]/98 text-[#1e143e] border-[#e8ded2]"}`}
       >
         {/* Brand & Logo */}
