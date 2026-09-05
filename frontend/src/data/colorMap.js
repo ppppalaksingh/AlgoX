@@ -1,40 +1,39 @@
 // ============================================================================
-// COLOR MAP
+// COLOR MAP - Glassmorphic & Glowing AI/SaaS Tokens
 // ----------------------------------------------------------------------------
-// Centralizing Tailwind class names here means: to re-theme a color used
-// across many components (icon bubble, progress bar, badge...), change it
-// ONCE, here — instead of hunting through every component file.
+// Curated for high-contrast dark surfaces with frosted glass borders & glows.
 // ============================================================================
 
 export const colorMap = {
   blue: {
-    bg: "bg-blue-100",
-    text: "text-blue-600",
-    bar: "bg-blue-600",
-    badgeBg: "bg-blue-50",
-    badgeText: "text-blue-700",
+    bg: "bg-blue-500/10 border border-blue-500/20",
+    text: "text-blue-400",
+    bar: "bg-gradient-to-r from-blue-500 to-indigo-500 shadow-[0_0_12px_rgba(59,130,246,0.4)]",
+    badgeBg: "bg-blue-500/15 border border-blue-500/30",
+    badgeText: "text-blue-300",
   },
   green: {
-    bg: "bg-green-100",
-    text: "text-green-600",
-    bar: "bg-green-600",
-    badgeBg: "bg-green-50",
-    badgeText: "text-green-700",
+    bg: "bg-emerald-500/10 border border-emerald-500/20",
+    text: "text-emerald-400",
+    bar: "bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]",
+    badgeBg: "bg-emerald-500/15 border border-emerald-500/30",
+    badgeText: "text-emerald-300",
   },
   orange: {
-    bg: "bg-orange-100",
-    text: "text-orange-600",
-    bar: "bg-orange-500",
-    badgeBg: "bg-orange-50",
-    badgeText: "text-orange-700",
+    bg: "bg-amber-500/10 border border-amber-500/20",
+    text: "text-amber-400",
+    bar: "bg-gradient-to-r from-amber-500 to-orange-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]",
+    badgeBg: "bg-amber-500/15 border border-amber-500/30",
+    badgeText: "text-amber-300",
   },
   purple: {
-    bg: "bg-purple-100",
-    text: "text-purple-600",
-    bar: "bg-purple-600",
-    badgeBg: "bg-purple-50",
-    badgeText: "text-purple-700",
+    bg: "bg-purple-500/10 border border-purple-500/20",
+    text: "text-purple-400",
+    bar: "bg-gradient-to-r from-purple-500 to-indigo-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]",
+    badgeBg: "bg-purple-500/15 border border-purple-500/30",
+    badgeText: "text-purple-300",
   },
 };
 
 export const getColor = (color) => colorMap[color] || colorMap.blue;
+

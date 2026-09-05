@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, Search, Bell, ChevronDown, User, LogOut, ShieldCheck, Sparkles, Bot, Building2, Lock } from "lucide-react";
+import { Menu, Search, Bell, ChevronDown, User, LogOut, ShieldCheck, Sparkles, Bot, Building2, ExternalLink } from "lucide-react";
 import { useClerk } from "@clerk/clerk-react";
 
 export default function Header({
@@ -49,65 +49,70 @@ export default function Header({
     : [];
 
   return (
-    <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 gap-4 sticky top-0 z-30 shadow-2xs">
-      <div className="flex items-center gap-4 min-w-0">
+    <header className="h-20 bg-[#090b10]/85 backdrop-blur-2xl border-b border-white/[0.08] flex items-center justify-between px-4 sm:px-6 lg:px-8 gap-4 sticky top-0 z-30 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+      {/* Left Title & Status */}
+      <div className="flex items-center gap-3.5 min-w-0">
         <button
           onClick={onMenuClick}
-          className="text-slate-500 hover:text-slate-700 lg:hidden p-1.5 rounded-xl hover:bg-slate-100 cursor-pointer"
+          className="text-slate-400 hover:text-white lg:hidden p-2 rounded-xl hover:bg-white/[0.05] cursor-pointer transition-colors"
         >
-          <Menu size={22} />
+          <Menu size={20} />
         </button>
+
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <p className="font-extrabold text-slate-800 leading-tight truncate text-sm sm:text-base tracking-tight">
-              AlgoX <span className="text-orange-500">Skill Intelligence</span>
+            <p className="font-extrabold text-white leading-tight truncate text-sm sm:text-base tracking-tight">
+              Algo<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">X</span>
+              <span className="text-slate-300 font-semibold ml-1.5">Intelligence Hub</span>
             </p>
-            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-              MoSPI &amp; iGOT Ecosystem
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/[0.05] text-slate-300 border border-white/[0.08]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              MoSPI &amp; iGOT Active
             </span>
           </div>
-          <p className="text-xs text-slate-500 truncate hidden sm:block">
+          <p className="text-xs text-slate-400 truncate hidden sm:block mt-0.5">
             Capacity Building &amp; AI Personalized Pathways for Official Statistics
           </p>
         </div>
       </div>
 
+      {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Role Switcher Pill — Strictly protected by Database Admin Verification */}
         {isAdminInDB ? (
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/[0.08]">
             <button
               onClick={() => onToggleRole?.("learner")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 currentRole === "learner"
-                  ? "bg-white text-blue-600 shadow-2xs"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "bg-white/[0.1] text-white shadow-xs border border-white/10"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <User size={13} /> Official View
+              <User size={13} /> Official
             </button>
             <button
               onClick={() => onToggleRole?.("admin")}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 currentRole === "admin"
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-2xs"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(99,102,241,0.4)]"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <Building2 size={13} /> 👑 Admin View
+              <Building2 size={13} /> Admin
             </button>
           </div>
         ) : (
-          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold">
-            <User size={13} className="text-blue-600" />
-            <span>Official (Learner View)</span>
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 text-xs font-semibold">
+            <User size={13} className="text-indigo-400" />
+            <span>Official Cadre</span>
           </div>
         )}
 
         {/* Karmayogi Sahayak AI Assistant Quick Button */}
         <button
           onClick={onOpenAIAssistant}
-          className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs transition"
+          className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-[0_0_18px_rgba(99,102,241,0.35)] transition-all cursor-pointer border border-white/10"
           title="Open Karmayogi Sahayak AI Statistical Mentor"
         >
           <Bot size={15} />
@@ -116,7 +121,7 @@ export default function Header({
 
         {/* Global Search with Real-time Dropdown */}
         <div ref={searchRef} className="relative hidden xl:block">
-          <div className="flex items-center gap-2 bg-slate-100 hover:bg-slate-50 rounded-full px-4 py-2 w-60 border border-slate-200/80 focus-within:border-blue-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div className="flex items-center gap-2.5 bg-white/[0.04] hover:bg-white/[0.06] rounded-full px-4 py-2 w-64 border border-white/[0.08] focus-within:border-indigo-500/50 focus-within:bg-[#0f1422] focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
             <Search size={15} className="text-slate-400 shrink-0" />
             <input
               type="text"
@@ -127,19 +132,19 @@ export default function Header({
                 setSearchOpen(true);
               }}
               onFocus={() => setSearchOpen(true)}
-              className="bg-transparent outline-none text-xs w-full text-slate-800 placeholder:text-slate-400"
+              className="bg-transparent outline-none text-xs w-full text-white placeholder:text-slate-500"
             />
           </div>
 
           {searchOpen && searchQuery.trim().length > 1 && (
-            <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
-              <div className="p-2 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3">
+            <div className="absolute top-12 left-0 right-0 bg-[#0f1420]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.1] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="p-2.5 border-b border-white/[0.06] text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3">
                 Matching Catalog Items
               </div>
               {searchResults.length === 0 ? (
-                <div className="p-4 text-xs text-slate-500 text-center">No results found</div>
+                <div className="p-4 text-xs text-slate-400 text-center">No results found</div>
               ) : (
-                <div className="divide-y divide-slate-50">
+                <div className="divide-y divide-white/[0.05]">
                   {searchResults.map((course) => (
                     <div
                       key={course.id}
@@ -148,10 +153,10 @@ export default function Header({
                         setSearchOpen(false);
                         setSearchQuery("");
                       }}
-                      className="p-3 hover:bg-blue-50/60 cursor-pointer transition-colors"
+                      className="p-3 hover:bg-white/[0.05] cursor-pointer transition-colors"
                     >
-                      <p className="text-xs font-semibold text-slate-800 leading-tight">{course.title}</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{course.domain} · {course.level || "Official"}</p>
+                      <p className="text-xs font-semibold text-white leading-tight">{course.title}</p>
+                      <p className="text-[11px] text-indigo-300 mt-0.5">{course.domain} · {course.level || "Official"}</p>
                     </div>
                   ))}
                 </div>
@@ -164,37 +169,37 @@ export default function Header({
         <div ref={notifRef} className="relative">
           <button
             onClick={() => setNotificationsOpen((s) => !s)}
-            className="relative p-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+            className="relative p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.06] cursor-pointer transition-colors border border-transparent hover:border-white/[0.08]"
           >
-            <Bell size={19} />
+            <Bell size={18} />
             {notifications.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 bg-orange-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+              <span className="absolute top-1.5 right-1.5 bg-gradient-to-tr from-amber-500 to-orange-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-xs">
                 {notifications.length}
               </span>
             )}
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-              <div className="p-3.5 border-b border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Official Alerts</span>
+            <div className="absolute right-0 top-12 w-80 bg-[#0f1422]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.1] shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+              <div className="p-3.5 border-b border-white/[0.08] flex items-center justify-between">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">Official Alerts</span>
                 {notifications.length > 0 && (
                   <button
                     onClick={onClearNotifications}
-                    className="text-[11px] text-blue-600 hover:underline cursor-pointer"
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 cursor-pointer"
                   >
                     Clear all
                   </button>
                 )}
               </div>
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
+              <div className="max-h-72 overflow-y-auto divide-y divide-white/[0.05]">
                 {notifications.length === 0 ? (
                   <div className="p-6 text-center text-xs text-slate-400">No new notifications</div>
                 ) : (
                   notifications.map((n, i) => (
-                    <div key={i} className="p-3 hover:bg-slate-50 transition-colors">
-                      <p className="text-xs font-semibold text-slate-800">{n.title}</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{n.description}</p>
+                    <div key={i} className="p-3 hover:bg-white/[0.04] transition-colors">
+                      <p className="text-xs font-semibold text-slate-200">{n.title}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{n.description}</p>
                     </div>
                   ))
                 )}
@@ -207,14 +212,14 @@ export default function Header({
         <div ref={profileRef} className="relative">
           <button
             onClick={() => setProfileDropdownOpen((s) => !s)}
-            className="flex items-center gap-2 p-1.5 sm:px-2.5 rounded-xl hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-colors cursor-pointer"
+            className="flex items-center gap-2.5 p-1.5 sm:px-2.5 rounded-xl hover:bg-white/[0.06] border border-transparent hover:border-white/[0.08] transition-all cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-              {user?.name?.charAt(0) ?? "P"}
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-[0_0_12px_rgba(99,102,241,0.3)] border border-white/20 shrink-0">
+              {user?.name?.charAt(0) ?? "O"}
             </div>
             <div className="hidden sm:block text-left leading-tight">
-              <p className="text-xs font-bold text-slate-800 truncate max-w-32">{user?.name || "Palak Singh"}</p>
-              <p className="text-[10px] text-slate-500 font-medium truncate max-w-32">
+              <p className="text-xs font-bold text-white truncate max-w-32">{user?.name || "Officer"}</p>
+              <p className="text-[10px] text-slate-400 font-medium truncate max-w-32">
                 {isAdminInDB ? `👑 Admin · ${user?.designation || "Assistant Director"}` : (user?.designation || "Assistant Director")}
               </p>
             </div>
@@ -222,13 +227,13 @@ export default function Header({
           </button>
 
           {profileDropdownOpen && (
-            <div className="absolute right-0 top-12 w-60 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-              <div className="p-2.5 border-b border-slate-100 mb-1 bg-slate-50/60 rounded-xl">
-                <p className="text-xs font-bold text-slate-800">{user?.name || "Palak Singh"}</p>
-                <p className="text-[11px] font-semibold text-blue-700 mt-0.5">{user?.designation || "Assistant Director"}</p>
+            <div className="absolute right-0 top-12 w-64 bg-[#0f1422]/95 backdrop-blur-2xl rounded-2xl border border-white/[0.1] shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+              <div className="p-3 border-b border-white/[0.08] mb-1 bg-white/[0.03] rounded-xl">
+                <p className="text-xs font-bold text-white">{user?.name || "Officer"}</p>
+                <p className="text-[11px] font-semibold text-indigo-300 mt-0.5">{user?.designation || "Assistant Director"}</p>
                 <p className="text-[10px] text-slate-400 truncate mt-0.5">{user?.email || "officer@mospi.gov.in"}</p>
                 {isAdminInDB && (
-                  <span className="inline-block mt-1 text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                  <span className="inline-block mt-1.5 text-[10px] font-black px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
                     👑 Verified Database Admin
                   </span>
                 )}
@@ -239,7 +244,7 @@ export default function Header({
                   onNavigate?.("profile");
                   setProfileDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
               >
                 <User size={15} className="text-slate-400" />
                 Officer Profile &amp; Cadre
@@ -250,17 +255,17 @@ export default function Header({
                   onNavigate?.("competencies");
                   setProfileDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
               >
                 <ShieldCheck size={15} className="text-slate-400" />
                 My Competencies
               </button>
 
-              <div className="border-t border-slate-100 my-1" />
+              <div className="border-t border-white/[0.06] my-1" />
 
               <button
                 onClick={() => signOut()}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
               >
                 <LogOut size={15} />
                 Sign Out
@@ -268,7 +273,6 @@ export default function Header({
             </div>
           )}
         </div>
-
       </div>
     </header>
   );

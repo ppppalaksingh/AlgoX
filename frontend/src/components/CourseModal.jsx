@@ -131,30 +131,30 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
   const officialPortalLink = course.officialUrl || course.igotLink || (isTPAC ? "https://nssta.gov.in" : "https://portal.igotkarmayogi.gov.in/public/home");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
+      <div className="bg-[#0c101d] rounded-3xl border border-white/[0.12] shadow-2xl max-w-3xl w-full overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
         
         {/* Course Header Banner */}
-        <div className="p-6 bg-slate-900 text-white flex items-start justify-between gap-4 shrink-0 border-b border-slate-800">
+        <div className="p-6 bg-white/[0.02] text-white flex items-start justify-between gap-4 shrink-0 border-b border-white/[0.08]">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-bold text-xl shadow-md shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-600/30 shrink-0 border border-white/10">
               {isTPAC ? <GraduationCap size={24} /> : <BookOpen size={24} />}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/25 uppercase tracking-wider">
                   {isTPAC ? "NSSTA TPAC Programme" : "iGOT Karmayogi Module"}
                 </span>
-                <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-white/[0.06] text-slate-300 border border-white/[0.06]">
                   {course.domain || "Statistical Competency"}
                 </span>
-                <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-white/[0.06] text-slate-300 border border-white/[0.06]">
                   {course.level || "Level 2"}
                 </span>
               </div>
               <h2 className="text-base sm:text-lg font-bold text-white leading-snug">{course.title}</h2>
               <p className="text-xs text-slate-400 mt-1 flex items-center gap-2">
-                <span>Accredited Provider: <strong>{provider}</strong></span>
+                <span>Accredited Provider: <strong className="text-slate-200">{provider}</strong></span>
                 <span>•</span>
                 <span>{course.duration || "20 hours"}</span>
               </p>
@@ -163,28 +163,28 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center shrink-0 transition cursor-pointer"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Progress Bar Ribbon */}
-        <div className="px-6 py-3 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-4 shrink-0">
+        <div className="px-6 py-3 bg-[#07090e]/80 border-b border-white/[0.06] flex items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-700">Course Mastery:</span>
-            <span className={`text-xs font-extrabold ${progressPercent === 100 ? "text-emerald-600" : "text-blue-600"}`}>
+            <span className="text-xs font-bold text-slate-300">Course Mastery:</span>
+            <span className={`text-xs font-extrabold ${progressPercent === 100 ? "text-emerald-400" : "text-blue-400"}`}>
               {progressPercent}%
             </span>
-            <span className="text-[11px] text-slate-400">({completedModules.length}/{modules.length} Chapters)</span>
+            <span className="text-[11px] text-slate-500">({completedModules.length}/{modules.length} Chapters)</span>
           </div>
 
-          <div className="w-48 sm:w-64 h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="w-48 sm:w-64 h-2 bg-white/[0.08] rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 progressPercent === 100
-                  ? "bg-gradient-to-r from-emerald-500 to-teal-500"
-                  : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-400 shadow-md shadow-emerald-500/20"
+                  : "bg-gradient-to-r from-blue-600 to-cyan-400 shadow-md shadow-blue-500/20"
               }`}
               style={{ width: `${progressPercent}%` }}
             />
@@ -192,20 +192,20 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
         </div>
 
         {/* Main Body: Two Columns (Chapter List + Active Chapter Viewer) */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-[#07090e]/40">
           
           {/* Milestone Completion Announcement & AI Run trigger */}
           {isFullyComplete && (
-            <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-blue-500/15 border border-emerald-300/80 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-blue-500/15 border border-emerald-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shrink-0 shadow-md">
                   <CheckCircle2 size={22} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">
+                  <p className="text-xs font-bold text-white">
                     All Modules Completed! Official Certificate Ready.
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-slate-300 mt-0.5">
                     Click &quot;Run AI Analysis&quot; to recalculate your overall readiness and domain competency.
                   </p>
                 </div>
@@ -217,7 +217,7 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
                   onClose();
                   onRunAnalysis?.();
                 }}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition shrink-0 cursor-pointer"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-lg shadow-blue-600/30 transition shrink-0 cursor-pointer"
               >
                 <Sparkles size={14} className="text-amber-300 animate-pulse" /> Run AI Analysis
               </button>
@@ -225,8 +225,8 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
           )}
 
           {/* Active Chapter Interactive Study Card */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white space-y-4 border border-slate-700 shadow-md">
-            <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+          <div className="bg-[#0f1422] rounded-3xl p-5 text-white space-y-4 border border-white/[0.08] shadow-xl">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Play size={13} className="fill-amber-400" /> Active Chapter: {selectedModuleIndex + 1}
               </span>
@@ -245,11 +245,11 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
               <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">{currentModule.summary}</p>
             </div>
 
-            <div className="bg-slate-800/80 rounded-xl p-3.5 border border-slate-700/80 space-y-2">
+            <div className="bg-white/[0.03] rounded-2xl p-4 border border-white/[0.06] space-y-2">
               <p className="text-xs font-bold text-sky-300 uppercase tracking-wider">Key Takeaways &amp; Formulations:</p>
               <div className="space-y-1.5">
                 {currentModule.keyTakeaways.map((item, kIdx) => (
-                  <div key={kIdx} className="flex items-start gap-2 text-xs text-slate-200">
+                  <div key={kIdx} className="flex items-start gap-2 text-xs text-slate-300">
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </div>
@@ -267,8 +267,8 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
                 onClick={handleCompleteActiveChapter}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
                   isCurrentDone
-                    ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs"
+                    ? "bg-white/[0.08] text-slate-300 hover:bg-white/[0.12]"
+                    : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30"
                 }`}
               >
                 <Check size={13} /> {isCurrentDone ? "Mark Incomplete" : "Mark Chapter Completed"}
@@ -279,10 +279,10 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
           {/* Chapter Outline Selection */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <Layers size={14} className="text-blue-600" /> Course Syllabus &amp; Milestones
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Layers size={14} className="text-blue-400" /> Course Syllabus &amp; Milestones
               </h4>
-              <span className="text-[11px] text-slate-400">Click circle to check off chapters</span>
+              <span className="text-[11px] text-slate-500">Click circle to check off chapters</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -296,10 +296,10 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
                     onClick={() => setSelectedModuleIndex(idx)}
                     className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                       isSelected
-                        ? "bg-blue-50/70 border-blue-400 ring-2 ring-blue-300/40"
+                        ? "bg-blue-500/15 border-blue-500/50 ring-1 ring-blue-500/30"
                         : isDone
-                        ? "bg-emerald-50/40 border-emerald-200"
-                        : "bg-white border-slate-200 hover:bg-slate-50"
+                        ? "bg-emerald-500/10 border-emerald-500/20"
+                        : "bg-[#0f1422] border-white/[0.08] hover:bg-white/[0.04]"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -310,21 +310,21 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
                           toggleModule(idx);
                         }}
                         className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold transition-colors cursor-pointer ${
-                          isDone ? "bg-emerald-600 text-white" : "border border-slate-300 text-slate-400 hover:border-blue-500"
+                          isDone ? "bg-emerald-600 text-white" : "border border-white/20 text-slate-400 hover:border-blue-400"
                         }`}
                         title={isDone ? "Mark incomplete" : "Mark complete"}
                       >
                         {isDone ? <Check size={14} /> : idx + 1}
                       </button>
                       <div className="min-w-0">
-                        <p className={`text-xs font-bold leading-tight truncate ${isSelected ? "text-blue-900" : "text-slate-800"}`}>
+                        <p className={`text-xs font-bold leading-tight truncate ${isSelected ? "text-blue-300" : "text-white"}`}>
                           {m.title}
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">{m.type} • {m.duration}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{m.type} • {m.duration}</p>
                       </div>
                     </div>
 
-                    <ChevronRight size={14} className={isSelected ? "text-blue-600" : "text-slate-300"} />
+                    <ChevronRight size={14} className={isSelected ? "text-blue-400" : "text-slate-600"} />
                   </div>
                 );
               })}
@@ -333,12 +333,12 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
         </div>
 
         {/* Footer Actions */}
-        <div className="p-5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+        <div className="p-5 bg-white/[0.02] border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           <a
             href={officialPortalLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs w-full sm:w-auto justify-center"
+            className="px-4 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-sm w-full sm:w-auto justify-center"
             title="Open official government portal"
           >
             <ExternalLink size={14} /> Open Official Portal ({provider.split('/')[0].trim()})
@@ -358,7 +358,7 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
                 onClose();
                 onRunAnalysis?.();
               }}
-              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/30 flex items-center justify-center gap-1.5 transition cursor-pointer"
               title="Run AI Gap Analysis and Recalibrate Competency Readiness"
             >
               <Sparkles size={14} className="text-amber-300" /> Run AI Analysis
@@ -366,17 +366,17 @@ export default function CourseModal({ course, isOpen, onClose, onCompleteCourse,
 
             <button
               onClick={handleIssueCertificate}
-              className={`flex-1 sm:flex-none px-5 py-2.5 text-white text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none px-5 py-2.5 text-white text-xs font-bold rounded-xl shadow-lg transition cursor-pointer ${
                 isFullyComplete
-                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/30"
+                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-600/30"
               }`}
             >
               <Award size={15} /> {isFullyComplete ? "Issued Certificate (View)" : "Complete & Issue Official Certificate"}
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-slate-300 text-xs font-semibold rounded-xl transition cursor-pointer"
             >
               Close
             </button>

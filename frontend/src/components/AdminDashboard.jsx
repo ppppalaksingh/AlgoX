@@ -157,9 +157,9 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
   ];
 
   const getHeatmapColor = (score) => {
-    if (score >= 80) return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    if (score >= 68) return "bg-amber-100 text-amber-800 border-amber-200";
-    return "bg-rose-100 text-rose-800 border-rose-200 font-semibold";
+    if (score >= 80) return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
+    if (score >= 68) return "bg-amber-500/15 text-amber-300 border-amber-500/30";
+    return "bg-rose-500/15 text-rose-300 border-rose-500/30 font-semibold";
   };
 
   const handleCreateBatch = (e) => {
@@ -188,28 +188,28 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
     <div className="space-y-6">
       {/* Toast Notification */}
       {assignedSuccessToast && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-md animate-in fade-in">
+        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm font-semibold flex items-center justify-between shadow-xl animate-in fade-in backdrop-blur-xl">
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-emerald-600" />
+            <CheckCircle2 size={18} className="text-emerald-400" />
             <span>{assignedSuccessToast}</span>
           </div>
-          <button onClick={() => setAssignedSuccessToast("")} className="text-emerald-700 font-bold"><X size={16} /></button>
+          <button onClick={() => setAssignedSuccessToast("")} className="text-emerald-400 font-bold hover:text-white"><X size={16} /></button>
         </div>
       )}
 
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      <div className="bg-[#0c101d]/90 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-white/[0.08] backdrop-blur-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Building2 size={13} />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <Building2 size={13} className="text-blue-400" />
               MoSPI &amp; NSSTA Capacity Building Division (Admin Hub)
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               Workforce Skill Intelligence &amp; Officials Management
             </h1>
-            <p className="text-slate-300 text-sm max-w-2xl mt-1 leading-relaxed">
+            <p className="text-slate-400 text-sm max-w-2xl mt-1 leading-relaxed">
               Full administrator control: Inspect individual official competency profiles, assign targeted TPAC modules, view division heatmaps, and plan national capacity cohorts.
             </p>
           </div>
@@ -217,13 +217,13 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => window.print()}
-              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2"
+              className="px-4 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 cursor-pointer"
             >
               <Download size={15} /> Export Audit Report
             </button>
             <button
               onClick={() => setActiveTab("batch")}
-              className="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md transition flex items-center gap-2"
+              className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-blue-600/30 transition flex items-center gap-2 cursor-pointer"
             >
               <Calendar size={15} /> Plan NSSTA Batch
             </button>
@@ -231,7 +231,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 mt-8 border-t border-white/10 pt-4 overflow-x-auto">
+        <div className="flex items-center gap-2 mt-8 border-t border-white/[0.08] pt-4 overflow-x-auto">
           {[
             { id: "officials", label: "All Officials Directory & Drill-Down", icon: Users, count: allOfficialsList.length },
             { id: "overview", label: "Executive Analytics", icon: BarChart3 },
@@ -245,17 +245,17 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? "bg-white text-slate-900 shadow-md font-bold"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white"
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-bold"
+                    : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
                 }`}
               >
                 <Icon size={16} />
                 <span>{tab.label}</span>
                 {tab.count && (
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                    isActive ? "bg-blue-600 text-white" : "bg-white/20 text-slate-200"
+                    isActive ? "bg-white/20 text-white" : "bg-white/[0.08] text-slate-300"
                   }`}>
                     {tab.count}
                   </span>
@@ -268,25 +268,25 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
       {/* TAB 0: ALL OFFICIALS DIRECTORY & DRILL-DOWN ACCESS */}
       {activeTab === "officials" && (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="bg-[#0f1422]/80 rounded-3xl border border-white/[0.08] p-6 sm:p-8 shadow-xl space-y-6 backdrop-blur-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 className="text-xl font-bold text-slate-800">Officials Directory &amp; Individual Access</h3>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <h3 className="text-xl font-bold text-white">Officials Directory &amp; Individual Access</h3>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
                 Inspect any official&apos;s competency profile, view skill gaps, and assign personalized iGOT / NSSTA training modules.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               {/* Search */}
-              <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3.5 py-2 border border-slate-200 w-full sm:w-64">
+              <div className="flex items-center gap-2 bg-white/[0.04] rounded-xl px-3.5 py-2 border border-white/[0.08] w-full sm:w-64 focus-within:border-blue-500/50">
                 <Search size={15} className="text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search by name, cadre, role..."
                   value={officialSearch}
                   onChange={(e) => setOfficialSearch(e.target.value)}
-                  className="bg-transparent text-xs outline-none w-full text-slate-800"
+                  className="bg-transparent text-xs outline-none w-full text-white placeholder:text-slate-500"
                 />
               </div>
 
@@ -294,7 +294,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
               <select
                 value={selectedDivision}
                 onChange={(e) => setSelectedDivision(e.target.value)}
-                className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-700 outline-none"
+                className="px-3 py-2 rounded-xl border border-white/[0.08] text-xs font-semibold bg-[#0c101d] text-slate-200 outline-none cursor-pointer"
               >
                 <option value="all">All Cadres</option>
                 <option value="Indian Statistical Service (ISS)">ISS Cadre</option>
@@ -309,7 +309,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <tr className="border-b border-white/[0.08] bg-white/[0.02] text-xs font-bold text-slate-400 uppercase tracking-wider">
                   <th className="py-3.5 px-4 rounded-l-xl">Official Name &amp; Email</th>
                   <th className="py-3.5 px-4">Designation &amp; Division</th>
                   <th className="py-3.5 px-4">Cadre</th>
@@ -318,27 +318,27 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                   <th className="py-3.5 px-4 text-center rounded-r-xl">Admin Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className="divide-y divide-white/[0.04] font-medium">
                 {filteredOfficials.map((off) => (
-                  <tr key={off.id} className="hover:bg-blue-50/40 transition">
+                  <tr key={off.id} className="hover:bg-white/[0.02] transition">
                     <td className="py-3.5 px-4">
-                      <p className="font-bold text-slate-800">{off.name}</p>
-                      <p className="text-xs text-slate-400">{off.email}</p>
+                      <p className="font-bold text-white">{off.name}</p>
+                      <p className="text-xs text-slate-500">{off.email}</p>
                     </td>
                     <td className="py-3.5 px-4">
-                      <p className="font-semibold text-slate-700 text-xs">{off.designation}</p>
-                      <p className="text-[11px] text-slate-400">{off.department}</p>
+                      <p className="font-semibold text-slate-300 text-xs">{off.designation}</p>
+                      <p className="text-[11px] text-slate-500">{off.department}</p>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-300 border border-white/[0.08]">
                         {off.cadre}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center">
-                      <span className="font-bold text-blue-600 text-sm">{off.overallCompetency}%</span>
+                      <span className="font-extrabold text-blue-400 text-sm">{off.overallCompetency}%</span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-200">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-lg border border-amber-500/25">
                         <AlertTriangle size={11} /> {off.topSkillGap}
                       </span>
                     </td>
@@ -346,14 +346,14 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => setSelectedOfficialModal(off)}
-                          className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-bold transition flex items-center gap-1 border border-blue-500/20 cursor-pointer"
                           title="Drill-down into competency profile"
                         >
                           <Eye size={13} /> Inspect Profile
                         </button>
                         <button
                           onClick={() => setAssignmentModal(off)}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                          className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-md shadow-blue-600/30 cursor-pointer"
                           title="Assign mandatory TPAC / iGOT course"
                         >
                           <Send size={12} /> Assign Module
@@ -370,19 +370,19 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
       {/* MODAL: OFFICIAL DRILL-DOWN INSPECTION */}
       {selectedOfficialModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-6 sm:p-8 border border-slate-200 max-h-[90vh] overflow-y-auto space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in">
+          <div className="bg-[#0c101d] rounded-3xl w-full max-w-2xl shadow-2xl p-6 sm:p-8 border border-white/[0.12] max-h-[90vh] overflow-y-auto space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-blue-300 bg-blue-500/15 px-3 py-1 rounded-full border border-blue-500/25">
                   {selectedOfficialModal.cadre}
                 </span>
-                <h3 className="text-2xl font-black text-slate-800 mt-2">{selectedOfficialModal.name}</h3>
-                <p className="text-xs text-slate-500">{selectedOfficialModal.designation} • {selectedOfficialModal.department}</p>
+                <h3 className="text-2xl font-black text-white mt-2">{selectedOfficialModal.name}</h3>
+                <p className="text-xs text-slate-400">{selectedOfficialModal.designation} • {selectedOfficialModal.department}</p>
               </div>
               <button
                 onClick={() => setSelectedOfficialModal(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -390,32 +390,32 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
             {/* Competency 4-Domain Breakdown */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider">4-Domain Competency Assessment</h4>
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">4-Domain Competency Assessment</h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 text-center">
-                  <p className="text-xs text-blue-700 font-semibold">Statistical</p>
-                  <p className="text-xl font-black text-blue-900 mt-1">{selectedOfficialModal.domainScores.statistical}%</p>
+                <div className="bg-blue-500/10 p-3.5 rounded-2xl border border-blue-500/20 text-center">
+                  <p className="text-xs text-blue-300 font-semibold">Statistical</p>
+                  <p className="text-xl font-extrabold text-blue-400 mt-1">{selectedOfficialModal.domainScores.statistical}%</p>
                 </div>
-                <div className="bg-orange-50/80 p-3 rounded-2xl border border-orange-200 text-center">
-                  <p className="text-xs text-orange-700 font-semibold">Technical</p>
-                  <p className="text-xl font-black text-orange-900 mt-1">{selectedOfficialModal.domainScores.technical}%</p>
+                <div className="bg-orange-500/10 p-3.5 rounded-2xl border border-orange-500/20 text-center">
+                  <p className="text-xs text-orange-300 font-semibold">Technical</p>
+                  <p className="text-xl font-extrabold text-orange-400 mt-1">{selectedOfficialModal.domainScores.technical}%</p>
                 </div>
-                <div className="bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 text-center">
-                  <p className="text-xs text-emerald-700 font-semibold">Digital Gov</p>
-                  <p className="text-xl font-black text-emerald-900 mt-1">{selectedOfficialModal.domainScores.digitalGovernance}%</p>
+                <div className="bg-emerald-500/10 p-3.5 rounded-2xl border border-emerald-500/20 text-center">
+                  <p className="text-xs text-emerald-300 font-semibold">Digital Gov</p>
+                  <p className="text-xl font-extrabold text-emerald-400 mt-1">{selectedOfficialModal.domainScores.digitalGovernance}%</p>
                 </div>
-                <div className="bg-purple-50/80 p-3 rounded-2xl border border-purple-200 text-center">
-                  <p className="text-xs text-purple-700 font-semibold">Leadership</p>
-                  <p className="text-xl font-black text-purple-900 mt-1">{selectedOfficialModal.domainScores.behavioural}%</p>
+                <div className="bg-purple-500/10 p-3.5 rounded-2xl border border-purple-500/20 text-center">
+                  <p className="text-xs text-purple-300 font-semibold">Leadership</p>
+                  <p className="text-xl font-extrabold text-purple-400 mt-1">{selectedOfficialModal.domainScores.behavioural}%</p>
                 </div>
               </div>
             </div>
 
             {/* Skill Gaps & Recommended Interventions */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <p className="text-xs font-bold text-slate-700 uppercase">Identified Priority Skill Gap</p>
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-2">
+              <p className="text-xs font-bold text-slate-400 uppercase">Identified Priority Skill Gap</p>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-rose-700 flex items-center gap-1.5">
+                <span className="text-sm font-bold text-rose-300 flex items-center gap-1.5">
                   <AlertTriangle size={15} /> {selectedOfficialModal.topSkillGap}
                 </span>
                 <button
@@ -424,17 +424,17 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                     setSelectedOfficialModal(null);
                     setAssignmentModal(off);
                   }}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/30 transition cursor-pointer"
                 >
                   Assign Recommended TPAC Course
                 </button>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.08]">
               <button
                 onClick={() => setSelectedOfficialModal(null)}
-                className="px-5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                className="px-5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer"
               >
                 Close Window
               </button>
@@ -445,20 +445,20 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
       {/* MODAL: ASSIGN COURSE TO INDIVIDUAL OFFICIAL */}
       {assignmentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl p-6 sm:p-8 border border-slate-200 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in">
+          <div className="bg-[#0c101d] rounded-3xl w-full max-w-lg shadow-2xl p-6 sm:p-8 border border-white/[0.12] space-y-5">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-black text-slate-800">Assign Training Programme</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Target Official: <strong className="text-slate-800">{assignmentModal.name}</strong> ({assignmentModal.designation})</p>
+                <h3 className="text-lg font-extrabold text-white">Assign Training Programme</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Target Official: <strong className="text-white">{assignmentModal.name}</strong> ({assignmentModal.designation})</p>
               </div>
-              <button onClick={() => setAssignmentModal(null)} className="text-slate-400 hover:text-slate-700">
+              <button onClick={() => setAssignmentModal(null)} className="text-slate-400 hover:text-white transition cursor-pointer">
                 <X size={18} />
               </button>
             </div>
 
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-slate-700 uppercase">Select Accredited NSSTA / iGOT Module</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase">Select Accredited NSSTA / iGOT Module</label>
               {[
                 "Planning and Designing of Large Scale Sample Surveys (NSSTA)",
                 "Python Training for Statisticians (C R Rao AIMSC, Hyderabad)",
@@ -469,10 +469,10 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                 <div
                   key={idx}
                   onClick={() => handleAssignIndividualCourse(assignmentModal, cName)}
-                  className="p-3.5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 cursor-pointer transition flex items-center justify-between"
+                  className="p-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.03] hover:border-blue-500/40 hover:bg-blue-500/10 cursor-pointer transition flex items-center justify-between group"
                 >
-                  <span className="text-xs font-bold text-slate-800">{cName}</span>
-                  <ChevronRight size={15} className="text-slate-400" />
+                  <span className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">{cName}</span>
+                  <ChevronRight size={15} className="text-slate-500 group-hover:text-blue-400 transition-colors" />
                 </div>
               ))}
             </div>
@@ -484,58 +484,58 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
       {activeTab === "overview" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+            <div className="bg-[#0f1422]/80 rounded-3xl p-5 border border-white/[0.08] shadow-xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Officials</span>
-                <span className="p-2 rounded-xl bg-blue-50 text-blue-600"><Users size={18} /></span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Officials</span>
+                <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20"><Users size={18} /></span>
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-800 mt-2">{summary.totalOfficials.toLocaleString()}</p>
-              <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold mt-1">
+              <p className="text-2xl sm:text-3xl font-extrabold text-white mt-2">{summary.totalOfficials.toLocaleString()}</p>
+              <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold mt-1">
                 <TrendingUp size={13} /> {summary.activeLearners.toLocaleString()} Active Learners ({Math.round((summary.activeLearners / summary.totalOfficials) * 100)}%)
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+            <div className="bg-[#0f1422]/80 rounded-3xl p-5 border border-white/[0.08] shadow-xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Org Competency Score</span>
-                <span className="p-2 rounded-xl bg-indigo-50 text-indigo-600"><Award size={18} /></span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Org Competency Score</span>
+                <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"><Award size={18} /></span>
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-800 mt-2">{summary.overallCompetencyScore}%</p>
-              <div className="flex items-center gap-1.5 text-xs text-indigo-600 font-semibold mt-1">
+              <p className="text-2xl sm:text-3xl font-extrabold text-white mt-2">{summary.overallCompetencyScore}%</p>
+              <div className="flex items-center gap-1.5 text-xs text-indigo-400 font-semibold mt-1">
                 <Sparkles size={13} /> Target: 85% by Q4 2026
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+            <div className="bg-[#0f1422]/80 rounded-3xl p-5 border border-white/[0.08] shadow-xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Training Hours</span>
-                <span className="p-2 rounded-xl bg-amber-50 text-amber-600"><Clock size={18} /></span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Training Hours</span>
+                <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20"><Clock size={18} /></span>
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-slate-800 mt-2">{summary.totalTrainingHours.toLocaleString()}h</p>
-              <div className="flex items-center gap-1.5 text-xs text-amber-600 font-semibold mt-1">
+              <p className="text-2xl sm:text-3xl font-extrabold text-white mt-2">{summary.totalTrainingHours.toLocaleString()}h</p>
+              <div className="flex items-center gap-1.5 text-xs text-amber-400 font-semibold mt-1">
                 <ArrowUpRight size={13} /> +18.4% YoY on iGOT Platform
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+            <div className="bg-[#0f1422]/80 rounded-3xl p-5 border border-white/[0.08] shadow-xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Skill Gap Reduction</span>
-                <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><CheckCircle2 size={18} /></span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Skill Gap Reduction</span>
+                <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><CheckCircle2 size={18} /></span>
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-2">{summary.avgSkillGapReduction}</p>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-1">
+              <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-2">{summary.avgSkillGapReduction}</p>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium mt-1">
                 Across 4 core competency domains
               </div>
             </div>
           </div>
 
           {/* Cadre Table */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <h3 className="text-base font-bold text-slate-800">Cadre-Wise Competency &amp; Completion Status</h3>
+          <div className="bg-[#0f1422]/80 rounded-3xl border border-white/[0.08] p-6 shadow-xl space-y-4 backdrop-blur-xl">
+            <h3 className="text-base font-bold text-white">Cadre-Wise Competency &amp; Completion Status</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600 border-collapse">
+              <table className="w-full text-left text-sm text-slate-300 border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr className="border-b border-white/[0.08] bg-white/[0.02] text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     <th className="py-3 px-4 rounded-l-xl">Cadre</th>
                     <th className="py-3 px-4">Headcount</th>
                     <th className="py-3 px-4">Avg Competency</th>
@@ -543,26 +543,26 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                     <th className="py-3 px-4 rounded-r-xl">iGOT Completion</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
+                <tbody className="divide-y divide-white/[0.04] font-medium">
                   {cadres.map((c, i) => (
-                    <tr key={i} className="hover:bg-slate-50/60 transition">
-                      <td className="py-3.5 px-4 font-semibold text-slate-800">{c.cadre}</td>
-                      <td className="py-3.5 px-4 text-slate-600">{c.headcount.toLocaleString()}</td>
+                    <tr key={i} className="hover:bg-white/[0.02] transition">
+                      <td className="py-3.5 px-4 font-semibold text-white">{c.cadre}</td>
+                      <td className="py-3.5 px-4 text-slate-400">{c.headcount.toLocaleString()}</td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-slate-200 rounded-full h-2 overflow-hidden">
-                            <div className="bg-blue-600 h-full rounded-full" style={{ width: `${c.avgCompetency}%` }} />
+                          <div className="w-16 bg-white/[0.08] rounded-full h-2 overflow-hidden">
+                            <div className="bg-gradient-to-r from-blue-600 to-indigo-500 h-full rounded-full" style={{ width: `${c.avgCompetency}%` }} />
                           </div>
-                          <span className="font-bold text-slate-800">{c.avgCompetency}%</span>
+                          <span className="font-bold text-white">{c.avgCompetency}%</span>
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/25 text-amber-300 text-xs font-semibold">
                           <AlertTriangle size={12} /> {c.topSkillGap}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-300 bg-emerald-500/15 px-2.5 py-1 rounded-lg border border-emerald-500/25">
                           <CheckCircle2 size={12} /> {c.completionRate}%
                         </span>
                       </td>
@@ -577,11 +577,11 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
       {/* TAB 2: DIVISION & CADRE HEATMAP */}
       {activeTab === "heatmap" && (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
+        <div className="bg-[#0f1422]/80 rounded-3xl border border-white/[0.08] p-6 shadow-xl space-y-6 backdrop-blur-xl">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h3 className="text-lg font-bold text-slate-800">MoSPI Directorate Skill-Gap Heatmap</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-lg font-bold text-white">MoSPI Directorate Skill-Gap Heatmap</h3>
+              <p className="text-xs text-slate-400">
                 Identifies competency readiness across national directorates (*FOD, DPD, SDRD, NAD, ESD*).
               </p>
             </div>
@@ -590,7 +590,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <tr className="border-b border-white/[0.08] bg-white/[0.02] text-xs font-bold text-slate-400 uppercase tracking-wider">
                   <th className="py-3 px-4 rounded-l-xl">Division / Directorate</th>
                   <th className="py-3 px-4 text-center">Statistical</th>
                   <th className="py-3 px-4 text-center">Technical</th>
@@ -599,10 +599,10 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                   <th className="py-3 px-4 rounded-r-xl">Priority Action Required</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-white/[0.04]">
                 {heatmapData.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 transition">
-                    <td className="py-3.5 px-4 font-semibold text-slate-800">{row.division}</td>
+                  <tr key={idx} className="hover:bg-white/[0.02] transition">
+                    <td className="py-3.5 px-4 font-semibold text-white">{row.division}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className={`inline-block px-3 py-1 rounded-lg border text-xs ${getHeatmapColor(row.statistical)}`}>
                         {row.statistical}%
@@ -624,7 +624,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                      <span className="text-xs font-semibold text-rose-300 bg-rose-500/15 px-2.5 py-1 rounded-lg border border-rose-500/25">
                         {row.criticalGap}
                       </span>
                     </td>
@@ -639,50 +639,50 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
       {/* TAB 3: PREDICTIVE CAPACITY FORECAST */}
       {activeTab === "predictive" && (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-6 text-white">
-            <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider mb-2">
-              <Sparkles size={14} /> AI Forecasting Model (2026–2028 Projection)
+          <div className="bg-[#0c101d]/90 rounded-3xl p-6 text-white border border-white/[0.08] backdrop-blur-xl relative overflow-hidden shadow-xl">
+            <div className="flex items-center gap-2 text-blue-300 text-xs font-bold uppercase tracking-wider mb-2">
+              <Sparkles size={14} className="text-blue-400" /> AI Forecasting Model (2026–2028 Projection)
             </div>
-            <h3 className="text-xl font-extrabold">Emerging Technology Skill Demand in Official Statistics</h3>
-            <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl">
+            <h3 className="text-xl font-extrabold text-white">Emerging Technology Skill Demand in Official Statistics</h3>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-3xl">
               Anticipating technology modernization across MoSPI datasets (AI automated survey scrutiny, GIS spatial frames, DPDP Act 2023 compliance, Big Data national accounts).
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {predictiveForecast.map((item, idx) => (
-              <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
+              <div key={idx} className="bg-[#0f1422]/80 rounded-3xl border border-white/[0.08] p-5 shadow-xl flex flex-col justify-between backdrop-blur-xl">
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                       item.urgency === "Critical"
-                        ? "bg-rose-100 text-rose-800 border border-rose-200"
-                        : "bg-amber-100 text-amber-800 border border-amber-200"
+                        ? "bg-rose-500/15 text-rose-300 border border-rose-500/25"
+                        : "bg-amber-500/15 text-amber-300 border border-amber-500/25"
                     }`}>
                       {item.urgency} Urgency
                     </span>
-                    <span className="text-xs font-semibold text-slate-400">Target 2027</span>
+                    <span className="text-xs font-semibold text-slate-500">Target 2027</span>
                   </div>
 
-                  <h4 className="text-base font-bold text-slate-800 mb-1">{item.skill}</h4>
+                  <h4 className="text-base font-bold text-white mb-1">{item.skill}</h4>
                   
                   <div className="space-y-2 my-4">
-                    <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-                      <span>Current Official Adoption: <strong className="text-slate-700">{item.currentAdoption}</strong></span>
-                      <span>Projected Requirement: <strong className="text-blue-600 font-bold">{item.projectedDemand2027}</strong></span>
+                    <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+                      <span>Current Official Adoption: <strong className="text-slate-200">{item.currentAdoption}</strong></span>
+                      <span>Projected Requirement: <strong className="text-blue-400 font-bold">{item.projectedDemand2027}</strong></span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-white/[0.06] rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full"
+                        className="bg-gradient-to-r from-blue-600 to-indigo-500 h-full rounded-full"
                         style={{ width: item.projectedDemand2027 }}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 mt-2 flex items-center justify-between">
-                  <span className="text-xs text-slate-500 font-medium">Recommended TPAC Course:</span>
-                  <span className="text-xs font-bold text-blue-700 truncate max-w-[220px]">
+                <div className="pt-3 border-t border-white/[0.06] mt-2 flex items-center justify-between">
+                  <span className="text-xs text-slate-400 font-medium">Recommended TPAC Course:</span>
+                  <span className="text-xs font-bold text-blue-300 truncate max-w-[220px]">
                     {item.recommendedTPACProgram}
                   </span>
                 </div>
@@ -694,61 +694,61 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
       {/* TAB 4: BATCH NOMINATION PLANNER */}
       {activeTab === "batch" && (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs max-w-3xl mx-auto space-y-6">
+        <div className="bg-[#0f1422]/80 rounded-3xl border border-white/[0.08] p-6 sm:p-8 shadow-xl max-w-3xl mx-auto space-y-6 backdrop-blur-xl">
           <div>
-            <h3 className="text-xl font-extrabold text-slate-800">NSSTA Training Programme Batch Nomination</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <h3 className="text-xl font-extrabold text-white">NSSTA Training Programme Batch Nomination</h3>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
               Assign recommended TPAC training programmes to specific cadres or state directorates to systematically close workforce skill gaps.
             </p>
           </div>
 
           {isNominated && (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center gap-3">
-              <CheckCircle2 size={20} className="text-emerald-600" />
+            <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm font-semibold flex items-center gap-3 shadow-lg">
+              <CheckCircle2 size={20} className="text-emerald-400" />
               Batch successfully created! 45 officials from Subordinate Statistical Service enrolled in NSSTA Calendar.
             </div>
           )}
 
           <form onSubmit={handleCreateBatch} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                 Target Cadre / Directorate
               </label>
               <select
                 value={batchNomination.cadre}
                 onChange={(e) => setBatchNomination({ ...batchNomination, cadre: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm font-medium text-white focus:border-blue-500/50 outline-none cursor-pointer"
               >
-                <option value="Subordinate Statistical Service (SSS)">Subordinate Statistical Service (SSS)</option>
-                <option value="Indian Statistical Service (ISS)">Indian Statistical Service (ISS)</option>
-                <option value="Field Operations Division (FOD)">Field Operations Division (FOD)</option>
-                <option value="Data Processing Division (DPD)">Data Processing Division (DPD)</option>
-                <option value="State DES Deputed Officers">State Directorates of Economics &amp; Statistics</option>
+                <option value="Subordinate Statistical Service (SSS)" className="bg-[#0c101d] text-white">Subordinate Statistical Service (SSS)</option>
+                <option value="Indian Statistical Service (ISS)" className="bg-[#0c101d] text-white">Indian Statistical Service (ISS)</option>
+                <option value="Field Operations Division (FOD)" className="bg-[#0c101d] text-white">Field Operations Division (FOD)</option>
+                <option value="Data Processing Division (DPD)" className="bg-[#0c101d] text-white">Data Processing Division (DPD)</option>
+                <option value="State DES Deputed Officers" className="bg-[#0c101d] text-white">State Directorates of Economics &amp; Statistics</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                 Recommended NSSTA / TPAC Programme
               </label>
               <select
                 value={batchNomination.program}
                 onChange={(e) => setBatchNomination({ ...batchNomination, program: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm font-medium text-white focus:border-blue-500/50 outline-none cursor-pointer"
               >
-                <option value="Planning and Designing of Large Scale Sample Surveys (NSSTA)">
+                <option value="Planning and Designing of Large Scale Sample Surveys (NSSTA)" className="bg-[#0c101d] text-white">
                   Planning and Designing of Large Scale Sample Surveys (NSSTA, Greater Noida)
                 </option>
-                <option value="Handling Large Scale Data & Data Analysis using R (IIT Kanpur / IASRI)">
+                <option value="Handling Large Scale Data & Data Analysis using R (IIT Kanpur / IASRI)" className="bg-[#0c101d] text-white">
                   Handling Large Scale Data &amp; Data Analysis using R (IIT Kanpur / IASRI)
                 </option>
-                <option value="Big Data Analysis (Dr. MCRHRD Hyderabad / C R Rao AIMSC)">
+                <option value="Big Data Analysis (Dr. MCRHRD Hyderabad / C R Rao AIMSC)" className="bg-[#0c101d] text-white">
                   Big Data Analysis (Dr. MCRHRD Hyderabad / C R Rao AIMSC)
                 </option>
-                <option value="Python Training for Statisticians (C R Rao AIMSC, Hyderabad)">
+                <option value="Python Training for Statisticians (C R Rao AIMSC, Hyderabad)" className="bg-[#0c101d] text-white">
                   Python Training for Statisticians (C R Rao AIMSC, Hyderabad)
                 </option>
-                <option value="Training on Artificial Intelligence and Machine Learning (IIT Madras)">
+                <option value="Training on Artificial Intelligence and Machine Learning (IIT Madras)" className="bg-[#0c101d] text-white">
                   Training on Artificial Intelligence and Machine Learning (IIT Madras)
                 </option>
               </select>
@@ -756,7 +756,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                   Batch Capacity (Officers)
                 </label>
                 <input
@@ -765,19 +765,19 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
                   max="200"
                   value={batchNomination.batchSize}
                   onChange={(e) => setBatchNomination({ ...batchNomination, batchSize: Number(e.target.value) })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm font-medium text-white focus:border-blue-500/50 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                   Cohort Start Date
                 </label>
                 <input
                   type="date"
                   value={batchNomination.startDate}
                   onChange={(e) => setBatchNomination({ ...batchNomination, startDate: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.1] text-sm font-medium text-white focus:border-blue-500/50 outline-none"
                 />
               </div>
             </div>
@@ -785,7 +785,7 @@ export default function AdminDashboard({ adminData, onAssignTraining, onInspectO
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+                className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <CheckCircle2 size={18} /> Confirm Batch Nomination &amp; Sync with iGOT
               </button>

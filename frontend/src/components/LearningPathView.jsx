@@ -355,16 +355,18 @@ export default function LearningPathView({
 
   return (
     <div className="space-y-6">
-      
       {/* Top Banner with Pathway Selector */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-800">
+      <div className="bg-[#0f1422]/90 backdrop-blur-xl text-white rounded-3xl p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.4)] border border-white/[0.08] relative overflow-hidden">
+        {/* Top edge glow sheen */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1.5 uppercase tracking-wider">
-                <Sparkles size={14} /> AI-Recommended Cadre Pathway
+              <span className="text-[10px] font-extrabold px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5 uppercase tracking-wider">
+                <Sparkles size={12} className="text-indigo-400" /> AI-Recommended Cadre Pathway
               </span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/[0.05] text-slate-300 border border-white/[0.08]">
                 Milestone Level {pathwayLevel}
               </span>
             </div>
@@ -372,38 +374,38 @@ export default function LearningPathView({
             <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white">
               {activeTemplate.title}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
               {activeTemplate.subtitle}
             </p>
 
             <div className="pt-2 flex items-center gap-2 flex-wrap text-xs text-slate-400">
-              <span>Target Cadre: <strong>{activeTemplate.targetRole}</strong></span>
+              <span>Target Cadre: <strong className="text-slate-200">{activeTemplate.targetRole}</strong></span>
               <span>•</span>
-              <span>Total Curriculum: <strong>{stages.length} Stages ({totalModulesCount} Key Modules)</strong></span>
+              <span>Total Curriculum: <strong className="text-slate-200">{stages.length} Stages ({totalModulesCount} Key Modules)</strong></span>
             </div>
           </div>
 
           {/* Dynamic Progress Indicator Box */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 min-w-56 text-center shrink-0 shadow-inner">
-            <span className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Path Completion</span>
-            <div className="text-3xl sm:text-4xl font-black text-white mt-1">{pathProgress}%</div>
-            <p className="text-[11px] text-slate-300 mt-0.5">
-              {completedModulesCount} of {totalModulesCount} Competency Milestones Done
+          <div className="bg-white/[0.04] backdrop-blur-md rounded-2xl p-5 border border-white/10 min-w-56 text-center shrink-0 shadow-inner">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Path Completion</span>
+            <div className="text-3xl sm:text-4xl font-black text-white mt-1 tracking-tight">{pathProgress}%</div>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {completedModulesCount} of {totalModulesCount} Milestones Mastered
             </p>
 
-            <div className="w-full h-2.5 bg-white/20 rounded-full mt-3 overflow-hidden">
+            <div className="w-full h-2 bg-white/[0.06] rounded-full mt-3 overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
+                className={`h-full rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(99,102,241,0.5)] ${
                   isFullyMastered
-                    ? "bg-gradient-to-r from-emerald-400 to-teal-300"
-                    : "bg-gradient-to-r from-blue-400 to-indigo-400"
+                    ? "bg-gradient-to-r from-emerald-400 to-teal-300 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                    : "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"
                 }`}
                 style={{ width: `${pathProgress}%` }}
               />
             </div>
 
             {isFullyMastered && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 mt-2">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 mt-2">
                 <Award size={13} /> Milestone Achieved!
               </span>
             )}
@@ -411,9 +413,9 @@ export default function LearningPathView({
         </div>
 
         {/* Pathway Switching Filter Tabs */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-between gap-3 flex-wrap">
+        <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-slate-400 mr-1">Switch Focus Track:</span>
+            <span className="text-xs font-semibold text-slate-400 mr-1">Focus Track:</span>
             {Object.entries(PRESET_PATHWAYS).map(([key, item]) => {
               const isSelected = selectedPathKey === key;
               return (
@@ -422,8 +424,8 @@ export default function LearningPathView({
                   onClick={() => setSelectedPathKey(key)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-slate-800/90 text-slate-300 hover:bg-slate-800 border border-slate-700"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.35)] border border-indigo-400/30"
+                      : "bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.07] border border-white/[0.08]"
                   }`}
                 >
                   {item.domain} Track
@@ -437,24 +439,24 @@ export default function LearningPathView({
             className="text-xs text-slate-400 hover:text-white flex items-center gap-1.5 transition cursor-pointer"
             title="Reset progress for this pathway"
           >
-            <RotateCcw size={13} /> Reset Pathway
+            <RotateCcw size={13} /> Reset Progress
           </button>
         </div>
       </div>
 
       {/* 100% Mastery Celebration Banner */}
       {isFullyMastered && (
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 border-2 border-emerald-500/50 text-white shadow-xl animate-in zoom-in-95 duration-200">
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-teal-950/70 to-[#0f1422] border border-emerald-500/40 text-white shadow-xl animate-in zoom-in-95 duration-200">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-lg shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] shrink-0">
                 <Award size={26} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-emerald-200">
+                <h3 className="text-lg font-bold text-emerald-300">
                   🎉 Pathway Mastered! Level {pathwayLevel} Specialization Completed!
                 </h3>
-                <p className="text-xs text-emerald-100/90 mt-0.5">
+                <p className="text-xs text-slate-300 mt-0.5">
                   You have successfully demonstrated all competency standards for this track. An official cadre achievement seal has been awarded.
                 </p>
               </div>
@@ -467,7 +469,7 @@ export default function LearningPathView({
                 disabled={isAwarded}
                 className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition ${
                   isAwarded
-                    ? "bg-emerald-900/90 text-emerald-200 border border-emerald-600/40 cursor-default"
+                    ? "bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 cursor-default"
                     : "bg-white text-slate-900 hover:bg-emerald-50 shadow-md cursor-pointer"
                 }`}
               >
@@ -477,7 +479,7 @@ export default function LearningPathView({
 
               <button
                 onClick={handleGenerateNextLevel}
-                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl flex items-center gap-2 transition shadow-md shrink-0 cursor-pointer"
+                className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-extrabold text-xs rounded-xl flex items-center gap-2 transition shadow-[0_0_20px_rgba(16,185,129,0.35)] shrink-0 cursor-pointer"
               >
                 <Zap size={15} /> Unlock Level {pathwayLevel + 1} Advanced Pathway <ArrowRight size={15} />
               </button>
@@ -499,25 +501,25 @@ export default function LearningPathView({
           return (
             <div
               key={stage.id}
-              className={`bg-white rounded-3xl border transition-all p-6 shadow-2xs ${
+              className={`rounded-3xl border transition-all p-6 backdrop-blur-xl ${
                 isInProgress
-                  ? "border-blue-400 ring-2 ring-blue-500/10 shadow-sm"
+                  ? "bg-[#0f1422]/90 border-indigo-500/50 ring-1 ring-indigo-500/30 shadow-[0_10px_30px_rgba(0,0,0,0.5),0_0_25px_rgba(99,102,241,0.15)]"
                   : isCompleted
-                  ? "border-emerald-200 bg-emerald-50/20"
-                  : "border-slate-200 opacity-80"
+                  ? "bg-emerald-950/15 border-emerald-500/30 shadow-sm"
+                  : "bg-[#0c0e17]/60 border-white/[0.05] opacity-75"
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                 <div className="flex items-start gap-3.5">
                   <div
-                    className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs ${
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 border ${
                       isCompleted
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
                         : isInProgress
-                        ? "bg-blue-600 text-white"
+                        ? "bg-gradient-to-tr from-blue-600 to-indigo-600 text-white border-white/20 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
                         : isLocked
-                        ? "bg-slate-100 text-slate-400"
-                        : "bg-slate-200 text-slate-600"
+                        ? "bg-white/[0.03] text-slate-500 border-white/5"
+                        : "bg-white/[0.05] text-slate-400 border-white/10"
                     }`}
                   >
                     {isCompleted ? <CheckCircle2 size={20} /> : isLocked ? <Lock size={18} /> : stage.id}
@@ -525,14 +527,14 @@ export default function LearningPathView({
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-slate-900 text-base">{stage.title}</h3>
+                      <h3 className="font-bold text-white text-base">{stage.title}</h3>
                       <span
-                        className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
                           isCompleted
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                             : isInProgress
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
-                            : "bg-slate-100 text-slate-500 border-slate-200"
+                            ? "bg-indigo-500/15 text-indigo-300 border-indigo-500/30"
+                            : "bg-white/[0.04] text-slate-400 border-white/10"
                         }`}
                       >
                         {stage.status}
@@ -541,34 +543,34 @@ export default function LearningPathView({
                         ({stageDoneCount}/{stageTotalCount} Modules Mastered)
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">{stage.description}</p>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{stage.description}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                  <span className="text-xs font-semibold text-slate-500 flex items-center gap-1 bg-slate-100 px-2.5 py-1 rounded-lg">
+                  <span className="text-xs font-semibold text-slate-400 flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 rounded-lg">
                     <Clock size={13} /> {stage.duration}
                   </span>
                 </div>
               </div>
 
               {/* Interactive Modules Checkboxes */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-slate-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-white/[0.06]">
                 {stage.modules.map((m, mIdx) => (
                   <button
                     key={m.id}
                     onClick={() => handleToggleModule(sIdx, mIdx)}
                     className={`p-3.5 rounded-2xl border text-left text-xs font-medium flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
                       m.done
-                        ? "bg-emerald-50/80 border-emerald-300 text-emerald-950 font-semibold"
-                        : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-blue-300"
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 font-semibold"
+                        : "bg-white/[0.03] border-white/10 hover:border-indigo-500/40 text-slate-300 hover:text-white hover:bg-white/[0.05]"
                     }`}
                   >
                     <span className="truncate leading-snug">{m.title}</span>
                     {m.done ? (
-                      <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                      <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
                     ) : (
-                      <div className="w-4 h-4 rounded-full border-2 border-slate-300 shrink-0 hover:border-blue-500" />
+                      <div className="w-4 h-4 rounded-full border border-white/20 shrink-0 hover:border-indigo-400" />
                     )}
                   </button>
                 ))}
@@ -588,7 +590,7 @@ export default function LearningPathView({
                         duration: stage.duration,
                       })
                     }
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                   >
                     <PlayCircle size={15} /> Study Stage in Interactive Viewer
                   </button>

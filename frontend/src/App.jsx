@@ -1249,7 +1249,11 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex bg-slate-50 min-h-screen font-sans antialiased text-slate-800">
+    <div className="flex bg-[#07090e] min-h-screen font-sans antialiased text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200 relative overflow-x-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-0 right-1/4 w-[700px] h-[500px] bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/3 left-10 w-[500px] h-[400px] bg-gradient-to-tr from-purple-600/10 via-indigo-500/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
+
       {/* Toast Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
@@ -1306,7 +1310,7 @@ function Dashboard() {
         isAdminInDB={isAdminInDB}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col relative z-10">
         {/* Header */}
         <Header
           user={user}
@@ -1334,28 +1338,36 @@ function Dashboard() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-7 max-w-7xl w-full mx-auto">
           {activeNav === "dashboard" && (
             <>
-              {/* Welcome Banner */}
-              <div className="flex items-center justify-between flex-wrap gap-3">
+              {/* Welcome Hero Banner */}
+              <div className="flex items-center justify-between flex-wrap gap-4 p-5 sm:p-6 rounded-3xl bg-[#0f1422]/70 backdrop-blur-xl border border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
                 <div>
-                  <h1 className="text-lg sm:text-2xl font-black text-slate-800 tracking-tight">
-                    Good Day, {user.name}! 👋
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                      Cadre Dashboard
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      Indian Statistical Service &amp; SSS
+                    </span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
+                    Good Day, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">{user.name}</span>! 👋
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    Personalized iGOT Karmayogi &amp; NSSTA TPAC pathways powered by AI Sentence-Transformer models.
+                  <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+                    Personalized iGOT Karmayogi &amp; NSSTA TPAC pathways powered by real-time AI Sentence-Transformer models.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <button
                     onClick={() => setIsAIAssistantOpen(true)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 px-3.5 py-2 rounded-xl transition shadow-2xs"
+                    className="flex items-center gap-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 border border-white/10 px-4 py-2.5 rounded-xl transition-all shadow-[0_0_18px_rgba(99,102,241,0.35)] cursor-pointer"
                   >
                     <Bot size={15} /> Karmayogi Sahayak
                   </button>
-                  <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl shadow-2xs">
-                    <Sparkles size={14} className="text-emerald-600" /> NSSTA Verified
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2.5 rounded-xl shadow-xs">
+                    <Sparkles size={14} className="text-emerald-400" /> NSSTA Verified
                   </span>
                 </div>
               </div>

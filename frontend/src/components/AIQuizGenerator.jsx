@@ -45,26 +45,28 @@ export default function AIQuizGenerator({
 
   return (
     <div className="space-y-8">
-      
       {/* Upload Box Card */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-5">
+      <div className="bg-[#0f1422]/80 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] space-y-5 relative overflow-hidden">
+        {/* Top edge glow sheen */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200/80 flex items-center gap-1">
-                <Sparkles size={12} className="text-purple-600" /> AI-Powered Question Generator
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                <Sparkles size={11} className="text-purple-400" /> AI Question Generator
               </span>
-              <span className="text-[11px] font-medium text-slate-400">Gemini 3.6 Flash &amp; MoSPI NLP</span>
+              <span className="text-[11px] text-slate-400">Gemini 3.6 Flash &amp; MoSPI NLP</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               Civil Services Assessment Generator
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl leading-relaxed">
               Upload your PPT, PDF, or document. The AI extracts the exact concepts and builds challenging, randomized multiple-choice examination questions.
             </p>
           </div>
 
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.35)] border border-white/20">
             <Bot size={24} />
           </div>
         </div>
@@ -83,8 +85,8 @@ export default function AIQuizGenerator({
           }}
           className={`flex flex-col items-center justify-center text-center gap-3 border-2 border-dashed rounded-2xl p-8 sm:p-10 cursor-pointer transition-all duration-200 ${
             isDragging
-              ? "border-blue-500 bg-blue-50/80 scale-[0.99]"
-              : "border-slate-200 hover:border-blue-400 hover:bg-slate-50/70 bg-slate-50/30"
+              ? "border-indigo-500 bg-indigo-500/10 scale-[0.99]"
+              : "border-white/10 hover:border-indigo-500/40 hover:bg-white/[0.02] bg-black/25"
           }`}
         >
           <input
@@ -97,23 +99,23 @@ export default function AIQuizGenerator({
           />
 
           {isGenerating ? (
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Loader2 size={32} className="animate-spin" />
+            <div className="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+              <Loader2 size={30} className="animate-spin" />
             </div>
           ) : fileName ? (
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 size={32} />
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+              <CheckCircle2 size={30} />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs">
-              <UploadCloud size={30} />
+            <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 text-indigo-400 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+              <UploadCloud size={28} />
             </div>
           )}
 
           <div>
-            <p className="text-sm font-bold text-slate-800">
+            <p className="text-sm font-bold text-white">
               {isGenerating
-                ? "Extracting slides/text & generating AI questions..."
+                ? "Extracting concepts & synthesizing questions..."
                 : fileName
                 ? fileName
                 : "Click or drag your Presentation or Document here"}
@@ -123,14 +125,14 @@ export default function AIQuizGenerator({
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-slate-500 pt-1">
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg font-medium shadow-2xs">
+          <div className="flex items-center gap-2.5 text-xs text-slate-400 pt-1 flex-wrap justify-center">
+            <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
               5 High-Impact MCQs
             </span>
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg font-medium shadow-2xs">
+            <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
               MoSPI Cadre Standards
             </span>
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg font-medium shadow-2xs">
+            <span className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg font-medium">
               Auto Saved to Database
             </span>
           </div>
@@ -141,7 +143,7 @@ export default function AIQuizGenerator({
           <button
             onClick={() => inputRef.current?.click()}
             disabled={isGenerating}
-            className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+            className="w-full sm:flex-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-60 transition-all text-white text-xs sm:text-sm font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
           >
             {isGenerating ? (
               <>
@@ -157,31 +159,31 @@ export default function AIQuizGenerator({
           <button
             onClick={onGenerateSample}
             disabled={isGenerating}
-            className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer"
+            className="w-full sm:w-auto px-5 py-3 bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-white text-xs sm:text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
-            <Sparkles size={15} className="text-purple-600" /> Try Official MoSPI Sample
+            <Sparkles size={15} className="text-purple-400" /> Try Official MoSPI Sample
           </button>
         </div>
       </div>
 
-      {/* Saved Assessments & Quiz History Section (Rendered only on dedicated AI Quiz page, not cluttered on main dashboard) */}
+      {/* Saved Assessments & Quiz History Section */}
       {showHistory && (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div className="bg-[#0f1422]/80 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] space-y-6 relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
             <div>
               <div className="flex items-center gap-2 mb-0.5">
-                <FileCheck size={18} className="text-emerald-600" />
-                <h3 className="text-lg font-bold text-slate-900">
-                  Assessment History &amp; Saved Quiz Records
+                <FileCheck size={18} className="text-emerald-400" />
+                <h3 className="text-lg font-bold text-white">
+                  Assessment History &amp; Saved Records
                 </h3>
               </div>
-              <p className="text-xs text-slate-500">
-                All your attempted quizzes and results are permanently stored in the database.
+              <p className="text-xs text-slate-400">
+                All attempted quizzes and results are permanently stored in the database.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-700 rounded-xl">
+              <span className="text-xs font-bold px-3 py-1 bg-white/[0.05] border border-white/10 text-slate-300 rounded-xl">
                 {attempts?.length || 0} Assessments Recorded
               </span>
             </div>
@@ -189,13 +191,13 @@ export default function AIQuizGenerator({
 
           {/* List of Previous Quiz Attempts */}
           {filteredAttempts.length === 0 ? (
-            <div className="text-center py-10 px-4 bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center mx-auto shadow-2xs">
+            <div className="text-center py-10 px-4 bg-black/20 rounded-2xl border border-dashed border-white/10 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 text-slate-400 flex items-center justify-center mx-auto shadow-inner">
                 <HelpCircle size={24} />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-700">No Assessment Records Yet</p>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-0.5">
+                <p className="text-sm font-bold text-white">No Assessment Records Yet</p>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
                   Upload your presentation or document above and submit the quiz. Your scores and review rubrics will be automatically saved here.
                 </p>
               </div>
@@ -223,16 +225,16 @@ export default function AIQuizGenerator({
                 return (
                   <div
                     key={att._id || idx}
-                    className="p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-blue-300 bg-white hover:bg-slate-50/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
+                    className="p-4 sm:p-5 rounded-2xl border border-white/[0.07] hover:border-indigo-500/40 bg-white/[0.02] hover:bg-white/[0.04] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
                   >
                     <div className="flex items-start sm:items-center gap-3.5 min-w-0">
                       <div
-                        className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs ${
+                        className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
                           isPPT
-                            ? "bg-orange-50 text-orange-600"
+                            ? "bg-orange-500/15 border-orange-500/30 text-orange-400"
                             : isPDF
-                            ? "bg-rose-50 text-rose-600"
-                            : "bg-blue-50 text-blue-600"
+                            ? "bg-rose-500/15 border-rose-500/30 text-rose-400"
+                            : "bg-blue-500/15 border-blue-500/30 text-blue-400"
                         }`}
                       >
                         <FileText size={20} />
@@ -240,14 +242,14 @@ export default function AIQuizGenerator({
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <h4 className="text-sm font-bold text-slate-900 truncate">
+                          <h4 className="text-sm font-bold text-white truncate">
                             {att.sourceFileName || "Official Statistics Document"}
                           </h4>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${
                               isPassed
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : "bg-amber-50 text-amber-700 border-amber-200"
+                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                : "bg-amber-500/15 text-amber-300 border-amber-500/30"
                             }`}
                           >
                             {isPassed ? "Passed (Proficient)" : "Needs Review"}
@@ -259,25 +261,25 @@ export default function AIQuizGenerator({
                             <Clock size={12} /> {dateStr}
                           </span>
                           <span>•</span>
-                          <span>{totalQ} Questions Evaluated</span>
+                          <span>{totalQ} Questions</span>
                           <span>•</span>
-                          <span className="text-blue-600 font-semibold">
-                            {isPassed ? "+5% Competency Boost" : "Recalibrated in MongoDB"}
+                          <span className="text-indigo-400 font-semibold">
+                            {isPassed ? "+3% Competency Boost" : "Recalibrated in MongoDB"}
                           </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Score & Action Button */}
-                    <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/[0.06]">
                       <div className="text-right">
                         <div className="flex items-baseline gap-1 justify-end">
-                          <span className={`text-xl font-black ${isPassed ? "text-emerald-600" : "text-amber-600"}`}>
+                          <span className={`text-xl font-black ${isPassed ? "text-emerald-400" : "text-amber-400"}`}>
                             {score}
                           </span>
                           <span className="text-xs text-slate-400">/{totalQ}</span>
                         </div>
-                        <span className="text-[11px] font-bold text-slate-500">
+                        <span className="text-[11px] font-semibold text-slate-400">
                           {pct}% Score
                         </span>
                       </div>
@@ -285,9 +287,9 @@ export default function AIQuizGenerator({
                       <button
                         type="button"
                         onClick={() => onReviewAttempt?.(att)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                        className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
                       >
-                        <Eye size={14} /> Review Questions
+                        <Eye size={14} /> Review
                       </button>
                     </div>
                   </div>
@@ -300,3 +302,4 @@ export default function AIQuizGenerator({
     </div>
   );
 }
+

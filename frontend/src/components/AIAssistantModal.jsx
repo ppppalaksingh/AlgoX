@@ -82,62 +82,62 @@ export default function AIAssistantModal({ isOpen, onClose, user }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl w-full max-w-3xl h-[85vh] shadow-2xl flex flex-col overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-[#0c101d] rounded-3xl w-full max-w-3xl h-[85vh] shadow-2xl flex flex-col overflow-hidden border border-white/[0.12]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 p-5 text-white flex items-center justify-between shrink-0">
+        <div className="p-5 text-white flex items-center justify-between shrink-0 border-b border-white/[0.08] bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30 border border-white/10">
               <Bot size={22} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-base tracking-tight">Karmayogi Sahayak</h3>
-                <span className="px-2 py-0.5 rounded-full bg-blue-500/30 border border-blue-400/40 text-[10px] font-bold text-blue-200 uppercase">
+                <h3 className="font-extrabold text-base tracking-tight text-white">Karmayogi Sahayak</h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/25 text-[10px] font-bold text-blue-300 uppercase tracking-wider">
                   AI Statistical Mentor
                 </span>
               </div>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-400 mt-0.5">
                 MoSPI &amp; NSSTA Knowledge Assistant • 24/7 Learner Support
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#07090e]/60">
           {messages.map((m, idx) => (
             <div
               key={idx}
               className={`flex gap-3 max-w-[88%] ${m.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
             >
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
+                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-md ${
                   m.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gradient-to-tr from-slate-800 to-indigo-900 text-white"
+                    ? "bg-gradient-to-tr from-blue-600 to-indigo-600 text-white"
+                    : "bg-white/[0.08] text-blue-400 border border-white/[0.08]"
                 }`}
               >
                 {m.role === "user" ? <User size={16} /> : <Bot size={16} />}
               </div>
 
               <div
-                className={`p-4 rounded-2xl text-sm leading-relaxed shadow-xs ${
+                className={`p-4 rounded-2xl text-sm leading-relaxed shadow-lg ${
                   m.role === "user"
-                    ? "bg-blue-600 text-white rounded-tr-none font-medium"
-                    : "bg-white text-slate-800 border border-slate-200 rounded-tl-none space-y-2"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none font-medium shadow-blue-600/20"
+                    : "bg-[#0f1422] text-slate-200 border border-white/[0.08] rounded-tl-none space-y-2"
                 }`}
               >
-                <div className="whitespace-pre-line prose-sm">{m.text}</div>
+                <div className="whitespace-pre-line prose prose-invert max-w-none text-xs sm:text-sm">{m.text}</div>
                 {m.source && (
-                  <p className="text-[10px] font-semibold text-slate-400 border-t border-slate-100 pt-2 flex items-center gap-1">
-                    <Sparkles size={11} className="text-blue-500" /> Source: {m.source}
+                  <p className="text-[10px] font-semibold text-slate-400 border-t border-white/[0.06] pt-2 flex items-center gap-1">
+                    <Sparkles size={11} className="text-blue-400" /> Source: {m.source}
                   </p>
                 )}
               </div>
@@ -146,11 +146,11 @@ export default function AIAssistantModal({ isOpen, onClose, user }) {
 
           {loading && (
             <div className="flex gap-3 max-w-[85%] mr-auto">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-slate-800 to-indigo-900 text-white flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-white/[0.08] text-blue-400 border border-white/[0.08] flex items-center justify-center shrink-0">
                 <Bot size={16} />
               </div>
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 text-slate-500 text-xs font-medium flex items-center gap-2 shadow-2xs">
-                <Loader2 size={15} className="animate-spin text-blue-600" />
+              <div className="p-3.5 rounded-2xl bg-[#0f1422] border border-white/[0.08] text-slate-400 text-xs font-medium flex items-center gap-2">
+                <Loader2 size={15} className="animate-spin text-blue-400" />
                 <span>Consulting official statistics guidelines &amp; AI models...</span>
               </div>
             </div>
@@ -159,16 +159,16 @@ export default function AIAssistantModal({ isOpen, onClose, user }) {
         </div>
 
         {/* Quick Prompts Carousel */}
-        <div className="p-2.5 bg-white border-t border-slate-100 overflow-x-auto flex items-center gap-2 shrink-0">
+        <div className="p-2.5 bg-[#0c101d] border-t border-white/[0.08] overflow-x-auto flex items-center gap-2 shrink-0">
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider pl-2 whitespace-nowrap flex items-center gap-1">
-            <Sparkles size={11} className="text-amber-500" /> Prompts:
+            <Sparkles size={11} className="text-amber-400" /> Prompts:
           </span>
           {quickPrompts.map((qp, idx) => (
             <button
               key={idx}
               onClick={() => handleSend(qp)}
               disabled={loading}
-              className="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 text-xs whitespace-nowrap transition border border-slate-200 shrink-0 font-medium"
+              className="px-3 py-1 rounded-full bg-white/[0.04] hover:bg-blue-500/15 hover:text-blue-300 text-slate-400 text-xs whitespace-nowrap transition border border-white/[0.08] hover:border-blue-500/30 shrink-0 font-medium cursor-pointer"
             >
               {qp}
             </button>
@@ -176,7 +176,7 @@ export default function AIAssistantModal({ isOpen, onClose, user }) {
         </div>
 
         {/* Input Bar */}
-        <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+        <div className="p-4 bg-[#0c101d] border-t border-white/[0.08] shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -190,12 +190,12 @@ export default function AIAssistantModal({ isOpen, onClose, user }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-slate-100 border border-slate-200 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-800 transition"
+              className="flex-1 px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-xs sm:text-sm focus:outline-none focus:border-blue-500/50 text-white placeholder:text-slate-500 transition"
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="p-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-2xl transition shadow-md flex items-center justify-center shrink-0"
+              className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-40 text-white rounded-2xl transition shadow-lg shadow-blue-600/30 flex items-center justify-center shrink-0 cursor-pointer"
             >
               <Send size={16} />
             </button>

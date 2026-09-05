@@ -42,27 +42,27 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
+      <div className="bg-[#0c101d] rounded-3xl border border-white/[0.12] shadow-2xl max-w-2xl w-full overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center border border-blue-400/30">
+        <div className="px-6 py-4 border-b border-white/[0.08] bg-white/[0.02] text-white flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center border border-blue-500/25 shadow-inner">
               <Sparkles size={18} />
             </div>
             <div>
-              <h2 className="text-base font-semibold leading-tight">AI Generated Assessment</h2>
-              <p className="text-xs text-slate-300">
+              <h2 className="text-base font-bold leading-tight text-white">AI Generated Assessment</h2>
+              <p className="text-xs text-slate-400">
                 Source: <span className="font-mono text-blue-300">{quiz.sourceFileName || "Uploaded Material"}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
@@ -71,11 +71,11 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
           {!result ? (
             <div>
               {/* Question Navigation Tabs */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/[0.06]">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Question {currentIdx + 1} of {total}
                 </span>
-                <span className="text-xs font-medium px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">
+                <span className="text-xs font-semibold px-2.5 py-1 bg-blue-500/15 text-blue-300 rounded-full border border-blue-500/20">
                   {answeredCount}/{total} Answered
                 </span>
               </div>
@@ -89,12 +89,12 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                     <button
                       key={idx}
                       onClick={() => setCurrentIdx(idx)}
-                      className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                         isCurrent
-                          ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-600 ring-offset-2"
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-500/40"
                           : isAnswered
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                          : "bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] hover:text-white border border-white/[0.06]"
                       }`}
                     >
                       {idx + 1}
@@ -106,8 +106,8 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
               {/* Active Question */}
               {currentQ && (
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <p className="text-sm font-semibold text-slate-800 leading-relaxed">
+                  <div className="p-4 bg-white/[0.03] rounded-2xl border border-white/[0.08]">
+                    <p className="text-sm font-semibold text-white leading-relaxed">
                       {currentQ.question}
                     </p>
                   </div>
@@ -121,17 +121,17 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                           key={optIdx}
                           type="button"
                           onClick={() => handleSelectOption(opt)}
-                          className={`w-full text-left p-3.5 rounded-xl border text-sm font-medium transition-all flex items-center gap-3 ${
+                          className={`w-full text-left p-3.5 rounded-2xl border text-sm font-medium transition-all flex items-center gap-3 cursor-pointer ${
                             isSelected
-                              ? "border-blue-500 bg-blue-50/60 text-blue-900 shadow-xs"
-                              : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 text-slate-700"
+                              ? "border-blue-500/60 bg-blue-500/15 text-white shadow-md shadow-blue-500/10 ring-1 ring-blue-500/30"
+                              : "border-white/[0.08] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04] text-slate-300"
                           }`}
                         >
                           <div
-                            className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs shrink-0 transition-colors ${
+                            className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                               isSelected
-                                ? "border-blue-600 bg-blue-600 text-white"
-                                : "border-slate-300 text-slate-500"
+                                ? "border-blue-400 bg-blue-600 text-white"
+                                : "border-white/20 text-slate-400"
                             }`}
                           >
                             {String.fromCharCode(65 + optIdx)}
@@ -145,12 +145,12 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
               )}
 
               {/* Footer controls */}
-              <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div className="mt-8 pt-4 border-t border-white/[0.06] flex items-center justify-between">
                 <button
                   type="button"
                   disabled={currentIdx === 0}
                   onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 rounded-xl transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.04] disabled:opacity-30 rounded-xl transition cursor-pointer"
                 >
                   Previous
                 </button>
@@ -160,7 +160,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                     <button
                       type="button"
                       onClick={() => setCurrentIdx((i) => Math.min(total - 1, i + 1))}
-                      className="px-5 py-2 text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1.5"
+                      className="px-5 py-2.5 text-sm font-bold bg-white/[0.08] hover:bg-white/[0.12] text-white rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-white/[0.08]"
                     >
                       Next <ArrowRight size={15} />
                     </button>
@@ -169,7 +169,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                       type="button"
                       disabled={!canSubmit || isSubmitting}
                       onClick={handleSubmit}
-                      className="px-5 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl shadow-xs transition-colors flex items-center gap-2"
+                      className="px-5 py-2.5 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-40 text-white rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center gap-2 cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>
@@ -188,29 +188,29 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
           ) : (
             /* Results Screen */
             <div className="space-y-6">
-              <div className="text-center py-4 bg-slate-50 rounded-2xl border border-slate-200/80">
-                <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 text-white flex items-center justify-center shadow-md mb-3">
+              <div className="text-center py-6 bg-white/[0.03] rounded-3xl border border-white/[0.08]">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 mb-3 border border-white/10">
                   <Award size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800">Quiz Completed!</h3>
-                <p className="text-xs text-slate-500 mt-1">Here is how you performed</p>
-                <div className="mt-4 flex items-center justify-center gap-6">
+                <h3 className="text-lg font-bold text-white">Quiz Completed!</h3>
+                <p className="text-xs text-slate-400 mt-1">Here is how you performed</p>
+                <div className="mt-4 flex items-center justify-center gap-8">
                   <div>
-                    <span className="text-3xl font-extrabold text-blue-600">{result.score}</span>
-                    <span className="text-slate-400 text-sm font-medium">/{result.total}</span>
-                    <p className="text-xs text-slate-500">Correct Answers</p>
+                    <span className="text-3xl font-extrabold text-blue-400">{result.score}</span>
+                    <span className="text-slate-500 text-sm font-medium">/{result.total}</span>
+                    <p className="text-xs text-slate-400 mt-0.5">Correct Answers</p>
                   </div>
-                  <div className="w-px h-10 bg-slate-200" />
+                  <div className="w-px h-10 bg-white/[0.08]" />
                   <div>
-                    <span className="text-3xl font-extrabold text-emerald-600">{result.percentage}%</span>
-                    <p className="text-xs text-slate-500">Overall Score</p>
+                    <span className="text-3xl font-extrabold text-emerald-400">{result.percentage}%</span>
+                    <p className="text-xs text-slate-400 mt-0.5">Overall Score</p>
                   </div>
                 </div>
               </div>
 
               {/* Question breakdown */}
               <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
-                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Review &amp; Explanations
                 </h4>
                 {questions.map((q, idx) => {
@@ -227,54 +227,56 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                   return (
                     <div
                       key={idx}
-                      className={`p-3.5 rounded-xl border text-sm space-y-1.5 transition-all ${
-                        isCorrect ? "border-emerald-200 bg-emerald-50/30" : "border-rose-200 bg-rose-50/30"
+                      className={`p-3.5 rounded-2xl border text-sm space-y-1.5 transition-all ${
+                        isCorrect
+                          ? "border-emerald-500/30 bg-emerald-500/10"
+                          : "border-rose-500/30 bg-rose-500/10"
                       }`}
                     >
                       <div className="flex items-start gap-2.5">
                         {isCorrect ? (
-                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                             <CheckCircle2 size={15} />
                           </div>
                         ) : (
-                          <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
                             <XCircle size={15} />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <p className="font-semibold text-slate-800 text-xs">
+                            <p className="font-bold text-white text-xs">
                               Question {idx + 1}
                             </p>
                             <span
-                              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                              className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                                 isCorrect
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-rose-100 text-rose-700"
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                  : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
                               }`}
                             >
                               {isCorrect ? "Correct ✓" : "Incorrect ✗"}
                             </span>
                           </div>
-                          <p className="text-sm font-medium text-slate-700 mt-1 leading-snug">
+                          <p className="text-sm font-medium text-slate-200 mt-1 leading-snug">
                             {q.question}
                           </p>
 
                           <div className="mt-2 text-xs space-y-1">
-                            <p className="text-slate-600">
+                            <p className="text-slate-400">
                               Your answer:{" "}
                               <span
                                 className={`font-semibold ${
-                                  isCorrect ? "text-emerald-700" : "text-rose-700 underline"
+                                  isCorrect ? "text-emerald-300" : "text-rose-300 underline"
                                 }`}
                               >
                                 {userAns}
                               </span>
                             </p>
                             {!isCorrect && (
-                              <p className="text-slate-700">
+                              <p className="text-slate-300">
                                 Correct answer:{" "}
-                                <span className="font-semibold text-emerald-700">
+                                <span className="font-semibold text-emerald-300">
                                   {q.correctAnswer}
                                 </span>
                               </p>
@@ -282,7 +284,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                           </div>
 
                           {q.explanation && (
-                            <p className="text-xs text-slate-500 bg-white/80 border border-slate-100 p-2 rounded-lg mt-2 italic">
+                            <p className="text-xs text-slate-400 bg-white/[0.03] border border-white/[0.06] p-2.5 rounded-xl mt-2 italic">
                               💡 {q.explanation}
                             </p>
                           )}
@@ -298,7 +300,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer"
                 >
                   <RotateCcw size={16} /> Retake Quiz
                 </button>
@@ -308,7 +310,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
                     onClose();
                     onRunAnalysis?.();
                   }}
-                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl shadow-xs flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition cursor-pointer"
                 >
                   <Sparkles size={16} /> Run Gap Analysis
                 </button>
