@@ -1339,7 +1339,7 @@ function Dashboard() {
         user={user}
       />
 
-      {/* Sidebar */}
+      {/* Slide-over Drawer for All Modules & Directory (never stays permanently on screen) */}
       <Sidebar
         activeItem={activeNav}
         onNavigate={setActiveNav}
@@ -1348,40 +1348,36 @@ function Dashboard() {
         currentRole={currentRole}
         isAdminInDB={isAdminInDB}
         isDarkMode={isDarkMode}
-        isCollapsed={sidebarCollapsed}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col relative z-10">
-        {/* Header */}
-        <Header
-          user={user}
-          currentRole={currentRole}
-          isAdminInDB={isAdminInDB}
-          onToggleRole={(role) => {
-            setCurrentRole(role);
-            if (role === "admin") {
-              setActiveNav("admin-dashboard");
-              showToast?.("👑 Switched to Administrator View", "info");
-            } else {
-              setActiveNav("dashboard");
-              showToast?.("👤 Switched to Official Cadre View", "info");
-            }
-          }}
-          onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
-          onMenuClick={() => setSidebarOpen(true)}
-          onNavigate={setActiveNav}
-          courses={courseList}
-          onSelectSearchResult={handleStartCourse}
-          notifications={notifications}
-          onClearNotifications={() => setNotifications([])}
-          isDarkMode={isDarkMode}
-          onToggleTheme={toggleTheme}
-          sidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
-        />
+      {/* Header - Stays sticky at top, full width, zero text overlapping */}
+      <Header
+        user={user}
+        currentRole={currentRole}
+        isAdminInDB={isAdminInDB}
+        onToggleRole={(role) => {
+          setCurrentRole(role);
+          if (role === "admin") {
+            setActiveNav("admin-dashboard");
+            showToast?.("👑 Switched to Administrator View", "info");
+          } else {
+            setActiveNav("dashboard");
+            showToast?.("👤 Switched to Official Cadre View", "info");
+          }
+        }}
+        onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
+        onMenuClick={() => setSidebarOpen(true)}
+        onNavigate={setActiveNav}
+        courses={courseList}
+        onSelectSearchResult={handleStartCourse}
+        notifications={notifications}
+        onClearNotifications={() => setNotifications([])}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
+      />
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-7 max-w-7xl w-full mx-auto">
+      {/* Main Content Area - Full width, centered, max-w-7xl, exactly like Najaba.ai */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-7 max-w-7xl w-full mx-auto relative z-10">
           {activeNav === "dashboard" && (
             <>
               {/* Najaba-style Tri-Factor Hero Stage */}
@@ -1812,7 +1808,6 @@ function Dashboard() {
             />
           )}
         </main>
-      </div>
     </div>
   );
 }

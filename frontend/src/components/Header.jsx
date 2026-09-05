@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { 
   Menu, Search, Bell, ChevronDown, User, LogOut, ShieldCheck, Sparkles, 
-  Bot, Building2, ExternalLink, Sun, Moon, PanelLeftClose, PanelLeft, X 
+  Bot, Building2, ExternalLink, Sun, Moon, X 
 } from "lucide-react";
 import { useClerk } from "@clerk/clerk-react";
 
@@ -19,8 +19,6 @@ export default function Header({
   onClearNotifications,
   isDarkMode: propIsDarkMode,
   onToggleTheme: propOnToggleTheme,
-  sidebarCollapsed = false,
-  onToggleSidebar,
 }) {
   const { signOut } = useClerk();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -80,74 +78,56 @@ export default function Header({
     : [];
 
   return (
-    <header className={`h-20 border-b flex items-center justify-between px-3 sm:px-5 lg:px-7 gap-3 sticky top-0 z-30 transition-all duration-300 backdrop-blur-2xl ${
+    <header className={`h-20 border-b flex items-center justify-between px-4 sm:px-6 lg:px-8 gap-4 sticky top-0 z-30 transition-all duration-300 backdrop-blur-2xl ${
       isDark
         ? "bg-[#120a2e]/92 border-white/[0.08] text-white"
         : "bg-[#faf7f2]/96 border-[#e8ded2] text-[#1e143e] shadow-[0_4px_20px_rgba(30,20,60,0.03)]"
     }`}>
-      {/* Left: Sidebar Toggle & Brand */}
-      <div className="flex items-center gap-2.5 shrink-0">
-        {/* Sidebar Collapse Toggle Button */}
+      {/* Left: Menu Drawer Trigger & Signature Najaba Brand */}
+      <div className="flex items-center gap-3 shrink-0">
         <button
-          onClick={onToggleSidebar || onMenuClick}
+          onClick={onMenuClick}
           className={`p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
             isDark 
               ? "text-slate-300 hover:text-white hover:bg-white/[0.08] border-white/10" 
               : "text-[#1e143e] hover:bg-[#ede6da] border-[#e8ded2]"
           }`}
-          title={sidebarCollapsed ? "Expand Navigation Sidebar" : "Collapse Sidebar (Full-Width Najaba View)"}
+          title="Open All Modules & Official Directory"
         >
-          {sidebarCollapsed ? (
-            <PanelLeft size={18} />
-          ) : (
-            <>
-              <PanelLeftClose size={18} className="hidden lg:block" />
-              <Menu size={18} className="lg:hidden" />
-            </>
-          )}
+          <Menu size={19} />
         </button>
 
-        {/* Brand Display: Shown when sidebar is collapsed or on smaller screens */}
-        {(sidebarCollapsed || typeof window !== "undefined" && window.innerWidth < 1024) ? (
-          <div
-            onClick={() => onNavigate?.("dashboard")}
-            className="flex items-center gap-2.5 cursor-pointer group shrink-0"
-          >
-            <div className="w-8 h-8 rounded-xl bg-[#5925dc] text-white flex items-center justify-center font-black text-base shadow-[0_4px_16px_rgba(89,37,220,0.4)] border border-white/20 shrink-0 group-hover:scale-105 transition-transform">
-              A
-            </div>
-            <div className="leading-tight">
-              <div className="flex items-center gap-1.5">
-                <span className={`font-extrabold text-base font-serif tracking-tight ${
-                  isDark ? "text-white" : "text-[#1e143e]"
-                }`}>
-                  AlgoX
-                </span>
-                <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider ${
-                  isDark ? "bg-[#5925dc]/20 text-indigo-300 border border-[#5925dc]/30" : "bg-[#5925dc]/10 text-[#5925dc] border border-[#5925dc]/25"
-                }`}>
-                  Cadre
-                </span>
-              </div>
-              <span className={`text-[8px] font-bold uppercase tracking-widest block -mt-0.5 ${
-                isDark ? "text-slate-400" : "text-[#7e7298]"
+        <div
+          onClick={() => onNavigate?.("dashboard")}
+          className="flex items-center gap-3 cursor-pointer group shrink-0"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#5925dc] text-white flex items-center justify-center font-black text-lg shadow-[0_4px_16px_rgba(89,37,220,0.4)] border border-white/20 shrink-0 group-hover:scale-105 transition-transform">
+            A
+          </div>
+          <div className="leading-tight">
+            <div className="flex items-center gap-1.5">
+              <span className={`font-extrabold text-lg font-serif tracking-tight ${
+                isDark ? "text-white group-hover:text-indigo-200" : "text-[#1e143e] group-hover:text-[#5925dc]"
               }`}>
-                ASSESS · DEVELOP · EXCEL
+                AlgoX
+              </span>
+              <span className={`hidden sm:inline-flex text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${
+                isDark ? "bg-[#5925dc]/20 text-indigo-300 border border-[#5925dc]/30" : "bg-[#5925dc]/10 text-[#5925dc] border border-[#5925dc]/25"
+              }`}>
+                AI Cadre
               </span>
             </div>
-          </div>
-        ) : (
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
-            <span className="w-2 h-2 rounded-full bg-[#de7a58]" />
-            <span className={`text-xs font-serif font-bold tracking-tight ${isDark ? "text-indigo-200" : "text-[#1e143e]"}`}>
-              Tri-Factor Cadre Portal
+            <span className={`text-[9px] font-bold uppercase tracking-widest block -mt-0.5 ${
+              isDark ? "text-slate-400" : "text-[#7e7298]"
+            }`}>
+              ASSESS · DEVELOP · EXCEL
             </span>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Center: Editorial Nav Links (Najaba signature style - No Overlapping) */}
-      <nav className="hidden lg:flex items-center gap-4 xl:gap-7 text-xs font-semibold shrink-0 whitespace-nowrap">
+      {/* Center: Editorial Nav Links (Najaba signature style) */}
+      <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-semibold shrink-0 whitespace-nowrap">
         <button
           onClick={() => onNavigate?.("dashboard")}
           className={`transition-colors relative py-1 cursor-pointer shrink-0 ${
@@ -184,7 +164,7 @@ export default function Header({
       </nav>
 
       {/* Right: Role Switcher, Language, Najaba Theme Toggle, Search & CTA */}
-      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Role Switcher Pill */}
         <div className={`flex items-center p-0.5 rounded-full border shrink-0 ${
           isDark
@@ -193,23 +173,23 @@ export default function Header({
         }`}>
           <button
             onClick={() => onToggleRole?.("learner")}
-            className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 ${
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 ${
               currentRole === "learner"
                 ? "bg-[#5925dc] text-white shadow-xs"
                 : isDark ? "text-slate-400 hover:text-slate-200" : "text-[#7e7298] hover:text-[#1e143e]"
             }`}
           >
-            <User size={11} /> Official
+            <User size={12} /> Official
           </button>
           <button
             onClick={() => onToggleRole?.("admin")}
-            className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 ${
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 ${
               currentRole === "admin"
                 ? "bg-[#e2ac52] text-[#19103c] font-black shadow-xs"
                 : isDark ? "text-slate-400 hover:text-slate-200" : "text-[#7e7298] hover:text-[#1e143e]"
             }`}
           >
-            <Building2 size={11} /> Admin
+            <Building2 size={12} /> Admin
           </button>
         </div>
 
@@ -242,7 +222,7 @@ export default function Header({
         {/* Najaba Signature Rounded-Full Pill CTA Button */}
         <button
           onClick={onOpenAIAssistant}
-          className={`hidden sm:flex items-center gap-1.5 px-4 py-2 text-xs transition-all duration-200 cursor-pointer shrink-0 ${
+          className={`hidden sm:flex items-center gap-1.5 px-4 sm:px-5 py-2 text-xs transition-all duration-200 cursor-pointer shrink-0 ${
             isDark ? "btn-najaba-gold" : "btn-najaba-purple"
           }`}
           title="Open Karmayogi Sahayak AI Mentor"
@@ -251,50 +231,26 @@ export default function Header({
           <span>AI Sahayak</span>
         </button>
 
-        {/* Global Search: Compact button on laptop, full bar on wide screens */}
+        {/* Global Search Button & Dropdown */}
         <div ref={searchRef} className="relative shrink-0">
-          {/* Search Icon Trigger for smaller/laptop screens */}
           <button
             onClick={() => setSearchOpen((s) => !s)}
-            className={`2xl:hidden p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
+            className={`p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
               isDark 
                 ? "text-slate-300 hover:text-white hover:bg-white/[0.06] border-white/10" 
                 : "text-[#1e143e] hover:bg-[#ede6da] border-[#e8ded2]"
             }`}
-            title="Search courses, competencies, and materials"
+            title="Search courses, skills, and materials"
           >
             <Search size={16} />
           </button>
 
-          {/* Expanded Input for 2XL screens */}
-          <div className={`hidden 2xl:flex items-center gap-2.5 rounded-full px-3.5 py-1.5 w-56 border transition-all ${
-            isDark
-              ? "bg-white/[0.04] hover:bg-white/[0.06] border-white/[0.08] focus-within:border-indigo-500/50 focus-within:bg-[#1b1242]"
-              : "bg-white hover:bg-[#faf7f2] border-[#e8ded2] focus-within:border-[#5925dc]"
-          }`}>
-            <Search size={14} className={`shrink-0 ${isDark ? "text-slate-400" : "text-[#7e7298]"}`} />
-            <input
-              type="text"
-              placeholder="Search catalog..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSearchOpen(true);
-              }}
-              onFocus={() => setSearchOpen(true)}
-              className={`bg-transparent outline-none text-xs w-full ${
-                isDark ? "text-white placeholder:text-slate-500" : "text-[#1e143e] placeholder:text-[#9d94b8]"
-              }`}
-            />
-          </div>
-
-          {/* Search Popover Dialog when clicked on laptop/tablet */}
           {searchOpen && (
-            <div className={`absolute right-0 top-12 w-72 sm:w-80 rounded-2xl border shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ${
+            <div className={`absolute right-0 top-12 w-80 rounded-2xl border shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 ${
               isDark ? "bg-[#1b1242]/98 backdrop-blur-2xl border-white/[0.12]" : "bg-white border-[#e8ded2]"
             }`}>
-              <div className="p-2.5 border-b border-white/[0.06] flex items-center gap-2">
-                <Search size={14} className="text-slate-400 shrink-0" />
+              <div className="p-3 border-b border-white/[0.06] flex items-center gap-2">
+                <Search size={15} className="text-slate-400 shrink-0" />
                 <input
                   type="text"
                   autoFocus
@@ -397,7 +353,7 @@ export default function Header({
         <div ref={profileRef} className="relative shrink-0">
           <button
             onClick={() => setProfileDropdownOpen((s) => !s)}
-            className={`flex items-center gap-2 p-1.5 sm:px-2 rounded-xl border transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-2 p-1.5 sm:px-2.5 rounded-xl border transition-all cursor-pointer shrink-0 ${
               isDark
                 ? "hover:bg-white/[0.06] border-white/10"
                 : "hover:bg-[#ede6da] border-[#e8ded2]"
@@ -441,7 +397,7 @@ export default function Header({
                   isDark ? "text-slate-300 hover:text-white hover:bg-white/[0.06]" : "text-[#4a3e65] hover:text-[#1e143e] hover:bg-[#faf7f2]"
                 }`}
               >
-                <User size={15} className={isDark ? "text-slate-400" : "text-[#7e7298]"} />
+                <User size={15} className={isDark ? "text-slate-400" : "text-[#7e7298]" } />
                 Officer Profile &amp; Cadre
               </button>
 
@@ -454,7 +410,7 @@ export default function Header({
                   isDark ? "text-slate-300 hover:text-white hover:bg-white/[0.06]" : "text-[#4a3e65] hover:text-[#1e143e] hover:bg-[#faf7f2]"
                 }`}
               >
-                <ShieldCheck size={15} className={isDark ? "text-slate-400" : "text-[#7e7298]"} />
+                <ShieldCheck size={15} className={isDark ? "text-slate-400" : "text-[#7e7298]" } />
                 My Competencies
               </button>
 

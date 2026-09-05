@@ -19,7 +19,6 @@ export default function Sidebar({
   currentRole = "learner",
   isAdminInDB = false,
   isDarkMode = true,
-  isCollapsed = false,
 }) {
   const visibleNavItems = sidebarNavItems.filter((item) => {
     if (currentRole === "learner" && item.id === "admin-dashboard") {
@@ -28,56 +27,58 @@ export default function Sidebar({
     return true;
   });
 
-  return (
-    <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div
-          onClick={onClose}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden transition-opacity"
-        />
-      )}
+  if (!isOpen) return null;
 
+  return (
+    <div className="fixed inset-0 z-50 flex">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+      />
+
+      {/* Slide-over Drawer (Never covers content permanently) */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen backdrop-blur-2xl flex flex-col shrink-0 z-40 border-r
-          transform transition-all duration-300 ease-in-out
-          ${isCollapsed ? "lg:-translate-x-full lg:w-0 lg:opacity-0 pointer-events-none lg:border-none" : "lg:w-64 lg:translate-x-0"}
-          ${isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 lg:w-auto"}
-          ${isDarkMode ? "bg-[#100829]/95 text-slate-200 border-white/[0.08]" : "bg-[#faf7f2]/98 text-[#1e143e] border-[#e8ded2]"}`}
+        className={`relative z-10 w-72 max-w-[85vw] h-full shadow-2xl flex flex-col border-r transition-all duration-300 animate-in slide-in-from-left duration-200 ${
+          isDarkMode
+            ? "bg-[#100829] text-slate-200 border-white/[0.08]"
+            : "bg-[#faf7f2] text-[#1e143e] border-[#e8ded2]"
+        }`}
       >
         {/* Brand & Logo */}
-        <div className={`px-5 py-5 flex items-center justify-between gap-2 border-b relative ${
+        <div className={`px-5 py-5 flex items-center justify-between gap-2 border-b ${
           isDarkMode ? "border-white/[0.08]" : "border-[#e8ded2]"
         }`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#5925dc] flex items-center justify-center font-black text-xl text-white shadow-[0_4px_16px_rgba(89,37,220,0.4)] border border-white/20 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#5925dc] flex items-center justify-center font-black text-lg text-white shadow-[0_4px_16px_rgba(89,37,220,0.4)] border border-white/20 shrink-0">
               A
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <p className={`font-extrabold text-lg font-serif leading-tight tracking-tight ${
+                <p className={`font-extrabold text-base font-serif leading-tight tracking-tight ${
                   isDarkMode ? "text-white" : "text-[#1e143e]"
                 }`}>
                   Algo<span className={isDarkMode ? "text-[#e2ac52]" : "text-[#5925dc]"}>X</span>
                 </p>
-                <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                   isDarkMode ? "bg-[#5925dc]/20 text-indigo-300 border border-[#5925dc]/30" : "bg-[#5925dc]/10 text-[#5925dc] border border-[#5925dc]/25"
                 }`}>
-                  AI v2.4
+                  AI Cadre
                 </span>
               </div>
-              <p className={`text-[10px] uppercase font-bold tracking-wider mt-0.5 ${
+              <p className={`text-[9px] uppercase font-bold tracking-wider mt-0.5 ${
                 isDarkMode ? "text-slate-400" : "text-[#7e7298]"
               }`}>
-                {currentRole === "admin" ? "MoSPI Cadre Admin" : "Official Statistics AI"}
+                {currentRole === "admin" ? "MoSPI Cadre Admin" : "ASSESS · DEVELOP · EXCEL"}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className={`lg:hidden p-1 rounded-lg ${
-              isDarkMode ? "text-slate-400 hover:text-white hover:bg-white/[0.05]" : "text-[#7e7298] hover:text-[#1e143e] hover:bg-[#ede6da]"
+            className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+              isDarkMode ? "text-slate-400 hover:text-white hover:bg-white/[0.06]" : "text-[#7e7298] hover:text-[#1e143e] hover:bg-[#ede6da]"
             }`}
+            title="Close Menu"
           >
             <X size={18} />
           </button>
@@ -173,6 +174,6 @@ export default function Sidebar({
           </div>
         </div>
       </aside>
-    </>
+    </div>
   );
 }
