@@ -8,7 +8,9 @@ const __dirname = path.dirname(__filename);
 
 let COURSE_ID_MAP = {};
 try {
-  const catalogPath = path.resolve(__dirname, "../../../ml-service/app/data/mospi_courses_catalog.json");
+  const localCatalogPath = path.resolve(__dirname, "../data/mospi_courses_catalog.json");
+  const mlServiceCatalogPath = path.resolve(__dirname, "../../../ml-service/app/data/mospi_courses_catalog.json");
+  const catalogPath = fs.existsSync(localCatalogPath) ? localCatalogPath : mlServiceCatalogPath;
   if (fs.existsSync(catalogPath)) {
     const raw = fs.readFileSync(catalogPath, "utf-8");
     const catalog = JSON.parse(raw);

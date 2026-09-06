@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { FileText, Eye, Sparkles, UploadCloud, ShieldCheck, X, Presentation, ChevronLeft, ChevronRight, Layers, CheckCircle2, Download, ExternalLink, BookOpen, Trash2 } from "lucide-react";
 
+const BACKEND_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+
 export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerateQuizFromDoc, onDeleteDoc }) {
   const [activeDoc, setActiveDoc] = useState(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -465,7 +467,7 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
 
                 {activeDoc.fileUrl && activeDoc.fileUrl !== "#" && (
                   <a
-                    href={activeDoc.fileUrl.startsWith("http") ? activeDoc.fileUrl : `http://localhost:5000${activeDoc.fileUrl}`}
+                    href={activeDoc.fileUrl.startsWith("http") ? activeDoc.fileUrl : `${BACKEND_URL}${activeDoc.fileUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3.5 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
