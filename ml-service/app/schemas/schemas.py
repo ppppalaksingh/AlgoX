@@ -17,16 +17,21 @@ class UserProfileInput(BaseModel):
 
 class SkillGap(BaseModel):
     id: Optional[str] = None
-    skillName: str
-    currentLevel: float
-    requiredLevel: float
-    gap: float
+    skillName: Optional[str] = None
+    name: Optional[str] = None
+    subCompetency: Optional[str] = None
+    currentLevel: Optional[float] = 2.0
+    requiredLevel: Optional[float] = 4.0
+    gap: Optional[float] = 2.0
     percent: Optional[Union[int, float]] = None
     status: Optional[str] = None
     domain: Optional[str] = None
     competencyType: Optional[str] = None
     nsstaCategory: Optional[str] = None
     categoryCode: Optional[str] = None
+
+    class Config:
+        extra = "allow"
 
 class GapAnalysisResponse(BaseModel):
     matchedDesignation: Optional[str] = None
@@ -47,15 +52,21 @@ class GapAnalysisResponse(BaseModel):
     topStrength: Optional[Any] = None
     aiExecutiveInsight: Optional[str] = None
 
+    class Config:
+        extra = "allow"
+
 class RecommendationRequest(BaseModel):
     designation: Optional[str] = None
     serviceCadre: Optional[str] = None
     post: Optional[str] = None
     domainScores: Optional[dict] = None
-    skillGaps: Optional[List[SkillGap]] = []
+    skillGaps: Optional[List[Any]] = []
     sourceFilter: Optional[str] = None
     domainFilter: Optional[str] = None
-    topN: Optional[int] = 12
+    topN: Optional[int] = 140
+
+    class Config:
+        extra = "allow"
 
 class QuizGenerationRequest(BaseModel):
     text: str

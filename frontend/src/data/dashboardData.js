@@ -1,3 +1,5 @@
+import mospiCatalog from "./mospi_courses_catalog.json";
+
 // ============================================================================
 // DASHBOARD DATA & CONFIGURATION
 // ============================================================================
@@ -121,39 +123,39 @@ export const progressSummary = {
   month: "This Quarter",
   percent: 25,
   completed: 0,
-  inProgress: 0,
-  notStarted: 6,
+  inProgress: 3,
+  notStarted: 137,
 };
 
 // "Continue Learning" course cards
 export const continueLearningCourses = [
   {
-    id: "course-1",
-    title: "Planning and Designing of Large Scale Sample Surveys",
+    id: "CRS0001",
+    title: "SSS Induction Training Programme",
     tag: "In Progress",
     percent: 60,
     color: "blue",
     domain: "Statistical",
   },
   {
-    id: "course-2",
-    title: "Python Training for Statisticians",
+    id: "CRS0004",
+    title: "Macroeconomic Diagnostics, Financial Programming and Policies",
     tag: "In Progress",
     percent: 35,
     color: "orange",
-    domain: "Technical",
+    domain: "Statistical",
   },
   {
-    id: "course-3",
-    title: "Cybersecurity & DPDP Compliance in Government",
+    id: "CRS0003",
+    title: "Ethics, Data Governance and Integrity in Public Service",
     tag: "In Progress",
     percent: 20,
     color: "green",
     domain: "Digital Governance",
   },
   {
-    id: "course-4",
-    title: "Handling Large Scale Data & Data Analysis using R",
+    id: "CRS0005",
+    title: "Applied Econometrics and Time Series Analysis",
     tag: "Available",
     percent: 0,
     color: "purple",
@@ -181,87 +183,42 @@ export const sidebarNavItems = [
   { id: "help", label: "Help & Support", icon: "HelpCircle" },
 ];
 
-export const allCourses = [
-  {
-    id: "tpac1",
-    title: "Planning and Designing of Large Scale Sample Surveys",
-    description: "Review of sample survey techniques, survey planning (frame, sampling scheme, sample size), questionnaire design, post-survey operations including field/computer scrutiny, multipliers, and report writing.",
-    domain: "Statistical",
-    level: "Advanced",
-    duration: "One week",
-    institute: "NSSTA, Greater Noida",
-    percent: 60,
-    status: "In Progress",
-    color: "blue",
-    source_type: "TPAC"
-  },
-  {
-    id: "tpac6",
-    title: "Python Training for Statisticians",
-    description: "Python fundamentals including data structures, file operations, exception handling, and data science packages (NumPy, pandas, matplotlib, seaborn, SciPy, statsmodels, scikit-learn) with hands-on model building.",
-    domain: "Technical",
-    level: "Intermediate",
-    duration: "One week",
-    institute: "C R Rao AIMSC, Hyderabad",
-    percent: 35,
-    status: "In Progress",
-    color: "orange",
-    source_type: "TPAC"
-  },
-  {
-    id: "igot1",
-    title: "Artificial Intelligence for Public Governance",
-    description: "Concepts of AI/ML, generative AI applications, and ethical frameworks for public administration.",
-    provider: "Kyndryl & DSCI",
-    domain: "Technical",
-    level: "Beginner",
-    duration: "2h 42m",
-    igotLink: "https://portal.igotkarmayogi.gov.in/app/toc/do_1144751221174108161801/overview",
-    percent: 20,
-    status: "In Progress",
-    color: "green",
-    source_type: "iGOT"
-  },
-  {
-    id: "igot12",
-    title: "Data Privacy and DPDP Act in Governance",
-    description: "Digital Personal Data Protection Act 2023 guidelines, data principal rights, and data fiduciary responsibilities for official statistics.",
-    provider: "Data Security Council of India",
-    domain: "Digital Governance",
-    level: "Beginner",
-    duration: "1h 50m",
-    percent: 0,
-    status: "Available",
-    color: "purple",
-    source_type: "iGOT"
-  },
-  {
-    id: "tpac2",
-    title: "Handling Large Scale Data & Data Analysis using R",
-    description: "Practical orientation to data analysis in R including descriptive analysis, regression, logistic analysis, factor analysis, cluster analysis using live NSSO/Census data.",
-    domain: "Technical",
-    level: "Intermediate",
-    duration: "One week",
-    institute: "IIT Kanpur / IASRI",
-    percent: 0,
-    status: "Available",
-    color: "blue",
-    source_type: "TPAC"
-  },
-  {
-    id: "tpac8",
-    title: "National Accounts Statistics & SNA 2008 Guidelines",
-    description: "Compilation of GDP, GVA, Supply-Use Tables, and capital formation according to UN System of National Accounts 2008.",
-    domain: "Statistical",
-    level: "Advanced",
-    duration: "Two weeks",
-    institute: "National Statistical Systems Training Academy (NSSTA)",
-    percent: 0,
-    status: "Available",
-    color: "orange",
-    source_type: "TPAC"
-  }
-];
+const colorList = ["blue", "orange", "green", "purple"];
+
+export const allCourses = (mospiCatalog || []).map((c, i) => {
+  const isTPAC = c.source_platform?.includes("NSSTA") || c.source_platform?.includes("TPAC");
+  const officialUrl = isTPAC ? "https://nssta.gov.in" : "https://portal.igotkarmayogi.gov.in/public/home";
+  const matchScore = parseFloat(Math.max(0.65, 0.96 - (i * 0.002)).toFixed(3));
+  const matchPercent = Math.max(68, Math.round(matchScore * 100));
+
+  return {
+    id: c.course_id || `CRS${i + 1}`,
+    course_id: c.course_id,
+    title: c.title,
+    competency_id: c.competency_id,
+    competency: c.competency || "",
+    domain: c.domain || "Statistical",
+    level: `Level ${c.difficulty_level || 3}`,
+    duration_hours: c.duration_hours || 20,
+    duration: `${c.duration_hours || 20} hours`,
+    institute: c.source_platform || (isTPAC ? "NSSTA, Greater Noida" : "iGOT Karmayogi"),
+    provider: c.source_platform || (isTPAC ? "NSSTA / MoSPI" : "iGOT Karmayogi"),
+    source_platform: c.source_platform || (isTPAC ? "NSSTA" : "iGOT"),
+    target_audience: c.target_audience || "Statistical Officers",
+    percent: i === 0 ? 60 : i === 1 ? 35 : i === 2 ? 20 : 0,
+    status: i < 3 ? "In Progress" : "Available",
+    color: colorList[i % colorList.length],
+    source_type: isTPAC ? "TPAC" : "iGOT",
+    matchScore,
+    matchPercent,
+    similarityScore: matchScore,
+    relevance: `${matchPercent}%`,
+    designationRelevance: "MoSPI Capacity Building Framework",
+    officialUrl,
+    igotLink: officialUrl,
+    description: `Official training in ${c.competency || c.title} (${c.domain || "Statistical"} domain) tailored for ${c.target_audience || "MoSPI statisticians"}.`,
+  };
+});
 
 export const certificates = [];
 

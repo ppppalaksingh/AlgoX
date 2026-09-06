@@ -1,6 +1,7 @@
 import json
 import os
 import torch
+import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -199,14 +200,33 @@ def _course_text(c: dict) -> str:
     return f"{c['title']} {domain} {comp} {detail} {tags} {nssta} {comp_type}"
 
 course_texts = [_course_text(c) for c in COURSES]
-# Encode in small batches with no_grad and convert_to_numpy to prevent RAM spikes on 512MB instances
-with torch.no_grad():
-    course_embeddings = model.encode(
-        course_texts,
-        batch_size=8,
-        show_progress_bar=False,
-        convert_to_numpy=True
-    )
+EMBEDDINGS_CACHE_PATH = os.path.join(DATA_DIR, "course_embeddings.npy")
+if os.path.exists(EMBEDDINGS_CACHE_PATH):
+    try:
+        print("[recommendation_engine] Loading precomputed course embeddings from cache")
+        course_embeddings = np.load(EMBEDDINGS_CACHE_PATH)
+    except Exception as err:
+        print(f"[recommendation_engine] Cache load warning: {err}, re-computing")
+        with torch.no_grad():
+            course_embeddings = model.encode(
+                course_texts,
+                batch_size=8,
+                show_progress_bar=False,
+                convert_to_numpy=True
+            )
+else:
+    # Encode in small batches with no_grad and convert_to_numpy to prevent RAM spikes on 512MB instances
+    with torch.no_grad():
+        course_embeddings = model.encode(
+            course_texts,
+            batch_size=8,
+            show_progress_bar=False,
+            convert_to_numpy=True
+        )
+    try:
+        np.save(EMBEDDINGS_CACHE_PATH, course_embeddings)
+    except Exception:
+        pass
 
 # Cadre classifications for designation-aware training
 CADRE_TIER_CONFIG = {

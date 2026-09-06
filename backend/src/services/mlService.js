@@ -510,7 +510,7 @@ function computeFallbackGapAnalysis(userProfile) {
 
 export const getGapAnalysis = async (userProfile) => {
   try {
-    const { data } = await axios.post(`${ML_BASE_URL}/gap-analysis`, userProfile, { timeout: 4000 });
+    const { data } = await axios.post(`${ML_BASE_URL}/gap-analysis`, userProfile, { timeout: 20000 });
     return data;
   } catch (err) {
     console.warn("[mlService] FastAPI gap-analysis note:", err.message, "- utilizing internal resilient ML model engine.");
@@ -520,7 +520,7 @@ export const getGapAnalysis = async (userProfile) => {
 
 export const getRecommendations = async (gapProfile) => {
   try {
-    const { data } = await axios.post(`${ML_BASE_URL}/recommendations`, gapProfile, { timeout: 4000 });
+    const { data } = await axios.post(`${ML_BASE_URL}/recommendations`, gapProfile, { timeout: 20000 });
     return data;
   } catch (err) {
     console.warn("[mlService] FastAPI recommendations note:", err.message);
