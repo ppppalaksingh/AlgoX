@@ -101,6 +101,119 @@ export const shuffleQuestionsOptions = (questions) => {
   });
 };
 
+export const SAMPLE_MOSPI_QUESTION_BANK = [
+  {
+    question: "In India's Official Statistical System, what is the core objective of Stratified Multi-stage Sampling?",
+    options: [
+      "Ensures national statistical accuracy through representative first stage and second stage units",
+      "Eliminates the requirement of sample multipliers and weighting",
+      "Restricts survey data collection only to urban industrial blocks",
+      "Replaces probability sampling with unverified estimates"
+    ],
+    correctAnswer: "Ensures national statistical accuracy through representative first stage and second stage units",
+    explanation: "Stratified multi-stage sampling provides unbiased population estimates with minimum variance across diverse geographic strata."
+  },
+  {
+    question: "What is the base year currently used for All-India Consumer Price Index (CPI) compiled by MoSPI?",
+    options: [
+      "2012 = 100",
+      "2004-05 = 100",
+      "2018 = 100",
+      "2020 = 100"
+    ],
+    correctAnswer: "2012 = 100",
+    explanation: "MoSPI CPI currently uses base year 2012=100 with modified Laspeyres aggregation."
+  },
+  {
+    question: "How does the DPDP Act 2023 impact official statistics microdata dissemination?",
+    options: [
+      "Requires robust anonymization, purpose limitation, and protection of citizen personal data",
+      "Prohibits publication of any national statistical reports",
+      "Mandates unrestricted public release of identifiable citizen records",
+      "Eliminates digital public infrastructure across ministries"
+    ],
+    correctAnswer: "Requires robust anonymization, purpose limitation, and protection of citizen personal data",
+    explanation: "The DPDP Act 2023 requires strict de-identification and security compliance for all published survey microdata."
+  },
+  {
+    question: "Under the UN System of National Accounts (SNA 2008), how is Gross Value Added (GVA at basic prices) defined?",
+    options: [
+      "Output at basic prices minus Intermediate Consumption at purchasers' prices",
+      "GDP at market prices minus total capital depreciation",
+      "Net Value Added plus total subsidies on products",
+      "Total exports minus imported final consumer goods"
+    ],
+    correctAnswer: "Output at basic prices minus Intermediate Consumption at purchasers' prices",
+    explanation: "GVA at basic prices equals the value of output minus intermediate consumption used in the production process."
+  },
+  {
+    question: "In the Periodic Labour Force Survey (PLFS), how is the Current Weekly Status (CWS) of employment determined?",
+    options: [
+      "Activity pursued by the person on any day during the 7 days preceding the survey date",
+      "Continuous employment throughout the preceding 365 days",
+      "Registration status on the National Career Service (NCS) portal",
+      "Number of hours worked exclusively during weekend days"
+    ],
+    correctAnswer: "Activity pursued by the person on any day during the 7 days preceding the survey date",
+    explanation: "CWS classifies an individual as employed if they worked for at least 1 hour on any day during the reference week."
+  },
+  {
+    question: "Which index formula is officially utilized by the NSO for compiling the Index of Industrial Production (IIP)?",
+    options: [
+      "Laspeyres weighted arithmetic mean index (base year 2011-12=100)",
+      "Paasche current-year production index",
+      "Fisher Ideal index with geometric volume adjustment",
+      "Unweighted chain-linked median index"
+    ],
+    correctAnswer: "Laspeyres weighted arithmetic mean index (base year 2011-12=100)",
+    explanation: "IIP uses the Laspeyres formula with base year 2011-12=100 and sector weights derived from National Accounts."
+  },
+  {
+    question: "What role does Neyman Allocation serve in sample survey design across heterogeneous strata?",
+    options: [
+      "Minimizes overall sample variance by allocating more units to larger and more variable strata",
+      "Allocates equal numbers of sample households to every district regardless of population",
+      "Selects only top decile enterprises for rapid estimation",
+      "Eliminates the necessity of post-stratification weighting"
+    ],
+    correctAnswer: "Minimizes overall sample variance by allocating more units to larger and more variable strata",
+    explanation: "Neyman Allocation achieves optimal precision for a given total sample size based on stratum size and standard deviation."
+  },
+  {
+    question: "What is the primary function of the National Indicator Framework (NIF) developed by MoSPI?",
+    options: [
+      "Monitoring national and state progress towards UN Sustainable Development Goals (SDGs)",
+      "Regulating foreign direct investment caps in retail trade",
+      "Tracking daily attendance of central government statistical officers",
+      "Automating customs tariff collection across maritime ports"
+    ],
+    correctAnswer: "Monitoring national and state progress towards UN Sustainable Development Goals (SDGs)",
+    explanation: "MoSPI's NIF provides quantitative indicators and metadata to track India's progress across all 17 SDGs."
+  },
+  {
+    question: "In official statistical computing, why is Python (Pandas/NumPy) preferred for NSS microdata scrutiny?",
+    options: [
+      "Enables vectorized operations, automated multiplier weighting, and reproducible anomaly validation",
+      "Completely replaces official statistical standards with unsupervised approximations",
+      "Prevents database backups and bypasses version control",
+      "Eliminates the requirement for survey documentation"
+    ],
+    correctAnswer: "Enables vectorized operations, automated multiplier weighting, and reproducible anomaly validation",
+    explanation: "Python empowers statisticians to automate field data validation, multiplier weights, and large-scale tabular scrutiny."
+  },
+  {
+    question: "Under the Fundamental Principles of Official Statistics adopted by the UN, what does the principle of Impartiality require?",
+    options: [
+      "Official statistics must be compiled and made available on an impartial basis to honour citizens' entitlement to public information",
+      "Statistical reports must be submitted exclusively to political authorities for prior redaction",
+      "Survey microdata must be withheld from researchers to avoid alternative analyses",
+      "Indices should be calculated using arbitrary convenience targets"
+    ],
+    correctAnswer: "Official statistics must be compiled and made available on an impartial basis to honour citizens' entitlement to public information",
+    explanation: "Principle 1 of UN Fundamental Principles establishes statistical objectivity, reliability, and equal access for all citizens."
+  }
+];
+
 export const uploadAndGenerateQuiz = async (req, res) => {
   try {
     if (!req.file) {
@@ -238,64 +351,9 @@ export const uploadAndGenerateQuiz = async (req, res) => {
       quizData = await generateQuiz(extractedText);
     } catch (mlErr) {
       console.warn("[quiz.controller] ML service note, using instant assessment fallback:", mlErr.message);
+      const shuffledBank = [...SAMPLE_MOSPI_QUESTION_BANK].sort(() => 0.5 - Math.random());
       quizData = {
-        questions: [
-          {
-            question: `According to ${req.file.originalname}, what is the primary objective of data quality and survey verification?`,
-            options: [
-              "Ensures national statistical accuracy through stratified validation protocols",
-              "Replaces traditional oversight with unvalidated reporting models",
-              "Standardizes informal estimation methods rather than official verification",
-              "Eliminates administrative controls in public data systems"
-            ],
-            correctAnswer: "Ensures national statistical accuracy through stratified validation protocols",
-            explanation: `Reference from ${req.file.originalname}: Official data validation and quality frameworks ensure high accuracy across statistical collections.`
-          },
-          {
-            question: "In government digital public infrastructure, how does DPDP Act 2023 compliance protect citizen survey data?",
-            options: [
-              "Mandates data anonymization, purpose limitation, and secure cloud storage",
-              "Allows unencrypted public sharing of individual identifying records",
-              "Eliminates data principal consent requirements in administrative surveys",
-              "Restricts data access exclusively to non-governmental entities"
-            ],
-            correctAnswer: "Mandates data anonymization, purpose limitation, and secure cloud storage",
-            explanation: "DPDP Act 2023 requires strict anonymization and secure handling of all citizen datasets."
-          },
-          {
-            question: "What is the primary role of stratified sampling in large-scale official statistics?",
-            options: [
-              "Reduces sampling variance and ensures representation across heterogeneous sub-populations",
-              "Eliminates the need for calculating population multipliers",
-              "Restricts sample selection exclusively to urban commercial districts",
-              "Replaces probability selection with convenience sampling"
-            ],
-            correctAnswer: "Reduces sampling variance and ensures representation across heterogeneous sub-populations",
-            explanation: "Stratification ensures representation and lowers standard errors across diverse demographic strata."
-          },
-          {
-            question: "Which formula is officially utilized for compiling All-India Consumer Price Index (CPI) numbers?",
-            options: [
-              "Modified Laspeyres price index formula with fixed consumption weights",
-              "Paasche current-year weighting index",
-              "Simple unweighted geometric mean of raw price quotations",
-              "Harmonic mean price indexing"
-            ],
-            correctAnswer: "Modified Laspeyres price index formula with fixed consumption weights",
-            explanation: "MoSPI CPI uses the modified Laspeyres formula with base year 2012=100 weights."
-          },
-          {
-            question: "What is the key purpose of the National Indicator Framework (NIF) in official statistics?",
-            options: [
-              "Tracks national and state-level progress on UN Sustainable Development Goals (SDGs)",
-              "Replaces industrial production indexing across manufacturing sectors",
-              "Manages internal civil service attendance and payroll systems",
-              "Calculates daily stock market valuations"
-            ],
-            correctAnswer: "Tracks national and state-level progress on UN Sustainable Development Goals (SDGs)",
-            explanation: "MoSPI's NIF provides quantitative indicators to monitor India's progress on the 17 SDGs."
-          }
-        ]
+        questions: shuffledBank.slice(0, 5),
       };
     }
 
@@ -321,119 +379,6 @@ export const uploadAndGenerateQuiz = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-const SAMPLE_MOSPI_QUESTION_BANK = [
-  {
-    question: "In India's Official Statistical System, what is the core objective of Stratified Multi-stage Sampling?",
-    options: [
-      "Ensures national statistical accuracy through representative first stage and second stage units",
-      "Eliminates the requirement of sample multipliers and weighting",
-      "Restricts survey data collection only to urban industrial blocks",
-      "Replaces probability sampling with unverified estimates"
-    ],
-    correctAnswer: "Ensures national statistical accuracy through representative first stage and second stage units",
-    explanation: "Stratified multi-stage sampling provides unbiased population estimates with minimum variance across diverse geographic strata."
-  },
-  {
-    question: "What is the base year currently used for All-India Consumer Price Index (CPI) compiled by MoSPI?",
-    options: [
-      "2012 = 100",
-      "2004-05 = 100",
-      "2018 = 100",
-      "2020 = 100"
-    ],
-    correctAnswer: "2012 = 100",
-    explanation: "MoSPI CPI currently uses base year 2012=100 with modified Laspeyres aggregation."
-  },
-  {
-    question: "How does the DPDP Act 2023 impact official statistics microdata dissemination?",
-    options: [
-      "Requires robust anonymization, purpose limitation, and protection of citizen personal data",
-      "Prohibits publication of any national statistical reports",
-      "Mandates unrestricted public release of identifiable citizen records",
-      "Eliminates digital public infrastructure across ministries"
-    ],
-    correctAnswer: "Requires robust anonymization, purpose limitation, and protection of citizen personal data",
-    explanation: "The DPDP Act 2023 requires strict de-identification and security compliance for all published survey microdata."
-  },
-  {
-    question: "Under the UN System of National Accounts (SNA 2008), how is Gross Value Added (GVA at basic prices) defined?",
-    options: [
-      "Output at basic prices minus Intermediate Consumption at purchasers' prices",
-      "GDP at market prices minus total capital depreciation",
-      "Net Value Added plus total subsidies on products",
-      "Total exports minus imported final consumer goods"
-    ],
-    correctAnswer: "Output at basic prices minus Intermediate Consumption at purchasers' prices",
-    explanation: "GVA at basic prices equals the value of output minus intermediate consumption used in the production process."
-  },
-  {
-    question: "In the Periodic Labour Force Survey (PLFS), how is the Current Weekly Status (CWS) of employment determined?",
-    options: [
-      "Activity pursued by the person on any day during the 7 days preceding the survey date",
-      "Continuous employment throughout the preceding 365 days",
-      "Registration status on the National Career Service (NCS) portal",
-      "Number of hours worked exclusively during weekend days"
-    ],
-    correctAnswer: "Activity pursued by the person on any day during the 7 days preceding the survey date",
-    explanation: "CWS classifies an individual as employed if they worked for at least 1 hour on any day during the reference week."
-  },
-  {
-    question: "Which index formula is officially utilized by the NSO for compiling the Index of Industrial Production (IIP)?",
-    options: [
-      "Laspeyres weighted arithmetic mean index (base year 2011-12=100)",
-      "Paasche current-year production index",
-      "Fisher Ideal index with geometric volume adjustment",
-      "Unweighted chain-linked median index"
-    ],
-    correctAnswer: "Laspeyres weighted arithmetic mean index (base year 2011-12=100)",
-    explanation: "IIP uses the Laspeyres formula with base year 2011-12=100 and sector weights derived from National Accounts."
-  },
-  {
-    question: "What role does Neyman Allocation serve in sample survey design across heterogeneous strata?",
-    options: [
-      "Minimizes overall sample variance by allocating more units to larger and more variable strata",
-      "Allocates equal numbers of sample households to every district regardless of population",
-      "Selects only top decile enterprises for rapid estimation",
-      "Eliminates the necessity of post-stratification weighting"
-    ],
-    correctAnswer: "Minimizes overall sample variance by allocating more units to larger and more variable strata",
-    explanation: "Neyman Allocation achieves optimal precision for a given total sample size based on stratum size and standard deviation."
-  },
-  {
-    question: "What is the primary function of the National Indicator Framework (NIF) developed by MoSPI?",
-    options: [
-      "Monitoring national and state progress towards UN Sustainable Development Goals (SDGs)",
-      "Regulating foreign direct investment caps in retail trade",
-      "Tracking daily attendance of central government statistical officers",
-      "Automating customs tariff collection across maritime ports"
-    ],
-    correctAnswer: "Monitoring national and state progress towards UN Sustainable Development Goals (SDGs)",
-    explanation: "MoSPI's NIF provides quantitative indicators and metadata to track India's progress across all 17 SDGs."
-  },
-  {
-    question: "In official statistical computing, why is Python (Pandas/NumPy) preferred for NSS microdata scrutiny?",
-    options: [
-      "Enables vectorized operations, automated multiplier weighting, and reproducible anomaly validation",
-      "Completely replaces official statistical standards with unsupervised approximations",
-      "Prevents database backups and bypasses version control",
-      "Eliminates the requirement for survey documentation"
-    ],
-    correctAnswer: "Enables vectorized operations, automated multiplier weighting, and reproducible anomaly validation",
-    explanation: "Python empowers statisticians to automate field data validation, multiplier weights, and large-scale tabular scrutiny."
-  },
-  {
-    question: "Under the Fundamental Principles of Official Statistics adopted by the UN, what does the principle of Impartiality require?",
-    options: [
-      "Official statistics must be compiled and made available on an impartial basis to honour citizens' entitlement to public information",
-      "Statistical reports must be submitted exclusively to political authorities for prior redaction",
-      "Survey microdata must be withheld from researchers to avoid alternative analyses",
-      "Indices should be calculated using arbitrary convenience targets"
-    ],
-    correctAnswer: "Official statistics must be compiled and made available on an impartial basis to honour citizens' entitlement to public information",
-    explanation: "Principle 1 of UN Fundamental Principles establishes statistical objectivity, reliability, and equal access for all citizens."
-  }
-];
 
 export const generateSampleQuiz = async (req, res) => {
   try {
