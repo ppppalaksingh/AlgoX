@@ -365,7 +365,7 @@ function computeFallbackGapAnalysis(userProfile) {
   const domainScores = {};
   for (const [domKey, kwList] of Object.entries(DOMAIN_KEYWORDS)) {
     // 1. Foundational baseline: cadre entry floor + progressive experience bonus
-    const entryBase = CADRE_ENTRY_BASE[canonicalDesig] || CADRE_RANK_BASE[canonicalDesig] || 1.8;
+    const entryBase = CADRE_ENTRY_BASE[canonicalDesignation] || CADRE_RANK_BASE[canonicalDesignation] || 1.8;
     const expBonus = calculateExperienceBonus(expYears);
     const base = Math.min(4.8, entryBase + expBonus);
 
