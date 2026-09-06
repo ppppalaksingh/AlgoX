@@ -12,11 +12,14 @@ export default function Login() {
   const [code, setCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verifyType, setVerifyType] = useState("signUp"); // "signUp" | "signInFirst" | "signInSecond"
+  const [resendStatus, setResendStatus] = useState("");
   const [error, setError] = useState("");
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError("");
+    setResendStatus("");
     if (!email || !password) return setError("Please enter both email and password.");
     if (!signInLoaded) return;
 
@@ -25,8 +28,27 @@ export default function Login() {
       const result = await signIn.create({ identifier: email, password });
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+      } else if (result.status === "needs_first_factor") {
+        // Automatically command Clerk to send the OTP email!
+        const emailFactor = result.supportedFirstFactors?.find(
+          (f) => f.strategy === "email_code"
+        );
+        if (emailFactor) {
+          await signIn.prepareFirstFactor({
+            strategy: "email_code",
+            emailAddressId: emailFactor.emailAddressId,
+          });
+          setVerifyType("signInFirst");
+          setMode("verify");
+        } else {
+          setError(`Verification required via ${result.supportedFirstFactors?.[0]?.strategy || "alternate method"}.`);
+        }
+      } else if (result.status === "needs_second_factor") {
+        await signIn.prepareSecondFactor({ strategy: "email_code" });
+        setVerifyType("signInSecond");
+        setMode("verify");
       } else {
-        setError("Additional verification required. Check your email.");
+        setError(`Additional verification required: ${result.status}`);
       }
     } catch (err) {
       setError(err?.errors?.[0]?.message || "Invalid email or password.");
@@ -38,6 +60,7 @@ export default function Login() {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
+    setResendStatus("");
     if (!email || !password) return setError("Please enter both email and password.");
     if (!signUpLoaded) return;
 
@@ -45,6 +68,7 @@ export default function Login() {
     try {
       await signUp.create({ emailAddress: email, password });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setVerifyType("signUp");
       setMode("verify");
     } catch (err) {
       setError(err?.errors?.[0]?.message || "Could not create account.");
@@ -56,18 +80,51 @@ export default function Login() {
   const handleVerify = async (e) => {
     e.preventDefault();
     setError("");
-    if (!signUpLoaded) return;
-
+    if (!code) return setError("Please enter the verification code.");
     setIsSubmitting(true);
     try {
-      const result = await signUp.attemptEmailAddressVerification({ code });
-      if (result.status === "complete") {
+      let result;
+      if (verifyType === "signUp") {
+        if (!signUpLoaded) return;
+        result = await signUp.attemptEmailAddressVerification({ code });
+      } else if (verifyType === "signInFirst") {
+        if (!signInLoaded) return;
+        result = await signIn.attemptFirstFactor({ strategy: "email_code", code });
+      } else if (verifyType === "signInSecond") {
+        if (!signInLoaded) return;
+        result = await signIn.attemptSecondFactor({ strategy: "email_code", code });
+      }
+
+      if (result && result.status === "complete") {
         await setActive({ session: result.createdSessionId });
       } else {
-        setError("Invalid or expired code.");
+        setError("Invalid or expired code. Please try again or request a new code.");
       }
     } catch (err) {
       setError(err?.errors?.[0]?.message || "Verification failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setError("");
+    setResendStatus("");
+    setIsSubmitting(true);
+    try {
+      if (verifyType === "signUp" && signUpLoaded) {
+        await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      } else if (signInLoaded) {
+        const factor = signIn.supportedFirstFactors?.find((f) => f.strategy === "email_code");
+        if (factor) {
+          await signIn.prepareFirstFactor({ strategy: "email_code", emailAddressId: factor.emailAddressId });
+        } else {
+          await signIn.prepareSecondFactor({ strategy: "email_code" });
+        }
+      }
+      setResendStatus("A new verification code has been sent to your email!");
+    } catch (err) {
+      setError(err?.errors?.[0]?.message || "Could not resend code. Please try again shortly.");
     } finally {
       setIsSubmitting(false);
     }
@@ -208,16 +265,42 @@ export default function Login() {
               </>
             )}
 
+            {resendStatus && (
+              <div className="text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3.5 py-2.5 flex items-start gap-2">
+                <span className="font-bold shrink-0">✓</span>
+                <span>{resendStatus}</span>
+              </div>
+            )}
+
             {mode === "verify" && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 block">Verification Code</label>
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="123456"
-                  className="w-full bg-black/30 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none text-sm text-center tracking-widest font-mono text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                />
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 block">Verification Code (from Email)</label>
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="123456"
+                    className="w-full bg-black/30 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none text-sm text-center tracking-widest font-mono text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <button
+                    type="button"
+                    onClick={() => { setMode("signIn"); setError(""); setResendStatus(""); }}
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
+                    ← Back to Log In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={isSubmitting}
+                    className="text-indigo-400 hover:text-indigo-300 hover:underline disabled:opacity-50"
+                  >
+                    Resend Code
+                  </button>
+                </div>
               </div>
             )}
 
