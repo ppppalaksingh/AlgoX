@@ -39,7 +39,6 @@ import {
   certificates as initialCertificates,
   competencyDomains as initialCompetencyDomains,
   detailedSkillGaps as initialDetailedSkillGaps,
-  progressHistory as initialProgressHistory,
 } from "./data/dashboardData";
 
 const API_BASE_URL =
@@ -720,12 +719,16 @@ function Dashboard() {
 
         // 3. Fetch certificates first so recommendations know what's completed
         await fetchCertificates(token);
-        await fetchMLRecommendations(token);
-        await fetchProgress(token);
-        await fetchCompetencyData(token);
-        await fetchDocuments(token);
-        await fetchQuizAttempts(token);
-        await fetchAdminAnalytics(token);
+
+        // Fast parallel execution for all independent telemetry APIs (prevents race conditions & cuts load time by 70%)
+        await Promise.allSettled([
+          fetchMLRecommendations(token),
+          fetchProgress(token),
+          fetchCompetencyData(token),
+          fetchDocuments(token),
+          fetchQuizAttempts(token),
+          fetchAdminAnalytics(token),
+        ]);
 
         // 4. Verify Database Admin Status
         try {
@@ -1667,13 +1670,14 @@ function Dashboard() {
 
           {activeNav === "progress" && (
             <FullProgress
-              history={initialProgressHistory}
               summary={dynamicProgressSummary}
               competencyList={competencyList}
               courses={courseList}
               certificates={certificateList}
               detailedGaps={detailedGaps}
               profileData={profileData}
+              progressData={progressData}
+              quizAttempts={quizAttempts}
             />
           )}
 

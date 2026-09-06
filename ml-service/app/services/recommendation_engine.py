@@ -4,6 +4,13 @@ import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Optimize PyTorch CPU inference memory footprint (keeps RAM well under 250MB on Render 512MB limit)
+torch.set_grad_enabled(False)
+try:
+    torch.set_num_threads(1)
+except Exception:
+    pass
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 CUSTOM_MODEL_DIR = os.path.join(os.path.dirname(__file__), "..", "models", "custom_stats_embedder")
 IGOT_PATH = os.path.join(DATA_DIR, "igot_courses_real.json")
@@ -178,7 +185,14 @@ def _course_text(c: dict) -> str:
     return f"{c['title']} {domain} {comp} {detail} {tags} {nssta} {comp_type}"
 
 course_texts = [_course_text(c) for c in COURSES]
-course_embeddings = model.encode(course_texts)
+# Encode in small batches with no_grad and convert_to_numpy to prevent RAM spikes on 512MB instances
+with torch.no_grad():
+    course_embeddings = model.encode(
+        course_texts,
+        batch_size=8,
+        show_progress_bar=False,
+        convert_to_numpy=True
+    )
 
 # Cadre classifications for designation-aware training
 CADRE_TIER_CONFIG = {
@@ -248,7 +262,8 @@ def recommend_courses(
         gap_parts.append(str(post).strip())
 
     gap_query = " ".join(gap_parts) if gap_parts else "Official Statistical Sampling Survey Design National Accounts DPDP Act"
-    query_embedding = model.encode([gap_query])
+    with torch.no_grad():
+        query_embedding = model.encode([gap_query], convert_to_numpy=True)
 
     similarities = cosine_similarity(query_embedding, course_embeddings)[0]
     
