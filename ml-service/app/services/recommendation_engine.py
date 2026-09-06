@@ -167,11 +167,25 @@ else:
             "domainName": tax["domainName"],
         })
 
-# 4. Load Model: Fine-Tuned Custom Official Stats Embedder
-if os.path.exists(CUSTOM_MODEL_DIR):
-    print(f"[recommendation_engine] Loading Fine-Tuned Official Model: {CUSTOM_MODEL_DIR}")
-    model = SentenceTransformer(CUSTOM_MODEL_DIR)
-else:
+# 4. Load Model: Fine-Tuned Custom Official Stats Embedder (with safe fallback)
+model = None
+has_custom_weights = (
+    os.path.isdir(CUSTOM_MODEL_DIR)
+    and any(
+        os.path.isfile(os.path.join(CUSTOM_MODEL_DIR, f))
+        for f in ("model.safetensors", "pytorch_model.bin", "model.pt")
+    )
+)
+
+if has_custom_weights:
+    try:
+        print(f"[recommendation_engine] Loading Fine-Tuned Official Model: {CUSTOM_MODEL_DIR}")
+        model = SentenceTransformer(CUSTOM_MODEL_DIR)
+    except Exception as exc:
+        print(f"[recommendation_engine] Warning: Could not load custom weights ({exc}). Falling back to base model.")
+        model = None
+
+if model is None:
     print("[recommendation_engine] Loading Base Transformer: all-MiniLM-L6-v2")
     model = SentenceTransformer("all-MiniLM-L6-v2")
 
