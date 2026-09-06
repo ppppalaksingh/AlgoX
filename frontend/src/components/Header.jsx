@@ -416,7 +416,19 @@ export default function Header({
               <div className={`border-t my-1 ${isDark ? "border-white/[0.06]" : "border-[#e8ded2]"}`} />
 
               <button
-                onClick={() => signOut()}
+                onClick={() => {
+                  // Clear legacy and active user-related keys
+                  try {
+                    Object.keys(localStorage).forEach((key) => {
+                      if (key.startsWith("algox_user_")) {
+                        localStorage.removeItem(key);
+                      }
+                    });
+                  } catch (e) {
+                    // Ignore storage access errors
+                  }
+                  signOut();
+                }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
               >
                 <LogOut size={15} />

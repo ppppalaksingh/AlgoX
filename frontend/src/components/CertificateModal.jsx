@@ -1,6 +1,6 @@
 import { Award, Download, Printer, X, CheckCircle2, ShieldCheck } from "lucide-react";
 
-export default function CertificateModal({ cert, userName = "Palak Singh", userDesignation = "Assistant Director", isOpen, onClose }) {
+export default function CertificateModal({ cert, userName = "Statistical Officer", userDesignation = "Assistant Director", isOpen, onClose }) {
   if (!isOpen || !cert) return null;
 
   const handlePrint = () => {
@@ -63,8 +63,7 @@ export default function CertificateModal({ cert, userName = "Palak Singh", userD
                 {(() => {
                   const cleaned = String(userName || "").trim();
                   if (!cleaned || cleaned === "Assistant Director" || cleaned === "Director" || cleaned.toLowerCase() === String(userDesignation || "").toLowerCase()) {
-                    const localStored = localStorage.getItem("algox_user_name");
-                    return localStored && localStored !== "Assistant Director" ? localStored : "Tarun Gupta";
+                    return "Statistical Officer";
                   }
                   return cleaned;
                 })()}

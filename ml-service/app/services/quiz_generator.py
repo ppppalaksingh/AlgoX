@@ -10,17 +10,33 @@ load_dotenv()
 def _sanitize_questions(questions: list) -> list:
     """
     Guarantees that options and correctAnswer are clean, consistent,
-    and correctly aligned so every question can be accurately graded.
+    unique, and correctly aligned so every question can be accurately graded.
     """
     clean_list = []
+    seen_stems = set()
+
     for item in questions:
         q_text = str(item.get("question", "")).strip()
         raw_options = item.get("options", [])
-        raw_correct = str(item.get("correctAnswer", item.get("correct_option", ""))).strip()
+        raw_correct = (
+            item.get("correctAnswer") or
+            item.get("correct_option") or
+            item.get("answer") or
+            item.get("correct_answer") or
+            item.get("correctOption") or
+            ""
+        )
+        raw_correct = str(raw_correct).strip()
         explanation = str(item.get("explanation", "Assessment principle derived directly from uploaded study material.")).strip()
 
         if not q_text:
             continue
+
+        # Prevent duplicate questions
+        stem_key = re.sub(r'[^a-zA-Z0-9]', '', q_text.lower())[:50]
+        if stem_key in seen_stems:
+            continue
+        seen_stems.add(stem_key)
 
         # If options is a dict e.g. {"A": "...", "B": "..."}
         if isinstance(raw_options, dict):
@@ -31,14 +47,44 @@ def _sanitize_questions(questions: list) -> list:
 
         # Clean options
         options = [str(opt).strip().replace("```", "") for opt in raw_options if str(opt).strip()]
-        if len(options) < 4:
-            while len(options) < 4:
-                options.append(f"Standard alternative protocol {len(options) + 1}")
+        # Remove duplicate options within question
+        seen_opts = set()
+        unique_options = []
+        for opt in options:
+            norm = opt.lower()
+            if norm not in seen_opts:
+                seen_opts.add(norm)
+                unique_options.append(opt)
+        options = unique_options
+
+        fallback_distractors = [
+            "Restricts execution to localized manual audits without national data integration.",
+            "Deprecates automated validation protocols in favor of unstructured survey estimates.",
+            "Operates strictly as an informal pilot without official administrative accreditation.",
+            "Substitutes verified probability sampling with unweighted convenience selection.",
+        ]
+        fb_idx = 0
+        while len(options) < 4:
+            cand = fallback_distractors[fb_idx % len(fallback_distractors)]
+            if cand.lower() not in seen_opts:
+                options.append(cand)
+                seen_opts.add(cand.lower())
+            fb_idx += 1
 
         options = options[:4]
 
         # Clean and map correctAnswer
         correct = raw_correct
+
+        # Handle numeric indices (e.g. 0, 1, 2, 3 or 1, 2, 3, 4)
+        if correct.isdigit():
+            num_idx = int(correct)
+            if 0 <= num_idx < len(options):
+                correct = options[num_idx]
+            elif 1 <= num_idx <= len(options):
+                correct = options[num_idx - 1]
+
+        # Handle letter indices (A, B, C, D)
         letter_match = re.match(r'^[A-D]$', correct, re.IGNORECASE)
         if letter_match:
             idx = ord(letter_match.group(0).upper()) - 65
@@ -52,7 +98,7 @@ def _sanitize_questions(questions: list) -> list:
         matched_option = None
         for opt in options:
             clean_opt = re.sub(r'^[A-D][\.\)\:\-]\s*', '', opt, flags=re.IGNORECASE).strip()
-            if clean_opt.lower() == clean_correct.lower() or clean_correct.lower() in clean_opt.lower():
+            if clean_opt.lower() == clean_correct.lower() or (len(clean_correct) > 5 and clean_correct.lower() in clean_opt.lower()):
                 matched_option = opt
                 break
 
@@ -92,18 +138,18 @@ Generate exactly {num_questions} completely unique, challenging, high-quality mu
 
 Format your output STRICTLY as a valid JSON array of objects with NO additional markdown wrappers.
 Each object in the array must have these exact keys:
-"question": string (clear question based directly on the provided material)
+"question": string (clear, distinct question based directly on the provided material)
 "options": array of 4 distinct strings (4 answer choices)
 "correctAnswer": string (MUST EXACTLY match one of the 4 choices in options)
 "explanation": string (brief citation explaining why it is correct based on the text)"""
 
-        for model_name in ['openai/gpt-oss-120b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-20b']:
+        for model_name in ['openai/gpt-oss-20b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b']:
             try:
                 response = client.chat.completions.create(
                     model=model_name,
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.7,
-                    max_tokens=2048,
+                    max_tokens=800,
                 )
                 raw = response.choices[0].message.content.strip()
                 if raw.startswith("```"):
@@ -146,7 +192,7 @@ Each object must have these exact keys:
 "correctAnswer": string (MUST EXACTLY match one of the 4 choices in options)
 "explanation": string (clear citation/justification)"""
 
-        for model_name in ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']:
+        for model_name in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']:
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -166,6 +212,25 @@ Each object must have these exact keys:
     except Exception as e:
         print(f"[_call_gemini_quiz] error: {e}")
     return None
+
+
+DIVERSE_DISTRACTORS = [
+    "Restricts execution to localized manual audits without national data integration.",
+    "Deprecates automated validation protocols in favor of unstructured survey estimates.",
+    "Operates strictly as an informal pilot without official administrative accreditation.",
+    "Substitutes verified probability sampling with unweighted convenience selection.",
+    "Excludes mandatory data privacy and anonymization safeguards required under the DPDP Act.",
+    "Limits scrutiny exclusively to metropolitan centers while bypassing rural district frames.",
+    "Replaces standard quality checks with non-standardized external estimations.",
+    "Delegates statistical compilation to unverified third-party contractors without civil service oversight.",
+    "Applies historical fixed ratios without periodic recalibration or revision.",
+    "Standardizes unverified sampling schedules instead of official NSS protocols.",
+    "Bypasses statutory multi-stage scrutiny filters across state and district divisions.",
+    "Eliminates stratified variance reduction algorithms in favor of unstratified cluster counts.",
+    "Confines reporting strictly to internal memoranda without public statistical dissemination.",
+    "Omits multiplier calculations and applies raw sample counts directly to population totals.",
+    "Restricts survey data processing to isolated legacy spreadsheets without metadata versioning.",
+]
 
 
 def generate_quiz_from_text(text: str, num_questions: int = 5) -> dict:
@@ -214,16 +279,36 @@ def generate_quiz_from_text(text: str, num_questions: int = 5) -> dict:
     used_sentences = set()
 
     keywords = re.findall(r'\b[A-Z][a-zA-Z0-9_\-]{2,}\b|\b[A-Z]{2,}\b|\b\w+(?: \w+){1,2}\b', clean_text)
-    keywords = [k for k in set(keywords) if len(k) > 3 and k.lower() not in ["the", "this", "that", "with", "from", "which", "their", "about", "under", "these", "into", "have", "been"]]
+    keywords = [k for k in set(keywords) if len(k) > 3 and k.lower() not in [
+        "the", "this", "that", "with", "from", "which", "their", "about", "under", "these", "into", "have", "been", "also", "each", "more"
+    ]]
     random.shuffle(keywords)
 
+    distractor_pool = list(DIVERSE_DISTRACTORS)
+    random.shuffle(distractor_pool)
+    distractor_idx = 0
+
+    def get_diverse_distractor(kw_subject=""):
+        nonlocal distractor_idx
+        other_kw = [k for k in keywords if k.lower() not in kw_subject.lower()]
+        if len(other_kw) >= 2 and random.random() < 0.5:
+            d_templates = [
+                f"Focuses exclusively on {other_kw[0]} without addressing official procedures for {other_kw[1]}.",
+                f"Automates reporting for {other_kw[0]} instead of standard verification protocols.",
+                f"Applies {other_kw[0]} principles without incorporating official standards for {other_kw[1]}.",
+            ]
+            return random.choice(d_templates)
+        d = distractor_pool[distractor_idx % len(distractor_pool)]
+        distractor_idx += 1
+        return d
+
+    # Pass 1: Pattern match definitions and core actions
     for sent in sentences:
         if len(questions) >= num_questions:
             break
         if sent in used_sentences:
             continue
 
-        # Look for definition/action statements
         match_def = re.search(r'([A-Za-z0-9\s\-]{3,40})\s+(is|are|refers to|means|provides|mandates|conducts|ensures|monitors|includes|describes|aims to|implements|utilizes|features|contains|supports)\s+(.+)', sent, re.IGNORECASE)
         if match_def:
             subject = match_def.group(1).strip()
@@ -239,24 +324,23 @@ def generate_quiz_from_text(text: str, num_questions: int = 5) -> dict:
                 if len(correct_opt) > 110:
                     correct_opt = correct_opt[:107] + "..."
 
-                distractors = [
-                    f"Primarily replaces standard workflows with unverified alternative procedures.",
-                    f"Restricts user participation and bypasses official evaluation protocols.",
-                    f"Operates as an external standalone utility without administrative integration.",
-                ]
+                d1 = get_diverse_distractor(subject)
+                d2 = get_diverse_distractor(subject)
+                d3 = get_diverse_distractor(subject)
+                # Ensure distractors are distinct
+                while d2 == d1:
+                    d2 = get_diverse_distractor(subject)
+                while d3 == d1 or d3 == d2:
+                    d3 = get_diverse_distractor(subject)
 
-                other_kw = [k for k in keywords if k.lower() not in subject.lower()][:2]
-                if len(other_kw) >= 2:
-                    distractors[0] = f"Focuses exclusively on {other_kw[0]} without addressing {subject.lower()}."
-                    distractors[1] = f"Automates reporting for {other_kw[1]} instead of standard verification."
-
-                options = [correct_opt] + distractors[:3]
+                options = [correct_opt, d1, d2, d3]
                 random.shuffle(options)
 
                 q_templates = [
                     f"According to the uploaded document, what does {subject} {verb}?",
-                    f"Based on the provided presentation material, what is the role or specification of {subject}?",
-                    f"Which of the following best describes {subject} as stated in the material?",
+                    f"Based on the provided material, what is the role or specification of {subject}?",
+                    f"Which of the following best describes {subject} as stated in the text?",
+                    f"In the context of the material, how is {subject} defined or implemented?",
                 ]
                 q_text = random.choice(q_templates)
 
@@ -267,7 +351,7 @@ def generate_quiz_from_text(text: str, num_questions: int = 5) -> dict:
                     "explanation": f"Directly cited from uploaded material: \"{sent[:180]}...\""
                 })
 
-    # If more questions needed, formulate direct comprehension questions from remaining sentences
+    # Pass 2: Meaningful comprehension questions with distinct, varied question stems
     for sent in sentences:
         if len(questions) >= num_questions:
             break
@@ -279,16 +363,34 @@ def generate_quiz_from_text(text: str, num_questions: int = 5) -> dict:
         if len(clean_sent) > 110:
             clean_sent = clean_sent[:107] + "..."
 
-        distractors = [
-            "The system is restricted solely to informal external pilot testing.",
-            "All processes are deprecated in favor of legacy paper schedules.",
-            "Independent verification standards are omitted from current architecture.",
-        ]
-        options = [clean_sent] + distractors
+        # Extract subject phrase or key words from sentence
+        sent_words = [w for w in re.findall(r'\b[A-Za-z0-9\-]{4,}\b', sent) if w.lower() not in [
+            "the", "this", "that", "with", "from", "which", "their", "about", "under", "these", "into", "have", "been", "shall", "must", "used", "will"
+        ]]
+        subject_phrase = " ".join(sent_words[:2]) if len(sent_words) >= 2 else (sent_words[0] if sent_words else "the specified statistical framework")
+
+        d1 = get_diverse_distractor(subject_phrase)
+        d2 = get_diverse_distractor(subject_phrase)
+        d3 = get_diverse_distractor(subject_phrase)
+        while d2 == d1:
+            d2 = get_diverse_distractor(subject_phrase)
+        while d3 == d1 or d3 == d2:
+            d3 = get_diverse_distractor(subject_phrase)
+
+        options = [clean_sent, d1, d2, d3]
         random.shuffle(options)
 
+        varied_stems = [
+            f"Regarding {subject_phrase}, what core principle is established in the uploaded document?",
+            f"According to the source documentation, which statement accurately reflects {subject_phrase}?",
+            f"What operational standard or finding is confirmed regarding {subject_phrase}?",
+            f"Based on the official study material, which of the following is verified concerning {subject_phrase}?",
+            f"In the context of the uploaded material, how is {subject_phrase} specified?",
+        ]
+        q_text = random.choice(varied_stems)
+
         questions.append({
-            "question": f"Which of the following key statements is directly confirmed in the uploaded document?",
+            "question": q_text,
             "options": options,
             "correctAnswer": clean_sent,
             "explanation": f"Confirmed in source document text: \"{sent[:180]}\""

@@ -158,12 +158,11 @@ const getCleanOfficerName = (raw, desig) => {
 };
 
 export default function ProfileView({ user, profileData, onSaveProfile, isSaving, onRunAnalysis, isAnalyzing }) {
-  const currentDesig = profileData?.designation || localStorage.getItem("algox_user_designation") || user?.designation || "Assistant Director";
+  const currentDesig = profileData?.designation || user?.designation || "Assistant Director";
   const initialCleanName =
     getCleanOfficerName(profileData?.name, currentDesig) ||
-    getCleanOfficerName(localStorage.getItem("algox_user_name"), currentDesig) ||
     getCleanOfficerName(user?.name, currentDesig) ||
-    "Tarun Gupta";
+    (user?.name ? user.name : "Statistical Officer");
 
   const [formData, setFormData] = useState({
     name: initialCleanName,

@@ -87,14 +87,14 @@ export const getMyProfile = async (req, res) => {
   try {
     let user = await User.findOne({ clerkId: req.userId });
     if (!user) {
-      user = await User.findOne().sort({ updatedAt: -1 });
+      // Never return another user's profile to an authenticated session
+      return res.status(404).json({ error: "Profile not found" });
     }
-    if (!user) return res.status(404).json({ error: "Profile not found" });
 
     // Clean up if name was erroneously saved as designation
     const uObj = user.toObject();
     if (uObj.name === "Assistant Director" || uObj.name === "Director" || uObj.name === uObj.designation) {
-      uObj.name = "Tarun Gupta";
+      uObj.name = "Statistical Officer";
     }
 
     res.json(uObj);

@@ -25,17 +25,16 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-async function getOrCreateUser(clerkId) {
+async function getOrCreateUser(clerkId, defaultData = {}) {
   let user = await User.findOne({ clerkId });
-  if (!user && (clerkId === "user_dev_officer_test" || clerkId === "officer-default" || !clerkId)) {
-    user = await User.findOne().sort({ updatedAt: -1 });
-  }
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: "Palak Singh",
-      designation: "Assistant Director",
-      department: "National Statistical Office (NSO)",
+      name: defaultData.name || "Statistical Officer",
+      email: defaultData.email,
+      designation: defaultData.designation || "Assistant Director",
+      post: defaultData.post || "Statistical Officer",
+      department: defaultData.department || "National Statistical Office (NSO)",
       experienceYears: 0,
       qualifications: [],
       pastTrainings: [],
@@ -323,59 +322,131 @@ export const uploadAndGenerateQuiz = async (req, res) => {
   }
 };
 
+const SAMPLE_MOSPI_QUESTION_BANK = [
+  {
+    question: "In India's Official Statistical System, what is the core objective of Stratified Multi-stage Sampling?",
+    options: [
+      "Ensures national statistical accuracy through representative first stage and second stage units",
+      "Eliminates the requirement of sample multipliers and weighting",
+      "Restricts survey data collection only to urban industrial blocks",
+      "Replaces probability sampling with unverified estimates"
+    ],
+    correctAnswer: "Ensures national statistical accuracy through representative first stage and second stage units",
+    explanation: "Stratified multi-stage sampling provides unbiased population estimates with minimum variance across diverse geographic strata."
+  },
+  {
+    question: "What is the base year currently used for All-India Consumer Price Index (CPI) compiled by MoSPI?",
+    options: [
+      "2012 = 100",
+      "2004-05 = 100",
+      "2018 = 100",
+      "2020 = 100"
+    ],
+    correctAnswer: "2012 = 100",
+    explanation: "MoSPI CPI currently uses base year 2012=100 with modified Laspeyres aggregation."
+  },
+  {
+    question: "How does the DPDP Act 2023 impact official statistics microdata dissemination?",
+    options: [
+      "Requires robust anonymization, purpose limitation, and protection of citizen personal data",
+      "Prohibits publication of any national statistical reports",
+      "Mandates unrestricted public release of identifiable citizen records",
+      "Eliminates digital public infrastructure across ministries"
+    ],
+    correctAnswer: "Requires robust anonymization, purpose limitation, and protection of citizen personal data",
+    explanation: "The DPDP Act 2023 requires strict de-identification and security compliance for all published survey microdata."
+  },
+  {
+    question: "Under the UN System of National Accounts (SNA 2008), how is Gross Value Added (GVA at basic prices) defined?",
+    options: [
+      "Output at basic prices minus Intermediate Consumption at purchasers' prices",
+      "GDP at market prices minus total capital depreciation",
+      "Net Value Added plus total subsidies on products",
+      "Total exports minus imported final consumer goods"
+    ],
+    correctAnswer: "Output at basic prices minus Intermediate Consumption at purchasers' prices",
+    explanation: "GVA at basic prices equals the value of output minus intermediate consumption used in the production process."
+  },
+  {
+    question: "In the Periodic Labour Force Survey (PLFS), how is the Current Weekly Status (CWS) of employment determined?",
+    options: [
+      "Activity pursued by the person on any day during the 7 days preceding the survey date",
+      "Continuous employment throughout the preceding 365 days",
+      "Registration status on the National Career Service (NCS) portal",
+      "Number of hours worked exclusively during weekend days"
+    ],
+    correctAnswer: "Activity pursued by the person on any day during the 7 days preceding the survey date",
+    explanation: "CWS classifies an individual as employed if they worked for at least 1 hour on any day during the reference week."
+  },
+  {
+    question: "Which index formula is officially utilized by the NSO for compiling the Index of Industrial Production (IIP)?",
+    options: [
+      "Laspeyres weighted arithmetic mean index (base year 2011-12=100)",
+      "Paasche current-year production index",
+      "Fisher Ideal index with geometric volume adjustment",
+      "Unweighted chain-linked median index"
+    ],
+    correctAnswer: "Laspeyres weighted arithmetic mean index (base year 2011-12=100)",
+    explanation: "IIP uses the Laspeyres formula with base year 2011-12=100 and sector weights derived from National Accounts."
+  },
+  {
+    question: "What role does Neyman Allocation serve in sample survey design across heterogeneous strata?",
+    options: [
+      "Minimizes overall sample variance by allocating more units to larger and more variable strata",
+      "Allocates equal numbers of sample households to every district regardless of population",
+      "Selects only top decile enterprises for rapid estimation",
+      "Eliminates the necessity of post-stratification weighting"
+    ],
+    correctAnswer: "Minimizes overall sample variance by allocating more units to larger and more variable strata",
+    explanation: "Neyman Allocation achieves optimal precision for a given total sample size based on stratum size and standard deviation."
+  },
+  {
+    question: "What is the primary function of the National Indicator Framework (NIF) developed by MoSPI?",
+    options: [
+      "Monitoring national and state progress towards UN Sustainable Development Goals (SDGs)",
+      "Regulating foreign direct investment caps in retail trade",
+      "Tracking daily attendance of central government statistical officers",
+      "Automating customs tariff collection across maritime ports"
+    ],
+    correctAnswer: "Monitoring national and state progress towards UN Sustainable Development Goals (SDGs)",
+    explanation: "MoSPI's NIF provides quantitative indicators and metadata to track India's progress across all 17 SDGs."
+  },
+  {
+    question: "In official statistical computing, why is Python (Pandas/NumPy) preferred for NSS microdata scrutiny?",
+    options: [
+      "Enables vectorized operations, automated multiplier weighting, and reproducible anomaly validation",
+      "Completely replaces official statistical standards with unsupervised approximations",
+      "Prevents database backups and bypasses version control",
+      "Eliminates the requirement for survey documentation"
+    ],
+    correctAnswer: "Enables vectorized operations, automated multiplier weighting, and reproducible anomaly validation",
+    explanation: "Python empowers statisticians to automate field data validation, multiplier weights, and large-scale tabular scrutiny."
+  },
+  {
+    question: "Under the Fundamental Principles of Official Statistics adopted by the UN, what does the principle of Impartiality require?",
+    options: [
+      "Official statistics must be compiled and made available on an impartial basis to honour citizens' entitlement to public information",
+      "Statistical reports must be submitted exclusively to political authorities for prior redaction",
+      "Survey microdata must be withheld from researchers to avoid alternative analyses",
+      "Indices should be calculated using arbitrary convenience targets"
+    ],
+    correctAnswer: "Official statistics must be compiled and made available on an impartial basis to honour citizens' entitlement to public information",
+    explanation: "Principle 1 of UN Fundamental Principles establishes statistical objectivity, reliability, and equal access for all citizens."
+  }
+];
+
 export const generateSampleQuiz = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
-    const sampleText = `Public Policy, Data Governance, Official Statistics and Digital Transformation in Government Services.
-Key competency areas include statistical indicators, survey design, AI in governance, automated competency mapping, iGOT Karmayogi integration, data validation, and security protocols in civil services.`;
 
-    let quizData;
-    try {
-      quizData = await generateQuiz(sampleText);
-    } catch (mlErr) {
-      quizData = {
-        questions: [
-          {
-            question: "In India's Official Statistical System, what is the core objective of Stratified Multi-stage Sampling?",
-            options: [
-              "Ensures national statistical accuracy through representative first stage and second stage units",
-              "Eliminates the requirement of sample multipliers and weighting",
-              "Restricts survey data collection only to urban industrial blocks",
-              "Replaces probability sampling with unverified estimates"
-            ],
-            correctAnswer: "Ensures national statistical accuracy through representative first stage and second stage units",
-            explanation: "Stratified multi-stage sampling provides unbiased population estimates with minimum variance."
-          },
-          {
-            question: "What is the base year currently used for All-India Consumer Price Index (CPI) by MoSPI?",
-            options: [
-              "2012 = 100",
-              "2004-05 = 100",
-              "2018 = 100",
-              "2020 = 100"
-            ],
-            correctAnswer: "2012 = 100",
-            explanation: "MoSPI CPI currently uses base year 2012=100 with modified Laspeyres aggregation."
-          },
-          {
-            question: "How does the DPDP Act 2023 impact official statistics data dissemination?",
-            options: [
-              "Requires robust anonymization, purpose limitation, and protection of citizen microdata",
-              "Prohibits publication of any national statistical reports",
-              "Mandates unrestricted public release of identifiable citizen records",
-              "Eliminates digital public infrastructure in government"
-            ],
-            correctAnswer: "Requires robust anonymization, purpose limitation, and protection of citizen microdata",
-            explanation: "The DPDP Act 2023 requires strict de-identification and security compliance for all published microdata."
-          }
-        ]
-      };
-    }
+    // Pick 5 distinct random questions from the comprehensive question bank
+    const shuffledBank = [...SAMPLE_MOSPI_QUESTION_BANK].sort(() => 0.5 - Math.random());
+    const selectedQuestions = shuffledBank.slice(0, 5);
 
-    const shuffledQuestions = shuffleQuestionsOptions(quizData.questions);
+    const shuffledQuestions = shuffleQuestionsOptions(selectedQuestions);
     const attempt = await QuizAttempt.create({
       userId: user._id,
-      sourceFileName: "Gov_AI_Policy_Sample.pdf",
+      sourceFileName: "MoSPI_Cadre_Competency_Assessment.pdf",
       questions: shuffledQuestions,
       totalQuestions: shuffledQuestions.length,
     });
@@ -383,7 +454,7 @@ Key competency areas include statistical indicators, survey design, AI in govern
     res.json({
       _id: attempt._id,
       attemptId: attempt._id,
-      sourceFileName: "Gov_AI_Policy_Sample.pdf",
+      sourceFileName: "MoSPI_Cadre_Competency_Assessment.pdf",
       questions: shuffledQuestions,
       totalQuestions: shuffledQuestions.length,
     });

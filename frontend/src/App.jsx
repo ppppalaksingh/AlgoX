@@ -177,13 +177,17 @@ function Dashboard() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  const userKeySuffix = clerkUser?.id ? `_${clerkUser.id}` : "";
+
   const officerDesignation =
     profileData?.designation ||
+    localStorage.getItem(`algox_user_designation${userKeySuffix}`) ||
     localStorage.getItem("algox_user_designation") ||
     "Assistant Director";
 
   const officerPost =
     profileData?.post ||
+    localStorage.getItem(`algox_user_post${userKeySuffix}`) ||
     localStorage.getItem("algox_user_post") ||
     "Statistical Officer";
 
@@ -202,7 +206,9 @@ function Dashboard() {
     return trimmed;
   };
 
-  const clerkFullName = clerkUser?.firstName
+  const clerkFullName = clerkUser?.fullName
+    ? clerkUser.fullName.trim()
+    : clerkUser?.firstName
     ? `${clerkUser.firstName} ${clerkUser.lastName || ""}`.trim()
     : clerkUser?.username;
 
@@ -212,9 +218,10 @@ function Dashboard() {
 
   const officerName =
     getCleanOfficerName(profileData?.name) ||
-    getCleanOfficerName(localStorage.getItem("algox_user_name")) ||
     getCleanOfficerName(clerkFullName) ||
-    (emailUsername ? emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1) : "Tarun Gupta");
+    getCleanOfficerName(localStorage.getItem(`algox_user_name${userKeySuffix}`)) ||
+    getCleanOfficerName(localStorage.getItem("algox_user_name")) ||
+    (emailUsername ? emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1) : "Statistical Officer");
 
   const user = {
     name: officerName,
@@ -665,6 +672,11 @@ function Dashboard() {
     }
   }, [applyRecalibratedProfile]);
 
+  // Reset user-specific state when switching accounts
+  useEffect(() => {
+    setProfileData(null);
+  }, [clerkUser?.id]);
+
   // Sync user profile & load initial data exactly once per login session
   useEffect(() => {
     if (!clerkUser?.id) return;
@@ -967,30 +979,31 @@ function Dashboard() {
 
     try {
       const token = (await getToken()) || "dev-test-token";
+      const userKeySuffix = clerkUser?.id ? `_${clerkUser.id}` : "";
       const basePayload = {
-        designation: profileData?.designation || localStorage.getItem("algox_user_designation") || user.designation || "Assistant Director",
-        post: profileData?.post || localStorage.getItem("algox_user_post") || user.post || "Statistical Officer",
+        designation: profileData?.designation || localStorage.getItem(`algox_user_designation${userKeySuffix}`) || localStorage.getItem("algox_user_designation") || user.designation || "Assistant Director",
+        post: profileData?.post || localStorage.getItem(`algox_user_post${userKeySuffix}`) || localStorage.getItem("algox_user_post") || user.post || "Statistical Officer",
         department: profileData?.department || "National Statistical Office (NSO)",
         experienceYears: profileData?.experienceYears != null 
           ? Number(profileData.experienceYears) 
-          : (localStorage.getItem("algox_user_experience_years") != null ? Number(localStorage.getItem("algox_user_experience_years")) : 0),
+          : (localStorage.getItem(`algox_user_experience_years${userKeySuffix}`) != null ? Number(localStorage.getItem(`algox_user_experience_years${userKeySuffix}`)) : (localStorage.getItem("algox_user_experience_years") != null ? Number(localStorage.getItem("algox_user_experience_years")) : 0)),
         qualifications: profileData?.qualifications || [],
         pastTrainings: profileData?.pastTrainings || [],
-        name: profileData?.name || user.name || "Tarun Gupta",
+        name: profileData?.name || user.name || "Statistical Officer",
       };
       const payload = overrideData ? { ...basePayload, ...overrideData } : basePayload;
 
       if (payload.designation) {
-        localStorage.setItem("algox_user_designation", payload.designation);
+        localStorage.setItem(`algox_user_designation${userKeySuffix}`, payload.designation);
       }
       if (payload.post) {
-        localStorage.setItem("algox_user_post", payload.post);
+        localStorage.setItem(`algox_user_post${userKeySuffix}`, payload.post);
       }
       if (payload.name) {
-        localStorage.setItem("algox_user_name", payload.name);
+        localStorage.setItem(`algox_user_name${userKeySuffix}`, payload.name);
       }
       if (payload.experienceYears !== undefined && payload.experienceYears !== null) {
-        localStorage.setItem("algox_user_experience_years", payload.experienceYears);
+        localStorage.setItem(`algox_user_experience_years${userKeySuffix}`, payload.experienceYears);
       }
 
       const res = await fetch(`${API_BASE_URL}/competency/analyze`, {
@@ -1192,11 +1205,18 @@ function Dashboard() {
     showToast("Saving profile and recalibrating ML models...", "loading");
 
     try {
-      if (formData.name) localStorage.setItem("algox_user_name", formData.name);
-      if (formData.designation) localStorage.setItem("algox_user_designation", formData.designation);
-      if (formData.post) localStorage.setItem("algox_user_post", formData.post);
+      const userKeySuffix = clerkUser?.id ? `_${clerkUser.id}` : "";
+      if (formData.name) {
+        localStorage.setItem(`algox_user_name${userKeySuffix}`, formData.name);
+      }
+      if (formData.designation) {
+        localStorage.setItem(`algox_user_designation${userKeySuffix}`, formData.designation);
+      }
+      if (formData.post) {
+        localStorage.setItem(`algox_user_post${userKeySuffix}`, formData.post);
+      }
       if (formData.experienceYears !== undefined && formData.experienceYears !== null) {
-        localStorage.setItem("algox_user_experience_years", formData.experienceYears);
+        localStorage.setItem(`algox_user_experience_years${userKeySuffix}`, formData.experienceYears);
       }
 
       const token = (await getToken()) || "dev-test-token";

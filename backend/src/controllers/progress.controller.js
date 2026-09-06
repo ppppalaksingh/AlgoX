@@ -5,17 +5,16 @@ import CompetencyProfile from "../models/CompetencyProfile.model.js";
 import QuizAttempt from "../models/QuizAttempt.model.js";
 import { getGapAnalysis } from "../services/mlService.js";
 
-async function getOrCreateUser(clerkId) {
+async function getOrCreateUser(clerkId, defaultData = {}) {
   let user = await User.findOne({ clerkId });
-  if (!user && (clerkId === "user_dev_officer_test" || clerkId === "officer-default" || !clerkId)) {
-    user = await User.findOne().sort({ updatedAt: -1 });
-  }
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: "Palak Singh",
-      designation: "Assistant Director",
-      department: "National Statistical Office (NSO)",
+      name: defaultData.name || "Statistical Officer",
+      email: defaultData.email,
+      designation: defaultData.designation || "Assistant Director",
+      post: defaultData.post || "Statistical Officer",
+      department: defaultData.department || "National Statistical Office (NSO)",
       experienceYears: 0,
       qualifications: [],
       pastTrainings: [],

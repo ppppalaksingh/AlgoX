@@ -5,7 +5,7 @@ import mospiCatalog from "./mospi_courses_catalog.json";
 // ============================================================================
 
 export const currentUser = {
-  name: "Palak Singh",
+  name: "Statistical Officer",
   role: "Assistant Director",
   designation: "Assistant Director",
   post: "Statistical Officer",
