@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SYSTEM_PROMPT = """You are "Karmayogi Sahayak" (AlgoX AI Statistical Mentor), an expert AI assistant dedicated to officers and analysts in India's Official Statistical System (Ministry of Statistics and Programme Implementation - MoSPI, NSSTA, NSSO, CSO, State DES, and iGOT Karmayogi).
+SYSTEM_PROMPT = """You are "Karmayogi Sahayak" (StatSkill AI Statistical Mentor), an expert AI assistant dedicated to officers and analysts in India's Official Statistical System (Ministry of Statistics and Programme Implementation - MoSPI, NSSTA, NSSO, CSO, State DES, and iGOT Karmayogi).
 
 You provide authoritative, clear, and actionable answers on:
 1. Official Statistics Methodologies: Large-scale sample surveys, Stratified Sampling, Multi-stage design, Multipliers, National Accounts Statistics (SNA 2008 / GDP / GVA), Price Statistics (CPI / WPI), Labour Statistics (PLFS / Periodic Labour Force Survey), Industrial Statistics (ASI / IIP), SDG Indicators & National Indicator Framework (NIF).
@@ -191,5 +191,5 @@ def answer_mentor_query(query: str, history: list = None) -> dict:
                     f"- **Methodology Reference:** NSSTA In-service Training Manuals & NSSO Survey Instructions.\n"
                     f"- **Recommended Next Step:** Check your **Skill Gaps** tab to see your current competency level and explore the **NSSTA TPAC** training programs.\n\n"
                     f"You can also ask about **PLFS sampling design, CPI compilation, Python survey scrutiny, or DPDP Act 2023 compliance**!",
-        "source": "AlgoX Statistical Engine"
+        "source": "StatSkill Statistical Engine"
     }

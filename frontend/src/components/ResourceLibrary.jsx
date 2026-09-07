@@ -187,10 +187,10 @@ export default function ResourceLibrary({ documents = [], onUploadDoc, onGenerat
 
   const getCleanSummary = (summary, docName = "") => {
     if (!summary || typeof summary !== "string") {
-      return `Official study material from ${docName}. Ingested into AlgoX repository for competency tracking, evaluation, and AI quiz generation.`;
+      return `Official study material from ${docName}. Ingested into StatSkill repository for competency tracking, evaluation, and AI quiz generation.`;
     }
     if (summary.includes('"config"') || (summary.startsWith("{") && summary.includes("newlineDelimiter"))) {
-      return `Official study material from ${docName}. Ingested into AlgoX repository for competency tracking, evaluation, and AI quiz generation.`;
+      return `Official study material from ${docName}. Ingested into StatSkill repository for competency tracking, evaluation, and AI quiz generation.`;
     }
     return summary;
   };

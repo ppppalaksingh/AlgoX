@@ -159,7 +159,7 @@ export default function Login() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Algo<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">X</span>
+            Stat<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Skill</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xs">
             Ministry of Statistics &amp; PI · iGOT Karmayogi Official Competency Suite
@@ -324,7 +324,7 @@ export default function Login() {
               className="w-full mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 disabled:opacity-60 transition-all text-white text-xs sm:text-sm font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(99,102,241,0.35)] cursor-pointer"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-              {mode === "signIn" && (isSubmitting ? "Authenticating..." : "Sign In to AlgoX")}
+              {mode === "signIn" && (isSubmitting ? "Authenticating..." : "Sign In to StatSkill")}
               {mode === "signUp" && (isSubmitting ? "Creating Profile..." : "Create Official Account")}
               {mode === "verify" && (isSubmitting ? "Verifying..." : "Verify & Continue")}
             </button>

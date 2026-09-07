@@ -1497,7 +1497,7 @@ function Dashboard() {
                         isDarkMode ? "border-white/[0.06]" : "border-[#e8ded2]"
                       }`} />
 
-                      {/* Center Node (Najaba 'N' / AlgoX 'A') */}
+                      {/* Center Node (StatSkill 'S') */}
                       <div className={`w-16 h-16 rounded-full flex flex-col items-center justify-center z-20 transition-all ${
                         isDarkMode
                           ? "bg-[#120a2e] border-2 border-[#e2ac52]/60 shadow-[0_0_30px_rgba(226,172,82,0.3)]"
@@ -1505,10 +1505,10 @@ function Dashboard() {
                       }`}>
                         <span className={`font-serif font-black text-2xl tracking-tighter ${
                           isDarkMode ? "text-[#e2ac52]" : "text-white"
-                        }`}>A</span>
+                        }`}>S</span>
                         <span className={`text-[7px] font-black uppercase tracking-widest -mt-1 ${
                           isDarkMode ? "text-slate-400" : "text-indigo-200"
-                        }`}>AlgoX</span>
+                        }`}>StatSkill</span>
                       </div>
 
                       {/* Orbital Node 1: CORE (Top - Purple) */}
@@ -1826,7 +1826,7 @@ function Dashboard() {
           {activeNav === "help" && (
             <SimplePage
               title="Help & Support"
-              description="iGOT Karmayogi helpdesk, AlgoX guides, and technical support contacts."
+              description="iGOT Karmayogi helpdesk, StatSkill guides, and technical support contacts."
               icon={HelpCircle}
             />
           )}

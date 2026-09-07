@@ -319,7 +319,7 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
         <div>
           <h2 className="text-base font-bold text-white">Official Profile &amp; Role Parameters</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            AlgoX ML recommendation engine uses these parameters to customize your learning pathway and skill gap metrics.
+            StatSkill ML recommendation engine uses these parameters to customize your learning pathway and skill gap metrics.
           </p>
         </div>
 

@@ -70,7 +70,7 @@ app.get("/api/health", async (req, res) => {
   });
 });
 
-app.get("/", (req, res) => res.send("AlgoX Official Statistics Platform backend running"));
+app.get("/", (req, res) => res.send("StatSkill Official Statistics Platform backend running"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

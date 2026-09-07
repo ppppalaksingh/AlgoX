@@ -44,7 +44,7 @@ export default function CertificateModal({ cert, userName = "Statistical Officer
                 <Award size={26} />
               </div>
               <div className="text-right">
-                <span className="text-[10px] font-bold tracking-widest text-blue-400 uppercase">AlgoX / iGOT</span>
+                <span className="text-[10px] font-bold tracking-widest text-blue-400 uppercase">StatSkill / iGOT</span>
                 <p className="text-xs font-semibold text-slate-300">Karmayogi Bharat</p>
               </div>
             </div>
@@ -95,7 +95,7 @@ export default function CertificateModal({ cert, userName = "Statistical Officer
 
               <div className="text-right">
                 <p className="font-semibold text-slate-300">Credential ID</p>
-                <p className="font-mono text-[11px] text-slate-400">{cert.regNumber || `ALGOX-${(cert._id || cert.title || "CERT").toString().slice(-8).toUpperCase()}`}</p>
+                <p className="font-mono text-[11px] text-slate-400">{cert.regNumber || `STATSKILL-${(cert._id || cert.title || "CERT").toString().slice(-8).toUpperCase()}`}</p>
               </div>
             </div>
 

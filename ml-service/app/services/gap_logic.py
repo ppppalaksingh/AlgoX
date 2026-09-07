@@ -225,7 +225,7 @@ ROLE_PROFILES = {
     },
 }
 
-# 3 Competency Types Mapped onto the 4 AlgoX Domains
+# 3 Competency Types Mapped onto the 4 StatSkill Domains
 COMPETENCY_TAXONOMY = {
     "statistical": {
         "name": "Statistical Analysis",

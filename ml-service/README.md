@@ -1,5 +1,5 @@
 ---
-title: AlgoX Official Statistics AI & ML Engine
+title: StatSkill Official Statistics AI & ML Engine
 emoji: 🏛️
 colorFrom: indigo
 colorTo: purple
@@ -8,7 +8,7 @@ app_port: 7860
 pinned: false
 ---
 
-# AlgoX Official Statistics AI & ML Engine
+# StatSkill Official Statistics AI & ML Engine
 
 Capacity building and competency telemetry AI microservice for **MoSPI**, **NSSTA**, and **iGOT Karmayogi**.
 

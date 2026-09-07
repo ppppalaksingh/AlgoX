@@ -1,4 +1,4 @@
-# AlgoX Dashboard — Frontend Setup
+# StatSkill Dashboard — Frontend Setup
 
 ## 1. Where these files go
 
@@ -69,7 +69,7 @@ Open http://localhost:5173/ — you should see the full dashboard.
 
 ## 5. Branding
 
-- Logo/sidebar header now reads **AlgoX** instead of iGOT KARMAYOGI.
+- Logo/sidebar header now reads **StatSkill** instead of iGOT KARMAYOGI.
 - A small "Built on iGOT Karmayogi" credit (with Ministry attribution) sits
   at the bottom of the sidebar, as a promotional nod to the original platform.
 - The top header keeps the "Smart Learning. Stronger India." tagline.

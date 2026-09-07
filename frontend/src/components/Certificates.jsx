@@ -13,7 +13,7 @@ export default function Certificates({ certificates, onViewCertificate, onBrowse
           </div>
           <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">Earned Official Credentials</h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Ministry of Statistics &amp; PI accredited certificates earned on the AlgoX / iGOT Karmayogi platform.
+            Ministry of Statistics &amp; PI accredited certificates earned on the StatSkill / iGOT Karmayogi platform.
           </p>
         </div>
 
