@@ -143,13 +143,13 @@ Each object in the array must have these exact keys:
 "correctAnswer": string (MUST EXACTLY match one of the 4 choices in options)
 "explanation": string (brief citation explaining why it is correct based on the text)"""
 
-        for model_name in ['openai/gpt-oss-20b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b']:
+        for model_name in ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.6-27b']:
             try:
                 response = client.chat.completions.create(
                     model=model_name,
                     messages=[{"role": "user", "content": prompt}],
-                    temperature=0.7,
-                    max_tokens=800,
+                    temperature=0.75,
+                    max_tokens=2048,
                 )
                 raw = response.choices[0].message.content.strip()
                 if raw.startswith("```"):
@@ -192,7 +192,7 @@ Each object must have these exact keys:
 "correctAnswer": string (MUST EXACTLY match one of the 4 choices in options)
 "explanation": string (clear citation/justification)"""
 
-        for model_name in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']:
+        for model_name in ['gemini-3.6-flash', 'gemini-2.0-flash']:
             try:
                 response = client.models.generate_content(
                     model=model_name,

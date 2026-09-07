@@ -5,12 +5,12 @@ import mospiCatalog from "./mospi_courses_catalog.json";
 // ============================================================================
 
 export const currentUser = {
-  name: "Statistical Officer",
-  role: "Assistant Director",
-  designation: "Assistant Director",
-  post: "Statistical Officer",
+  name: "",
+  role: "",
+  designation: "",
+  post: "",
   avatarUrl: "",
-  notificationsCount: 3,
+  notificationsCount: 0,
 };
 
 // Top summary cards
@@ -18,11 +18,11 @@ export const overviewStats = [
   {
     id: "overall-readiness",
     label: "Overall Cadre Readiness",
-    value: "71.7%",
+    value: "0%",
     caption: "Benchmarked against MoSPI Standards",
     icon: "TrendingUp",
     color: "blue",
-    progress: 71.7,
+    progress: 0,
   },
   {
     id: "courses-completed",
@@ -55,56 +55,51 @@ export const skillGaps = [
   {
     id: "statistical",
     name: "Statistical Analysis",
-    current: 2.6,
+    current: 0,
     target: 4.0,
-    percent: 65,
-    gap: 1.4,
-    status: "Critical",
+    percent: 0,
+    gap: 0,
+    status: "Pending",
     icon: "BarChart3",
     color: "blue",
   },
   {
     id: "technical",
     name: "Technical & Analytics",
-    current: 2.6,
+    current: 0,
     target: 3.5,
-    percent: 74,
-    gap: 0.9,
-    status: "Moderate",
+    percent: 0,
+    gap: 0,
+    status: "Pending",
     icon: "Monitor",
     color: "orange",
   },
   {
     id: "digitalGovernance",
     name: "Digital Governance",
-    current: 2.6,
+    current: 0,
     target: 3.5,
-    percent: 74,
-    gap: 0.9,
-    status: "Moderate",
+    percent: 0,
+    gap: 0,
+    status: "Pending",
     icon: "PieChart",
     color: "green",
   },
   {
     id: "behavioural",
     name: "Behavioural & Leadership",
-    current: 2.6,
+    current: 0,
     target: 3.5,
-    percent: 74,
-    gap: 0.9,
-    status: "Moderate",
+    percent: 0,
+    gap: 0,
+    status: "Pending",
     icon: "MessageSquare",
     color: "purple",
   },
 ];
 
 // Detailed skill gaps
-export const detailedSkillGaps = [
-  { id: "sg-1", skill: "Python for Data Scrutiny", domain: "Technical", currentLevel: 2.8, requiredLevel: 4.2, gap: 1.4 },
-  { id: "sg-2", skill: "DPDP Act 2023 Compliance", domain: "Digital Governance", currentLevel: 3.0, requiredLevel: 4.0, gap: 1.0 },
-  { id: "sg-3", skill: "GIS & Spatial Sampling", domain: "Technical", currentLevel: 2.2, requiredLevel: 3.8, gap: 1.6 },
-  { id: "sg-4", skill: "National Accounts Base Year", domain: "Statistical", currentLevel: 3.4, requiredLevel: 4.2, gap: 0.8 },
-];
+export const detailedSkillGaps = [];
 
 // Recommended Learning Path panel
 export const recommendedPath = {
@@ -223,10 +218,10 @@ export const allCourses = (mospiCatalog || []).map((c, i) => {
 export const certificates = [];
 
 export const competencyDomains = [
-  { id: "statistical", name: "Statistical Analysis", current: 2.6, target: 4.0, percent: 65, status: "Critical", icon: "BarChart3", color: "blue" },
-  { id: "technical", name: "Technical & Analytics", current: 2.6, target: 3.5, percent: 74, status: "Moderate", icon: "Monitor", color: "orange" },
-  { id: "digitalGovernance", name: "Digital Governance", current: 2.6, target: 3.5, percent: 74, status: "Moderate", icon: "PieChart", color: "green" },
-  { id: "behavioural", name: "Behavioural & Leadership", current: 2.6, target: 3.5, percent: 74, status: "Moderate", icon: "MessageSquare", color: "purple" },
+  { id: "statistical", name: "Statistical Analysis", current: 0, target: 4.0, percent: 0, status: "Pending", icon: "BarChart3", color: "blue" },
+  { id: "technical", name: "Technical & Analytics", current: 0, target: 3.5, percent: 0, status: "Pending", icon: "Monitor", color: "orange" },
+  { id: "digitalGovernance", name: "Digital Governance", current: 0, target: 3.5, percent: 0, status: "Pending", icon: "PieChart", color: "green" },
+  { id: "behavioural", name: "Behavioural & Leadership", current: 0, target: 3.5, percent: 0, status: "Pending", icon: "MessageSquare", color: "purple" },
 ];
 
 export const progressHistory = [

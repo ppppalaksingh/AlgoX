@@ -48,15 +48,15 @@ CENTRAL_TARGET_MATRIX = {
 
 # Foundational Cadre Entry Base Floor (at 0 years of experience)
 CADRE_ENTRY_BASE = {
-    "JSO": 1.1,
-    "SO": 1.3,
-    "SSO": 1.5,
-    "Assistant Director": 1.8,
-    "Deputy Director": 2.2,
-    "Joint Director": 2.6,
-    "Director": 3.0,
-    "ADG": 3.4,
-    "DG": 3.6,
+    "JSO": 1.00,
+    "SO": 1.34,
+    "SSO": 1.72,
+    "Assistant Director": 2.14,
+    "Deputy Director": 2.52,
+    "Joint Director": 2.83,
+    "Director": 3.25,
+    "ADG": 3.60,
+    "DG": 3.95,
 }
 CADRE_RANK_BASE = CADRE_ENTRY_BASE
 
@@ -483,15 +483,36 @@ def estimate_current_level(
         if att.get("score") is not None and str(att.get("score")).strip() != ""
     ]
     if valid_attempts:
+        # Group by unique quiz source to avoid duplicate stacking on retakes
+        latest_by_quiz = {}
+        for att in valid_attempts:
+            key = str(att.get("sourceFileName") or att.get("title") or "quiz").lower().strip()
+            latest_by_quiz[key] = att
+        unique_attempts = list(latest_by_quiz.values())
+
         domain_attempts = [
-            att for att in valid_attempts
+            att for att in unique_attempts
             if matches_keywords(
                 f"{att.get('sourceFileName', '')} {att.get('domain', '')} {att.get('title', '')} {att.get('questionTopics', '')}",
                 keywords
             )
         ]
-        # If domain-specific attempts found, prioritize them. Otherwise, any valid assessment counts as evidence.
-        target_attempts = domain_attempts if domain_attempts else valid_attempts
+
+        target_attempts = []
+        is_general = False
+        if domain_attempts:
+            target_attempts = domain_attempts
+        else:
+            # Check if attempts belong to another specific domain
+            belongs_other = any(
+                matches_keywords(f"{att.get('sourceFileName', '')} {att.get('domain', '')} {att.get('title', '')} {att.get('questionTopics', '')}", other_kws)
+                for other_dom, other_kws in DOMAIN_KEYWORDS.items()
+                if other_dom != domain
+                for att in unique_attempts
+            )
+            if not belongs_other:
+                target_attempts = unique_attempts
+                is_general = True
 
         total_correct = 0.0
         total_questions = 0.0
@@ -506,20 +527,33 @@ def estimate_current_level(
 
         if total_questions > 0:
             avg_pct = (total_correct / total_questions) * 100.0
+            weight = 0.35 if is_general else 1.0
             if avg_pct >= 80.0:
-                quiz_delta = 0.15 + min(((avg_pct - 80.0) / 20.0) * 0.15, 0.20)
+                quiz_delta = (0.10 + min(((avg_pct - 80.0) / 20.0) * 0.08, 0.08)) * weight
             elif avg_pct >= 60.0:
-                quiz_delta = 0.05 + min(((avg_pct - 60.0) / 20.0) * 0.10, 0.10)
+                quiz_delta = (0.04 + min(((avg_pct - 60.0) / 20.0) * 0.04, 0.04)) * weight
             elif avg_pct >= 40.0:
-                quiz_delta = -0.05 - (((60.0 - avg_pct) / 20.0) * 0.05)
+                quiz_delta = (-0.03 - (((60.0 - avg_pct) / 20.0) * 0.03)) * weight
             else:
-                quiz_delta = -0.12 - (((40.0 - avg_pct) / 40.0) * 0.08)
+                quiz_delta = (-0.06 - (((40.0 - avg_pct) / 40.0) * 0.04)) * weight
 
     total = base + qual_bonus + training_bonus + course_bonus + quiz_delta
     return round(min(max(total, 1.0), 5.0), 2)
 
 def run_gap_analysis(profile: dict) -> dict:
-    raw_designation = profile.get("designation", "Assistant Director")
+    raw_designation = profile.get("designation")
+    if not raw_designation or not str(raw_designation).strip():
+        return {
+            "overallReadiness": 0.0,
+            "domainScores": { "statistical": 0.0, "technical": 0.0, "digitalGovernance": 0.0, "behavioural": 0.0 },
+            "skillGaps": [],
+            "subCompetencies": [],
+            "highestGap": None,
+            "topStrength": None,
+            "aiExecutiveInsight": "Please configure your official Designation and Role in your Profile to generate your AI skill gap analysis and competency benchmarks.",
+            "domainTargets": { "statistical": 0.0, "technical": 0.0, "digitalGovernance": 0.0, "behavioural": 0.0 },
+        }
+
     canonical_designation = normalize_designation(raw_designation)
     post = profile.get("post") or profile.get("jobRole") or "Statistical Officer"
     department = profile.get("department", "National Statistical Office (NSO)")

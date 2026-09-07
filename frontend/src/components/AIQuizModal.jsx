@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Sparkles, CheckCircle2, XCircle, Award, ArrowRight, RotateCcw, X, Loader2, BookOpen } from "lucide-react";
 
-export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, isSubmitting, result, onRunAnalysis, onRetake }) {
+export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, isSubmitting, result, onRunAnalysis, onRetake, isRetaking }) {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentIdx, setCurrentIdx] = useState(0);
 
@@ -11,7 +11,7 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
       setSelectedAnswers({});
       setCurrentIdx(0);
     }
-  }, [isOpen, quiz?._id, result]);
+  }, [isOpen, quiz?._id, quiz?.attemptId, result]);
 
   if (!isOpen || !quiz) return null;
 
@@ -32,7 +32,8 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
 
   const handleSubmit = () => {
     const answersArray = questions.map((_, i) => selectedAnswers[i] || "");
-    onSubmitAnswers?.(quiz._id, answersArray);
+    const attemptId = quiz._id || quiz.attemptId;
+    onSubmitAnswers?.(attemptId, answersArray);
   };
 
   const handleReset = () => {
@@ -312,10 +313,19 @@ export default function AIQuizModal({ quiz, isOpen, onClose, onSubmitAnswers, is
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="button"
+                  disabled={isRetaking}
                   onClick={handleReset}
-                  className="flex-1 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer"
+                  className="flex-1 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
                 >
-                  <RotateCcw size={16} /> Retake Quiz
+                  {isRetaking ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin text-purple-400" /> Generating New Questions...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw size={16} /> Retake Quiz (Fresh Questions)
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"

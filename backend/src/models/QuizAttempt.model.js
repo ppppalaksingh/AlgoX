@@ -6,6 +6,7 @@ const quizAttemptSchema = new mongoose.Schema(
     sourceFileName: String,
     domain: { type: String, default: "" },
     title: { type: String, default: "" },
+    extractedText: { type: String, default: "" },
     questions: [
       {
         question: String,

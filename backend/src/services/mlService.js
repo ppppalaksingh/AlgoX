@@ -129,15 +129,15 @@ const CENTRAL_TARGET_MATRIX = {
 };
 
 export const CADRE_ENTRY_BASE = {
-  "JSO": 1.1,
-  "SO": 1.3,
-  "SSO": 1.5,
-  "Assistant Director": 1.8,
-  "Deputy Director": 2.2,
-  "Joint Director": 2.6,
-  "Director": 3.0,
-  "ADG": 3.4,
-  "DG": 3.6,
+  "JSO": 1.00,
+  "SO": 1.34,
+  "SSO": 1.72,
+  "Assistant Director": 2.14,
+  "Deputy Director": 2.52,
+  "Joint Director": 2.83,
+  "Director": 3.25,
+  "ADG": 3.60,
+  "DG": 3.95,
 };
 export const CADRE_RANK_BASE = CADRE_ENTRY_BASE;
 
@@ -395,14 +395,48 @@ function computeFallbackGapAnalysis(userProfile) {
     }
     courseBonus = Math.min(courseBonus, 0.30);
 
-    // 5. Assessment / Quiz Performance impact
+    // 5. Assessment / Quiz Performance impact (Domain-targeted, realistic calibration)
     let quizBonus = 0;
     if (validAttempts.length > 0) {
-      const domAttempts = validAttempts.filter((att) => {
+      // Group by quiz/document to take the latest score per assessment to avoid erratic stacking
+      const latestByQuiz = {};
+      for (const att of validAttempts) {
+        const key = (att.sourceFileName || att.title || "quiz").toLowerCase().trim();
+        const existing = latestByQuiz[key];
+        const attTime = att.createdAt ? new Date(att.createdAt).getTime() : 0;
+        const existTime = existing?.createdAt ? new Date(existing.createdAt).getTime() : 0;
+        if (!existing || attTime >= existTime) {
+          latestByQuiz[key] = att;
+        }
+      }
+      const uniqueAttempts = Object.values(latestByQuiz);
+
+      // Check if any quiz specifically targets this domain
+      const domAttempts = uniqueAttempts.filter((att) => {
         const text = `${att.sourceFileName || ""} ${att.domain || ""} ${att.title || ""} ${att.questionTopics || ""}`;
         return matchesKeywords(text, kwList);
       });
-      const targetAttempts = domAttempts.length > 0 ? domAttempts : validAttempts;
+
+      let targetAttempts = [];
+      let isGeneral = false;
+      if (domAttempts.length > 0) {
+        targetAttempts = domAttempts;
+      } else {
+        // If the quiz belongs to another specific domain, do not leak its score into this unrelated domain
+        const belongsToOtherDomain = uniqueAttempts.some((att) => {
+          const text = `${att.sourceFileName || ""} ${att.domain || ""} ${att.title || ""} ${att.questionTopics || ""}`;
+          return Object.entries(DOMAIN_KEYWORDS).some(([otherKey, otherKws]) => {
+            return otherKey !== domKey && matchesKeywords(text, otherKws);
+          });
+        });
+
+        // Only use as general assessment if it doesn't belong to another specific domain
+        if (!belongsToOtherDomain) {
+          targetAttempts = uniqueAttempts;
+          isGeneral = true;
+        }
+      }
+
       if (targetAttempts.length > 0) {
         let totalCorrect = 0;
         let totalQuestions = 0;
@@ -412,14 +446,17 @@ function computeFallbackGapAnalysis(userProfile) {
         }
         const pct = (totalCorrect / totalQuestions) * 100;
 
+        // General quizzes have a smaller distributed effect (0.35x), specific quizzes directly impact their domain
+        const weight = isGeneral ? 0.35 : 1.0;
+
         if (pct >= 80) {
-          quizBonus = 0.15 + Math.min(((pct - 80) / 20) * 0.15, 0.20);
+          quizBonus = (0.10 + Math.min(((pct - 80) / 20) * 0.08, 0.08)) * weight;
         } else if (pct >= 60) {
-          quizBonus = 0.05 + Math.min(((pct - 60) / 20) * 0.10, 0.10);
+          quizBonus = (0.04 + Math.min(((pct - 60) / 20) * 0.04, 0.04)) * weight;
         } else if (pct >= 40) {
-          quizBonus = -0.05 - (((60 - pct) / 20) * 0.05);
+          quizBonus = (-0.03 - (((60 - pct) / 20) * 0.03)) * weight;
         } else {
-          quizBonus = -0.12 - (((40 - pct) / 40) * 0.08);
+          quizBonus = (-0.06 - (((40 - pct) / 40) * 0.04)) * weight;
         }
       }
     }
@@ -509,6 +546,24 @@ function computeFallbackGapAnalysis(userProfile) {
 }
 
 export const getGapAnalysis = async (userProfile) => {
+  if (!userProfile?.designation || userProfile.designation.trim() === "") {
+    return {
+      overallReadiness: 0,
+      domainScores: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+      skillGaps: [],
+      subCompetencies: [],
+      highestGap: null,
+      topStrength: null,
+      aiExecutiveInsight: "Please configure your official Designation and Role in your Profile to generate your AI skill gap analysis and competency benchmarks.",
+      domainTargets: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+      matchedDesignation: "",
+      cadreService: "",
+      cadreGrade: "",
+      post: userProfile?.post || "",
+      department: userProfile?.department || "",
+    };
+  }
+
   try {
     const { data } = await axios.post(`${ML_BASE_URL}/gap-analysis`, userProfile, { timeout: 20000 });
     return data;

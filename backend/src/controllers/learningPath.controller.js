@@ -14,12 +14,12 @@ async function getOrCreateUser(clerkId, defaultData = {}) {
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: defaultData.name || "Statistical Officer",
+      name: defaultData.name || "",
       email: defaultData.email,
-      designation: defaultData.designation || "Assistant Director",
-      post: defaultData.post || "Statistical Officer",
-      department: defaultData.department || "National Statistical Office (NSO)",
-      experienceYears: 0,
+      designation: defaultData.designation || "",
+      post: defaultData.post || "",
+      department: defaultData.department || "",
+      experienceYears: null,
       qualifications: [],
       pastTrainings: [],
     });
@@ -94,34 +94,53 @@ export const completeLearningPath = async (req, res) => {
       }
     }
 
-    const gapResult = await getGapAnalysis({
-      designation: user.designation || "Assistant Director",
-      department: user.department || "National Statistical Office (NSO)",
-      experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
-      qualifications: user.qualifications || [],
-      pastTrainings: user.pastTrainings || [],
-      quizAttempts: quizAttempts.map((q) => ({
-        sourceFileName: q.sourceFileName,
-        score: q.score,
-        totalQuestions: q.totalQuestions,
-      })),
-      completedCourses,
-    });
+    let recalibratedProfile = null;
+    let gapResult = null;
+    if (user && user.designation && user.designation.trim() !== "") {
+      gapResult = await getGapAnalysis({
+        designation: user.designation,
+        department: user.department || "National Statistical Office (NSO)",
+        experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+        qualifications: user.qualifications || [],
+        pastTrainings: user.pastTrainings || [],
+        quizAttempts: quizAttempts.map((q) => ({
+          sourceFileName: q.sourceFileName,
+          score: q.score,
+          totalQuestions: q.totalQuestions,
+        })),
+        completedCourses,
+      });
 
-    const recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
-      { userId: user._id },
-      {
-        domainScores: gapResult.domainScores,
-        skillGaps: gapResult.skillGaps,
-        subCompetencies: gapResult.subCompetencies,
-        overallReadiness: gapResult.overallReadiness,
-        highestGap: gapResult.highestGap,
-        topStrength: gapResult.topStrength,
-        aiExecutiveInsight: gapResult.aiExecutiveInsight,
-        domainTargets: gapResult.domainTargets,
-      },
-      { upsert: true, new: true }
-    );
+      recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
+        { userId: user._id },
+        {
+          domainScores: gapResult.domainScores,
+          skillGaps: gapResult.skillGaps,
+          subCompetencies: gapResult.subCompetencies,
+          overallReadiness: gapResult.overallReadiness,
+          highestGap: gapResult.highestGap,
+          topStrength: gapResult.topStrength,
+          aiExecutiveInsight: gapResult.aiExecutiveInsight,
+          domainTargets: gapResult.domainTargets,
+        },
+        { upsert: true, new: true }
+      );
+    } else {
+      recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
+        { userId: user._id },
+        {
+          domainScores: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+          skillGaps: [],
+          subCompetencies: [],
+          overallReadiness: 0,
+          highestGap: null,
+          topStrength: null,
+          aiExecutiveInsight: "Please configure your official Designation and Role in your Profile to generate your AI skill gap analysis and competency benchmarks.",
+          domainTargets: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+        },
+        { upsert: true, new: true }
+      );
+    }
 
     res.json({
       success: true,

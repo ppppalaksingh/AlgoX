@@ -28,10 +28,10 @@ async function getOrCreateUser(clerkId) {
   if (!user) {
     user = await User.create({
       clerkId,
-      name: "Learner",
-      designation: "Assistant Director",
-      department: "National Statistical Office (NSO)",
-      experienceYears: 0,
+      name: "",
+      designation: "",
+      department: "",
+      experienceYears: null,
       qualifications: [],
       pastTrainings: [],
     });

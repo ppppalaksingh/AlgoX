@@ -11,12 +11,12 @@ async function getOrCreateUser(clerkId, defaultData = {}) {
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: defaultData.name || "Statistical Officer",
-      email: defaultData.email,
-      designation: defaultData.designation || "Assistant Director",
-      post: defaultData.post || "Statistical Officer",
-      department: defaultData.department || "National Statistical Office (NSO)",
-      experienceYears: 0,
+      name: defaultData.name || "",
+      email: defaultData.email || "",
+      designation: defaultData.designation || "",
+      post: defaultData.post || "",
+      department: defaultData.department || "",
+      experienceYears: null,
       qualifications: [],
       pastTrainings: [],
     });
@@ -31,14 +31,31 @@ export const runGapAnalysis = async (req, res) => {
     // If body contains profile updates (e.g. changed designation / role from Profile), persist them
     if (req.body && Object.keys(req.body).length > 0) {
       const { designation, post, jobRole, department, experienceYears, qualifications, pastTrainings, name } = req.body;
-      if (designation) user.designation = designation;
-      if (post || jobRole) user.post = post || jobRole;
-      if (department) user.department = department;
-      if (name) user.name = name;
-      if (experienceYears != null) user.experienceYears = Number(experienceYears);
-      if (qualifications) user.qualifications = qualifications;
-      if (pastTrainings) user.pastTrainings = pastTrainings;
+      if (designation !== undefined) user.designation = designation;
+      if (post !== undefined || jobRole !== undefined) user.post = post || jobRole || "";
+      if (department !== undefined) user.department = department;
+      if (name !== undefined) user.name = name;
+      if (experienceYears !== undefined && experienceYears !== null && !isNaN(Number(experienceYears))) {
+        user.experienceYears = Number(experienceYears);
+      }
+      if (qualifications !== undefined) user.qualifications = qualifications;
+      if (pastTrainings !== undefined) user.pastTrainings = pastTrainings;
       await user.save();
+    }
+
+    const effectiveDesignation = req.body?.designation || user.designation;
+    if (!effectiveDesignation || effectiveDesignation.trim() === "") {
+      return res.json({
+        overallReadiness: 0,
+        domainScores: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+        skillGaps: [],
+        subCompetencies: [],
+        highestGap: null,
+        topStrength: null,
+        aiExecutiveInsight: "Please select your Designation in Profile to run AI Gap Analysis.",
+        domainTargets: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+        profileComplete: false,
+      });
     }
 
     // Fetch live user activities (only finished quiz attempts with scores, documents, certificates, progress)
@@ -63,9 +80,9 @@ export const runGapAnalysis = async (req, res) => {
     }
 
     const gapResult = await getGapAnalysis({
-      designation: req.body?.designation || user.designation || "Assistant Director",
-      post: req.body?.post || req.body?.jobRole || user.post || "Statistical Officer",
-      department: req.body?.department || user.department || "National Statistical Office (NSO)",
+      designation: effectiveDesignation,
+      post: req.body?.post || req.body?.jobRole || user.post || "",
+      department: req.body?.department || user.department || "",
       experienceYears: req.body?.experienceYears != null ? Number(req.body.experienceYears) : (user.experienceYears != null ? Number(user.experienceYears) : 0),
       qualifications: req.body?.qualifications || user.qualifications || [],
       pastTrainings: req.body?.pastTrainings || user.pastTrainings || [],
@@ -82,6 +99,7 @@ export const runGapAnalysis = async (req, res) => {
               domain: q.domain || "",
               title: q.title || "",
               questionTopics,
+              createdAt: q.createdAt,
             };
           }),
       completedCourses: (req.body?.completedCourses != null)
@@ -117,6 +135,22 @@ export const runGapAnalysis = async (req, res) => {
 export const getMyCompetencyProfile = async (req, res) => {
   try {
     const user = await getOrCreateUser(req.userId);
+
+    // If user has not set their designation yet, overall readiness must be 0
+    if (!user.designation || user.designation.trim() === "") {
+      return res.json({
+        overallReadiness: 0,
+        domainScores: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+        skillGaps: [],
+        subCompetencies: [],
+        highestGap: null,
+        topStrength: null,
+        aiExecutiveInsight: "Please configure your official Designation and Role in your Profile to generate your AI skill gap analysis and competency benchmarks.",
+        domainTargets: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+        profileComplete: false,
+      });
+    }
+
     const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
       .sort({ createdAt: -1 })
       .limit(10);
@@ -138,9 +172,9 @@ export const getMyCompetencyProfile = async (req, res) => {
     }
 
     const gapResult = await getGapAnalysis({
-      designation: user.designation || "Assistant Director",
-      post: user.post || "Statistical Officer",
-      department: user.department || "National Statistical Office (NSO)",
+      designation: user.designation,
+      post: user.post || "",
+      department: user.department || "",
       experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
       qualifications: user.qualifications || [],
       pastTrainings: user.pastTrainings || [],

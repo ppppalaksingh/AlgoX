@@ -378,7 +378,7 @@ export default function Header({
                 isDark ? "border-white/[0.08] bg-white/[0.03]" : "border-[#e8ded2] bg-[#faf7f2]"
               }`}>
                 <p className={`text-xs font-bold ${isDark ? "text-white" : "text-[#1e143e]"}`}>{user?.name || "Officer"}</p>
-                <p className="text-[11px] font-semibold text-[#5925dc] mt-0.5">{user?.designation || "Assistant Director"}</p>
+                <p className="text-[11px] font-semibold text-[#5925dc] mt-0.5">{user?.designation || "Profile Incomplete"}</p>
                 <p className={`text-[10px] truncate mt-0.5 ${isDark ? "text-slate-400" : "text-[#7e7298]"}`}>{user?.email || "officer@mospi.gov.in"}</p>
                 {isAdminInDB && (
                   <span className="inline-block mt-1.5 text-[10px] font-black px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">

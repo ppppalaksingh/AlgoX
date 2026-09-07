@@ -158,21 +158,21 @@ const getCleanOfficerName = (raw, desig) => {
 };
 
 export default function ProfileView({ user, profileData, onSaveProfile, isSaving, onRunAnalysis, isAnalyzing }) {
-  const currentDesig = profileData?.designation || user?.designation || "Assistant Director";
+  const currentDesig = profileData?.designation || user?.designation || "";
   const initialCleanName =
     getCleanOfficerName(profileData?.name, currentDesig) ||
     getCleanOfficerName(user?.name, currentDesig) ||
-    (user?.name ? user.name : "Statistical Officer");
+    (user?.name ? user.name : "");
 
   const [formData, setFormData] = useState({
     name: initialCleanName,
-    email: profileData?.email || user?.email || "officer@mospi.gov.in",
+    email: profileData?.email || user?.email || "",
     designation: currentDesig,
-    post: profileData?.post || localStorage.getItem("algox_user_post") || user?.post || "Statistical Officer",
-    department: profileData?.department || "National Statistical Office (NSO)",
+    post: profileData?.post || user?.post || "",
+    department: profileData?.department || user?.department || "",
     experienceYears: profileData?.experienceYears != null 
       ? profileData.experienceYears 
-      : (localStorage.getItem("algox_user_experience_years") != null ? Number(localStorage.getItem("algox_user_experience_years")) : 0),
+      : "",
     qualifications: Array.isArray(profileData?.qualifications)
       ? profileData.qualifications.join(", ")
       : profileData?.qualifications || "",
@@ -188,12 +188,12 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
         ...prev,
         name: cleanIncomingName || prev.name,
         email: profileData.email || prev.email,
-        designation: profileData.designation || prev.designation,
-        post: profileData.post || prev.post || "Statistical Officer",
-        department: profileData.department || prev.department,
+        designation: profileData.designation !== undefined ? (profileData.designation || "") : prev.designation,
+        post: profileData.post !== undefined ? (profileData.post || "") : prev.post,
+        department: profileData.department !== undefined ? (profileData.department || "") : prev.department,
         experienceYears: profileData.experienceYears != null 
           ? profileData.experienceYears 
-          : (localStorage.getItem("algox_user_experience_years") != null ? Number(localStorage.getItem("algox_user_experience_years")) : (prev.experienceYears ?? 0)),
+          : (prev.experienceYears !== undefined ? prev.experienceYears : ""),
         qualifications: Array.isArray(profileData.qualifications)
           ? profileData.qualifications.join(", ")
           : (profileData.qualifications != null ? profileData.qualifications : prev.qualifications),
@@ -211,10 +211,10 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
   const getPayload = () => ({
     name: formData.name,
     email: formData.email,
-    designation: formData.designation,
-    post: formData.post || "Statistical Officer",
-    department: formData.department,
-    experienceYears: formData.experienceYears !== "" && !isNaN(Number(formData.experienceYears)) ? Number(formData.experienceYears) : 0,
+    designation: formData.designation || "",
+    post: formData.post || "",
+    department: formData.department || "",
+    experienceYears: formData.experienceYears !== "" && formData.experienceYears != null && !isNaN(Number(formData.experienceYears)) ? Number(formData.experienceYears) : null,
     qualifications: typeof formData.qualifications === "string"
       ? formData.qualifications.split(",").map((s) => s.trim()).filter(Boolean)
       : (formData.qualifications || []),
@@ -229,11 +229,15 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
   };
 
   const handleRunAnalysisWithProfile = () => {
+    if (!formData.designation) {
+      alert("Please select your Designation / Cadre first before running Gap Analysis.");
+      return;
+    }
     onRunAnalysis?.(getPayload());
   };
 
-  const activeService = SERVICE_CADRE_MAP[formData.designation] || "Indian Statistical Service (ISS)";
-  const activeRoleProfile = ROLE_PROFILES[formData.designation] || ROLE_PROFILES["Assistant Director"];
+  const activeService = formData.designation ? (SERVICE_CADRE_MAP[formData.designation] || "MoSPI Cadre") : "";
+  const activeRoleProfile = formData.designation ? ROLE_PROFILES[formData.designation] : null;
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -245,20 +249,22 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white">{formData.name}</h1>
+              <h1 className="text-xl font-bold text-white">{formData.name || "Official Profile"}</h1>
               <span className="text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                 <ShieldCheck size={12} /> Verified Officer
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">{formData.designation} ({activeService}) · {formData.department}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{formData.email}</p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {formData.designation ? `${formData.designation} (${activeService}) · ${formData.department || "No Department Set"}` : "Profile Incomplete (Select designation & role below)"}
+            </p>
+            {formData.email && <p className="text-xs text-slate-500 mt-0.5">{formData.email}</p>}
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleRunAnalysisWithProfile}
-          disabled={isAnalyzing}
+          disabled={isAnalyzing || !formData.designation}
           className="px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
         >
           {isAnalyzing ? (
@@ -279,23 +285,33 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
           <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
             <Layers size={12} className="text-indigo-400" /> MoSPI &amp; NSSTA Official Alignment Flow
           </span>
-          <span className="text-[11px] font-semibold text-slate-400">
-            {activeService} · {formData.designation} · {formData.post || "Statistical Officer"}
-          </span>
+          {formData.designation && (
+            <span className="text-[11px] font-semibold text-slate-400">
+              {activeService} · {formData.designation} {formData.post ? `· ${formData.post}` : ""}
+            </span>
+          )}
         </div>
 
         {/* 5-Level Hierarchy Flow */}
-        <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] text-slate-300 pb-1 font-medium scrollbar-thin">
-          <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-white shrink-0 font-bold">MoSPI (Ministry)</span>
-          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
-          <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/25 text-indigo-200 shrink-0 font-semibold">NSO (Department)</span>
-          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
-          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-indigo-300 shrink-0">{activeService.includes('SSS') ? 'SSS Cadre' : 'ISS Cadre'}</span>
-          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
-          <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white shrink-0 font-semibold">{formData.designation}</span>
-          <ChevronRight size={13} className="text-indigo-400 shrink-0" />
-          <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 shrink-0 font-bold">{formData.post || "Statistical Officer"}</span>
-        </div>
+        {formData.designation ? (
+          <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] text-slate-300 pb-1 font-medium scrollbar-thin">
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-white shrink-0 font-bold">MoSPI (Ministry)</span>
+            <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/25 text-indigo-200 shrink-0 font-semibold">{formData.department || "NSO (Department)"}</span>
+            <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-indigo-300 shrink-0">{activeService.includes('SSS') ? 'SSS Cadre' : 'ISS Cadre'}</span>
+            <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white shrink-0 font-semibold">{formData.designation}</span>
+            {formData.post && (
+              <>
+                <ChevronRight size={13} className="text-indigo-400 shrink-0" />
+                <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 shrink-0 font-bold">{formData.post}</span>
+              </>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-indigo-300/80">Select your Cadre Designation and Post below to initialize your official alignment hierarchy.</p>
+        )}
       </div>
 
       {/* Form Details */}
@@ -340,10 +356,11 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                 <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] rounded-xl px-3.5 py-2.5 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50 transition">
                   <Briefcase size={16} className="text-slate-400 shrink-0" />
                   <select
-                    value={formData.designation}
+                    value={formData.designation || ""}
                     onChange={(e) => handleChange("designation", e.target.value)}
                     className="w-full text-sm outline-none text-white bg-transparent cursor-pointer [&>option]:bg-[#0f1422] [&>option]:text-white"
                   >
+                    <option value="">-- Select Designation / Cadre --</option>
                     {MOSPI_CADRES.map((cadre) => (
                       <option key={cadre} value={cadre}>
                         {cadre}
@@ -361,7 +378,7 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                 <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] rounded-xl px-3.5 py-2.5 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/50 transition">
                   <Briefcase size={16} className="text-amber-400 shrink-0" />
                   <select
-                    value={MOSPI_POST_ROLES.includes(formData.post) ? formData.post : "Other"}
+                    value={!formData.post ? "" : (MOSPI_POST_ROLES.includes(formData.post) ? formData.post : "Other")}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === "Other") {
@@ -374,6 +391,7 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                     }}
                     className="w-full text-sm outline-none text-white bg-transparent cursor-pointer [&>option]:bg-[#0f1422] [&>option]:text-white"
                   >
+                    <option value="">-- Select Post / Job Role --</option>
                     {MOSPI_POST_ROLES.map((role) => (
                       <option key={role} value={role}>
                         {role}
@@ -382,7 +400,7 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                     <option value="Other">+ Other (Custom Post / Role)...</option>
                   </select>
                 </div>
-                {(!MOSPI_POST_ROLES.includes(formData.post) || formData.post === "") && (
+                {formData.post !== "" && !MOSPI_POST_ROLES.includes(formData.post) && (
                   <div className="mt-2 flex items-center gap-2 bg-white/[0.03] border border-amber-500/40 rounded-xl px-3 py-2 animate-in fade-in duration-150">
                     <input
                       type="text"

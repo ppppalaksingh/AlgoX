@@ -30,12 +30,12 @@ async function getOrCreateUser(clerkId, defaultData = {}) {
   if (!user) {
     user = await User.create({
       clerkId: clerkId || "officer-default",
-      name: defaultData.name || "Statistical Officer",
+      name: defaultData.name || "",
       email: defaultData.email,
-      designation: defaultData.designation || "Assistant Director",
-      post: defaultData.post || "Statistical Officer",
-      department: defaultData.department || "National Statistical Office (NSO)",
-      experienceYears: 0,
+      designation: defaultData.designation || "",
+      post: defaultData.post || "",
+      department: defaultData.department || "",
+      experienceYears: null,
       qualifications: [],
       pastTrainings: [],
     });
@@ -361,6 +361,7 @@ export const uploadAndGenerateQuiz = async (req, res) => {
     const attempt = await QuizAttempt.create({
       userId: user._id,
       sourceFileName: req.file.originalname,
+      extractedText: extractedText || "",
       questions: shuffledQuestions,
       totalQuestions: shuffledQuestions.length,
     });
@@ -723,62 +724,81 @@ export const submitQuizAnswers = async (req, res) => {
     try {
       const user = await User.findById(attempt.userId);
       if (user) {
-        const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
-          .sort({ createdAt: -1 })
-          .limit(10);
-        const certificates = await Certificate.find({ userId: user._id });
-        const progress = await UserProgress.findOne({ userId: user._id });
+        if (user.designation && user.designation.trim() !== "") {
+          const quizAttempts = await QuizAttempt.find({ userId: user._id, score: { $exists: true, $ne: null } })
+            .sort({ createdAt: -1 })
+            .limit(10);
+          const certificates = await Certificate.find({ userId: user._id });
+          const progress = await UserProgress.findOne({ userId: user._id });
 
-        const certTitles = new Set();
-        const completedCourses = [...(user.pastTrainings || [])];
-        for (const c of certificates) {
-          if (c.title && !certTitles.has(c.title.toLowerCase().trim())) {
-            certTitles.add(c.title.toLowerCase().trim());
-            completedCourses.push(`${c.title} (${c.domain || 'Statistical'})`);
+          const certTitles = new Set();
+          const completedCourses = [...(user.pastTrainings || [])];
+          for (const c of certificates) {
+            if (c.title && !certTitles.has(c.title.toLowerCase().trim())) {
+              certTitles.add(c.title.toLowerCase().trim());
+              completedCourses.push(`${c.title} (${c.domain || 'Statistical'})`);
+            }
           }
-        }
-        for (const cId of (progress?.completedCourseIds || [])) {
-          if (!certTitles.has(String(cId).toLowerCase().trim())) {
-            completedCourses.push(String(cId));
+          for (const cId of (progress?.completedCourseIds || [])) {
+            if (!certTitles.has(String(cId).toLowerCase().trim())) {
+              completedCourses.push(String(cId));
+            }
           }
+
+          const gapResult = await getGapAnalysis({
+            designation: user.designation,
+            department: user.department || "National Statistical Office (NSO)",
+            experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
+            qualifications: user.qualifications || [],
+            pastTrainings: user.pastTrainings || [],
+            quizAttempts: quizAttempts.map((q) => {
+              const questionTopics = (q.questions || [])
+                .map((item) => `${item.question || ""} ${item.explanation || ""}`)
+                .join(" ");
+              return {
+                sourceFileName: q.sourceFileName,
+                score: q.score,
+                totalQuestions: q.totalQuestions,
+                domain: q.domain || "",
+                title: q.title || "",
+                questionTopics,
+                createdAt: q.createdAt,
+              };
+            }),
+            completedCourses,
+          });
+
+          recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
+            { userId: user._id },
+            {
+              domainScores: gapResult.domainScores,
+              skillGaps: gapResult.skillGaps,
+              subCompetencies: gapResult.subCompetencies,
+              overallReadiness: gapResult.overallReadiness,
+              highestGap: gapResult.highestGap,
+              topStrength: gapResult.topStrength,
+              aiExecutiveInsight: gapResult.aiExecutiveInsight,
+              domainTargets: gapResult.domainTargets,
+            },
+            { upsert: true, new: true }
+          );
+        } else {
+          // User has not set their designation yet: do NOT assume a role; readiness must remain 0
+          recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
+            { userId: user._id },
+            {
+              domainScores: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+              skillGaps: [],
+              subCompetencies: [],
+              overallReadiness: 0,
+              highestGap: null,
+              topStrength: null,
+              aiExecutiveInsight: "Please configure your official Designation and Role in your Profile to generate your AI skill gap analysis and competency benchmarks.",
+              domainTargets: { statistical: 0, technical: 0, digitalGovernance: 0, behavioural: 0 },
+            },
+            { upsert: true, new: true }
+          );
         }
-
-        const gapResult = await getGapAnalysis({
-          designation: user.designation || "Assistant Director",
-          department: user.department || "National Statistical Office (NSO)",
-          experienceYears: user.experienceYears != null ? Number(user.experienceYears) : 0,
-          qualifications: user.qualifications || [],
-          pastTrainings: user.pastTrainings || [],
-          quizAttempts: quizAttempts.map((q) => {
-            const questionTopics = (q.questions || [])
-              .map((item) => `${item.question || ""} ${item.explanation || ""}`)
-              .join(" ");
-            return {
-              sourceFileName: q.sourceFileName,
-              score: q.score,
-              totalQuestions: q.totalQuestions,
-              domain: q.domain || "",
-              title: q.title || "",
-              questionTopics,
-            };
-          }),
-          completedCourses,
-        });
-
-        recalibratedProfile = await CompetencyProfile.findOneAndUpdate(
-          { userId: user._id },
-          {
-            domainScores: gapResult.domainScores,
-            skillGaps: gapResult.skillGaps,
-            subCompetencies: gapResult.subCompetencies,
-            overallReadiness: gapResult.overallReadiness,
-            highestGap: gapResult.highestGap,
-            topStrength: gapResult.topStrength,
-            aiExecutiveInsight: gapResult.aiExecutiveInsight,
-            domainTargets: gapResult.domainTargets,
-          },
-          { upsert: true, new: true }
-        );
 
         // Also update UserProgress study hours & streak
         await UserProgress.findOneAndUpdate(
@@ -816,6 +836,98 @@ export const getQuizAttempts = async (req, res) => {
     res.json({ attempts });
   } catch (err) {
     console.error("[quiz.controller] getQuizAttempts error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const retakeQuiz = async (req, res) => {
+  try {
+    const user = await getOrCreateUser(req.userId);
+    const { attemptId, sourceFileName } = req.body;
+
+    let previousAttempt = null;
+    if (attemptId) {
+      previousAttempt = await QuizAttempt.findById(attemptId);
+    }
+    const fileName = sourceFileName || previousAttempt?.sourceFileName || "MoSPI_Cadre_Competency_Assessment.pdf";
+
+    let freshQuestions = null;
+
+    // 1. Check if previous attempt has extractedText
+    let docText = previousAttempt?.extractedText || "";
+
+    // If not found in attempt, check if there is a Document record or file in uploads
+    if (!docText) {
+      const doc = await Document.findOne({
+        $or: [{ originalName: fileName }, { filename: fileName }]
+      }).sort({ createdAt: -1 });
+      if (doc?.summary && doc.summary.length > 50) {
+        docText = doc.summary;
+      } else if (doc?.filename) {
+        const localPath = path.join(UPLOADS_DIR, doc.filename);
+        if (fs.existsSync(localPath)) {
+          try {
+            docText = fs.readFileSync(localPath, "utf-8");
+          } catch (e) {}
+        }
+      }
+    }
+
+    // 2. If it is sample assessment or no custom document text available:
+    const isSample = !docText || fileName.toLowerCase().includes("sample") || fileName.toLowerCase().includes("cadre_competency");
+    if (isSample) {
+      const prevQuestionTexts = new Set(
+        (previousAttempt?.questions || []).map((q) => q.question.toLowerCase().trim())
+      );
+      // Pick questions that were not asked in the previous attempt
+      const unasked = SAMPLE_MOSPI_QUESTION_BANK.filter(
+        (q) => !prevQuestionTexts.has(q.question.toLowerCase().trim())
+      );
+      const pool = unasked.length >= 5 ? unasked : SAMPLE_MOSPI_QUESTION_BANK;
+      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      freshQuestions = shuffleQuestionsOptions(shuffled.slice(0, 5));
+    } else {
+      // 3. Document text is available: Call ML quiz generator (Groq / Gemini / Smart NLP)
+      try {
+        const mlRes = await generateQuiz(docText);
+        if (mlRes?.questions?.length > 0) {
+          freshQuestions = shuffleQuestionsOptions(mlRes.questions);
+        }
+      } catch (mlErr) {
+        console.warn("[quiz.controller] retakeQuiz ML error:", mlErr.message);
+      }
+
+      if (!freshQuestions || freshQuestions.length === 0) {
+        // Fallback to unasked sample questions
+        const prevQuestionTexts = new Set(
+          (previousAttempt?.questions || []).map((q) => q.question.toLowerCase().trim())
+        );
+        const unasked = SAMPLE_MOSPI_QUESTION_BANK.filter(
+          (q) => !prevQuestionTexts.has(q.question.toLowerCase().trim())
+        );
+        const pool = unasked.length >= 5 ? unasked : SAMPLE_MOSPI_QUESTION_BANK;
+        const shuffled = [...pool].sort(() => 0.5 - Math.random());
+        freshQuestions = shuffleQuestionsOptions(shuffled.slice(0, 5));
+      }
+    }
+
+    const newAttempt = await QuizAttempt.create({
+      userId: user._id,
+      sourceFileName: fileName,
+      extractedText: docText,
+      questions: freshQuestions,
+      totalQuestions: freshQuestions.length,
+    });
+
+    res.json({
+      _id: newAttempt._id,
+      attemptId: newAttempt._id,
+      sourceFileName: fileName,
+      questions: freshQuestions,
+      totalQuestions: freshQuestions.length,
+    });
+  } catch (err) {
+    console.error("[quiz.controller] retakeQuiz error:", err);
     res.status(500).json({ error: err.message });
   }
 };

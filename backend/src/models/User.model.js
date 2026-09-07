@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     name: String,
     email: String,
     designation: String,
-    post: { type: String, default: "Statistical Officer" },
+    post: String,
     department: String,
     experienceYears: Number,
     qualifications: [String],

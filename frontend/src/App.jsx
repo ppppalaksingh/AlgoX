@@ -144,6 +144,7 @@ function Dashboard() {
   // Loading States
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
+  const [isRetakingQuiz, setIsRetakingQuiz] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isStartingPath, setIsStartingPath] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -182,14 +183,12 @@ function Dashboard() {
   const officerDesignation =
     profileData?.designation ||
     localStorage.getItem(`algox_user_designation${userKeySuffix}`) ||
-    localStorage.getItem("algox_user_designation") ||
-    "Assistant Director";
+    "";
 
   const officerPost =
     profileData?.post ||
     localStorage.getItem(`algox_user_post${userKeySuffix}`) ||
-    localStorage.getItem("algox_user_post") ||
-    "Statistical Officer";
+    "";
 
   const getCleanOfficerName = (raw) => {
     if (!raw) return "";
@@ -199,7 +198,7 @@ function Dashboard() {
       trimmed === "Director" ||
       trimmed === "Deputy Director" ||
       trimmed === "Joint Director" ||
-      trimmed.toLowerCase() === officerDesignation.toLowerCase()
+      (officerDesignation && trimmed.toLowerCase() === officerDesignation.toLowerCase())
     ) {
       return "";
     }
@@ -220,14 +219,13 @@ function Dashboard() {
     getCleanOfficerName(profileData?.name) ||
     getCleanOfficerName(clerkFullName) ||
     getCleanOfficerName(localStorage.getItem(`algox_user_name${userKeySuffix}`)) ||
-    getCleanOfficerName(localStorage.getItem("algox_user_name")) ||
-    (emailUsername ? emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1) : "Statistical Officer");
+    (emailUsername ? emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1) : "");
 
   const user = {
     name: officerName,
     designation: officerDesignation,
     post: officerPost,
-    email: profileData?.email || clerkUser?.primaryEmailAddress?.emailAddress || "officer@mospi.gov.in",
+    email: profileData?.email || clerkUser?.primaryEmailAddress?.emailAddress || "",
     notificationsCount: notifications.length,
   };
 
@@ -335,7 +333,7 @@ function Dashboard() {
     const inProgressCount = currentCourses.filter((c) => c.percent > 0 && c.percent < 100).length;
     const computedHours = Math.round(completedCount * 18 + inProgressCount * 6 + (currentCerts.length * 8));
     const totalHours = progressDataRef.current?.totalHours != null ? progressDataRef.current.totalHours : computedHours;
-    const numReadiness = overallReadiness != null ? Number(overallReadiness) : 26.5;
+    const numReadiness = overallReadiness != null ? Number(overallReadiness) : 0;
     const roundedReadiness = Math.round(numReadiness * 10) / 10;
     const readinessFormatted = roundedReadiness % 1 === 0 ? `${roundedReadiness}%` : `${roundedReadiness.toFixed(1)}%`;
 
@@ -712,12 +710,12 @@ function Dashboard() {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              name: officerName,
+              name: officerName || emailUsername || "",
               email: user.email,
-              designation: officerDesignation,
-              post: officerPost,
-              department: "National Statistical Office (NSO)",
-              experienceYears: 0,
+              designation: "",
+              post: "",
+              department: "",
+              experienceYears: null,
               qualifications: [],
               pastTrainings: [],
             }),
@@ -970,6 +968,43 @@ function Dashboard() {
     }
   };
 
+  // Handler: Retake Quiz with Brand New Questions
+  const handleRetakeQuiz = async () => {
+    if (!activeQuiz) return;
+    setIsRetakingQuiz(true);
+    showToast("Generating fresh assessment questions...", "loading");
+
+    try {
+      const token = (await getToken()) || "dev-test-token";
+      const attemptId = activeQuiz.attemptId || activeQuiz._id;
+      const res = await fetch(`${API_BASE_URL}/quiz/retake`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          attemptId,
+          sourceFileName: activeQuiz.sourceFileName,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate new quiz questions.");
+      }
+
+      setActiveQuiz(data);
+      setQuizResult(null);
+      showToast("✨ Fresh quiz generated! Test your knowledge.", "success");
+    } catch (err) {
+      console.error("[handleRetakeQuiz] Error:", err);
+      showToast(err.message || "Failed to retake quiz.", "error");
+    } finally {
+      setIsRetakingQuiz(false);
+    }
+  };
+
   // Handler: Run ML Gap Analysis
   const handleRunGapAnalysis = async (openModal = true, overrideData = null) => {
     setIsAnalyzing(true);
@@ -981,17 +1016,23 @@ function Dashboard() {
       const token = (await getToken()) || "dev-test-token";
       const userKeySuffix = clerkUser?.id ? `_${clerkUser.id}` : "";
       const basePayload = {
-        designation: profileData?.designation || localStorage.getItem(`algox_user_designation${userKeySuffix}`) || localStorage.getItem("algox_user_designation") || user.designation || "Assistant Director",
-        post: profileData?.post || localStorage.getItem(`algox_user_post${userKeySuffix}`) || localStorage.getItem("algox_user_post") || user.post || "Statistical Officer",
-        department: profileData?.department || "National Statistical Office (NSO)",
+        designation: profileData?.designation || localStorage.getItem(`algox_user_designation${userKeySuffix}`) || user.designation || "",
+        post: profileData?.post || localStorage.getItem(`algox_user_post${userKeySuffix}`) || user.post || "",
+        department: profileData?.department || "",
         experienceYears: profileData?.experienceYears != null 
           ? Number(profileData.experienceYears) 
-          : (localStorage.getItem(`algox_user_experience_years${userKeySuffix}`) != null ? Number(localStorage.getItem(`algox_user_experience_years${userKeySuffix}`)) : (localStorage.getItem("algox_user_experience_years") != null ? Number(localStorage.getItem("algox_user_experience_years")) : 0)),
+          : (localStorage.getItem(`algox_user_experience_years${userKeySuffix}`) != null ? Number(localStorage.getItem(`algox_user_experience_years${userKeySuffix}`)) : null),
         qualifications: profileData?.qualifications || [],
         pastTrainings: profileData?.pastTrainings || [],
-        name: profileData?.name || user.name || "Statistical Officer",
+        name: profileData?.name || user.name || "",
       };
       const payload = overrideData ? { ...basePayload, ...overrideData } : basePayload;
+
+      if (!payload.designation) {
+        showToast("Please configure your Designation in Profile first to run Gap Analysis.", "error");
+        setIsAnalyzing(false);
+        return;
+      }
 
       if (payload.designation) {
         localStorage.setItem(`algox_user_designation${userKeySuffix}`, payload.designation);
@@ -1025,7 +1066,7 @@ function Dashboard() {
         ...prev,
         ...payload,
         designation: data.matchedDesignation || payload.designation,
-        post: payload.post || prev?.post || "Statistical Officer",
+        post: payload.post || prev?.post || "",
       }));
 
       applyRecalibratedProfile(data, courseListRef.current, certificateListRef.current);
@@ -1275,7 +1316,8 @@ function Dashboard() {
         isSubmitting={isSubmittingQuiz}
         result={quizResult}
         onRunAnalysis={handleRunGapAnalysis}
-        onRetake={() => setQuizResult(null)}
+        onRetake={handleRetakeQuiz}
+        isRetaking={isRetakingQuiz}
       />
 
       <CourseModal

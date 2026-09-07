@@ -30,10 +30,10 @@ export default function SkillGapOverview({
   onRunAnalysis,
   isAnalyzing,
   isDarkMode = true,
-  currentDesignation = "Assistant Director",
+  currentDesignation = "",
   onCadreChange,
 }) {
-  const currentService = SERVICE_CADRE_MAP?.[currentDesignation] || "Indian Statistical Service (ISS)";
+  const currentService = currentDesignation ? (SERVICE_CADRE_MAP?.[currentDesignation] || "MoSPI Cadre") : "";
 
   return (
     <div className={`p-6 rounded-3xl relative overflow-hidden flex flex-col justify-between h-full border transition-all duration-300 ${
@@ -51,9 +51,11 @@ export default function SkillGapOverview({
           <div>
             <div className="flex items-center gap-1.5 mb-0.5">
               <span className="text-[10px] font-bold text-[#de7a58] uppercase tracking-widest block">MoSPI / NSSTA Matrix</span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
-                {currentService.includes("SSS") ? "SSS Cadre" : "ISS Cadre"}
-              </span>
+              {currentService && (
+                <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
+                  {currentService.includes("SSS") ? "SSS Cadre" : "ISS Cadre"}
+                </span>
+              )}
             </div>
             <h3 className={`font-extrabold text-lg font-serif tracking-tight ${
               isDarkMode ? "text-white" : "text-[#1e143e]"
@@ -66,13 +68,14 @@ export default function SkillGapOverview({
               }`}>
                 <span className="text-slate-400 text-[10px]">Cadre:</span>
                 <select
-                  value={currentDesignation}
+                  value={currentDesignation || ""}
                   onChange={(e) => onCadreChange(e.target.value)}
                   className={`bg-transparent outline-none cursor-pointer font-bold text-[11px] ${
                     isDarkMode ? "text-[#e2ac52] [&>option]:bg-[#1b1242] [&>option]:text-white" : "text-[#5925dc] [&>option]:bg-white [&>option]:text-[#1e143e]"
                   }`}
                   title="Switch cadre to test dynamic competency recalculation"
                 >
+                  <option value="">-- Select Cadre --</option>
                   {MOSPI_CADRES.map((cadre) => (
                     <option key={cadre} value={cadre}>
                       {cadre}

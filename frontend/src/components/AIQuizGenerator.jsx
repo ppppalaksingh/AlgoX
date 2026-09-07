@@ -56,7 +56,6 @@ export default function AIQuizGenerator({
               <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1">
                 <Sparkles size={11} className="text-purple-400" /> AI Question Generator
               </span>
-              <span className="text-[11px] text-slate-400">Gemini 3.6 Flash &amp; MoSPI NLP</span>
             </div>
             <h2 className="text-lg sm:text-xl font-extrabold text-white font-serif tracking-tight">
               Civil Services Assessment Generator
