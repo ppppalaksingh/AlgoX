@@ -36,6 +36,7 @@ export const SERVICE_CADRE_MAP = {
   "SSO": "Subordinate Statistical Service (SSS)",
   "SO": "Subordinate Statistical Service (SSS)",
   "JSO": "Subordinate Statistical Service (SSS)",
+  "Other": "Other / Allied Statistical Cadre",
 };
 
 export const ROLE_PROFILES = {
@@ -138,6 +139,17 @@ export const ROLE_PROFILES = {
       "Final authority on release of official national statistics and economic indicators",
     ],
   },
+  "Other": {
+    cadreTitle: "Other / Allied Cadre Officer",
+    service: "Other / Allied Cadre",
+    grade: "General / Specialized Cadre",
+    coreMandate: "Statistical analysis, technical support, research, and project execution across divisions.",
+    keyResponsibilities: [
+      "Contributing to statistical surveys, data management, and empirical reporting",
+      "Collaborating on specialized analytics, research studies, and technology adoption",
+      "Applying domain expertise to support data-driven official statistics",
+    ],
+  },
 };
 
 export const BENCHMARK_DISCLAIMER =
@@ -159,16 +171,24 @@ const getCleanOfficerName = (raw, desig) => {
 
 export default function ProfileView({ user, profileData, onSaveProfile, isSaving, onRunAnalysis, isAnalyzing }) {
   const currentDesig = profileData?.designation || user?.designation || "";
+  const currentPost = profileData?.post || user?.post || "";
   const initialCleanName =
     getCleanOfficerName(profileData?.name, currentDesig) ||
     getCleanOfficerName(user?.name, currentDesig) ||
     (user?.name ? user.name : "");
 
+  const [isCustomDesignation, setIsCustomDesignation] = useState(() => {
+    return Boolean(currentDesig && !MOSPI_CADRES.includes(currentDesig));
+  });
+  const [isCustomPost, setIsCustomPost] = useState(() => {
+    return Boolean(currentPost && !MOSPI_POST_ROLES.includes(currentPost));
+  });
+
   const [formData, setFormData] = useState({
     name: initialCleanName,
     email: profileData?.email || user?.email || "",
     designation: currentDesig,
-    post: profileData?.post || user?.post || "",
+    post: currentPost,
     department: profileData?.department || user?.department || "",
     experienceYears: profileData?.experienceYears != null 
       ? profileData.experienceYears 
@@ -184,12 +204,22 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
   useEffect(() => {
     if (profileData) {
       const cleanIncomingName = getCleanOfficerName(profileData.name, profileData.designation);
+      const incDesig = profileData.designation !== undefined ? (profileData.designation || "") : formData.designation;
+      const incPost = profileData.post !== undefined ? (profileData.post || "") : formData.post;
+
+      if (incDesig && !MOSPI_CADRES.includes(incDesig)) {
+        setIsCustomDesignation(true);
+      }
+      if (incPost && !MOSPI_POST_ROLES.includes(incPost)) {
+        setIsCustomPost(true);
+      }
+
       setFormData((prev) => ({
         ...prev,
         name: cleanIncomingName || prev.name,
         email: profileData.email || prev.email,
-        designation: profileData.designation !== undefined ? (profileData.designation || "") : prev.designation,
-        post: profileData.post !== undefined ? (profileData.post || "") : prev.post,
+        designation: incDesig,
+        post: incPost,
         department: profileData.department !== undefined ? (profileData.department || "") : prev.department,
         experienceYears: profileData.experienceYears != null 
           ? profileData.experienceYears 
@@ -230,14 +260,19 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
 
   const handleRunAnalysisWithProfile = () => {
     if (!formData.designation) {
-      alert("Please select your Designation / Cadre first before running Gap Analysis.");
+      alert("Please select or enter your Designation / Cadre first before running Gap Analysis.");
       return;
     }
     onRunAnalysis?.(getPayload());
   };
 
-  const activeService = formData.designation ? (SERVICE_CADRE_MAP[formData.designation] || "MoSPI Cadre") : "";
-  const activeRoleProfile = formData.designation ? ROLE_PROFILES[formData.designation] : null;
+  const activeService = formData.designation ? (SERVICE_CADRE_MAP[formData.designation] || "Other / Allied Statistical Cadre") : "";
+  const activeRoleProfile = formData.designation
+    ? (ROLE_PROFILES[formData.designation] || {
+        ...ROLE_PROFILES["Other"],
+        cadreTitle: formData.designation,
+      })
+    : null;
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -356,8 +391,19 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                 <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] rounded-xl px-3.5 py-2.5 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50 transition">
                   <Briefcase size={16} className="text-slate-400 shrink-0" />
                   <select
-                    value={formData.designation || ""}
-                    onChange={(e) => handleChange("designation", e.target.value)}
+                    value={isCustomDesignation ? "Other" : (!formData.designation ? "" : (MOSPI_CADRES.includes(formData.designation) ? formData.designation : "Other"))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "Other") {
+                        setIsCustomDesignation(true);
+                        if (MOSPI_CADRES.includes(formData.designation)) {
+                          handleChange("designation", "");
+                        }
+                      } else {
+                        setIsCustomDesignation(false);
+                        handleChange("designation", val);
+                      }
+                    }}
                     className="w-full text-sm outline-none text-white bg-transparent cursor-pointer [&>option]:bg-[#0f1422] [&>option]:text-white"
                   >
                     <option value="">-- Select Designation / Cadre --</option>
@@ -366,8 +412,21 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                         {cadre}
                       </option>
                     ))}
+                    <option value="Other">+ Other (Custom Designation / Cadre)...</option>
                   </select>
                 </div>
+                {(isCustomDesignation || (formData.designation !== "" && !MOSPI_CADRES.includes(formData.designation))) && (
+                  <div className="mt-2 flex items-center gap-2 bg-white/[0.03] border border-blue-500/40 rounded-xl px-3 py-2 animate-in fade-in duration-150">
+                    <input
+                      type="text"
+                      value={formData.designation}
+                      onChange={(e) => handleChange("designation", e.target.value)}
+                      placeholder="Type custom designation / cadre (e.g. Data Processing Assistant)"
+                      className="w-full text-xs outline-none text-blue-200 bg-transparent placeholder:text-slate-500"
+                      autoFocus
+                    />
+                  </div>
+                )}
                 <p className="text-[11px] text-slate-500 mt-1">
                   Cadre rank benchmark (Highest: DG → Lowest: JSO).
                 </p>
@@ -378,14 +437,16 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                 <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] rounded-xl px-3.5 py-2.5 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/50 transition">
                   <Briefcase size={16} className="text-amber-400 shrink-0" />
                   <select
-                    value={!formData.post ? "" : (MOSPI_POST_ROLES.includes(formData.post) ? formData.post : "Other")}
+                    value={isCustomPost ? "Other" : (!formData.post ? "" : (MOSPI_POST_ROLES.includes(formData.post) ? formData.post : "Other"))}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === "Other") {
+                        setIsCustomPost(true);
                         if (MOSPI_POST_ROLES.includes(formData.post)) {
                           handleChange("post", "");
                         }
                       } else {
+                        setIsCustomPost(false);
                         handleChange("post", val);
                       }
                     }}
@@ -400,7 +461,7 @@ export default function ProfileView({ user, profileData, onSaveProfile, isSaving
                     <option value="Other">+ Other (Custom Post / Role)...</option>
                   </select>
                 </div>
-                {formData.post !== "" && !MOSPI_POST_ROLES.includes(formData.post) && (
+                {(isCustomPost || (formData.post !== "" && !MOSPI_POST_ROLES.includes(formData.post))) && (
                   <div className="mt-2 flex items-center gap-2 bg-white/[0.03] border border-amber-500/40 rounded-xl px-3 py-2 animate-in fade-in duration-150">
                     <input
                       type="text"

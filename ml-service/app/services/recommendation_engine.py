@@ -239,6 +239,7 @@ CADRE_TIER_CONFIG = {
     "Director": {"cadre": "Indian Statistical Service (ISS)", "tier": "sag_policy", "focus": ["Policy Formulation", "Strategic Governance", "Inter-ministerial Coordination"]},
     "ADG": {"cadre": "Indian Statistical Service (ISS)", "tier": "hag_apex", "focus": ["National Statistical Programme", "Executive Direction", "Disruptive Tech"]},
     "DG": {"cadre": "Indian Statistical Service (ISS)", "tier": "apex", "focus": ["Chief Statistical Authority", "Public Policy", "Strategic Transformation"]},
+    "Other": {"cadre": "Other / Allied Statistical Cadre", "tier": "general_statistical", "focus": ["Data Analysis", "Statistical Methods", "Data Quality", "Official Statistics"]},
 }
 
 def recommend_courses(

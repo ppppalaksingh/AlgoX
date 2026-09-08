@@ -183,13 +183,6 @@ export default function Header({
           </button>
         </div>
 
-        {/* Language / Region Badge (Najaba style: EN · हिन्दी) */}
-        <div className={`hidden md:flex items-center text-xs font-semibold gap-1 px-1 shrink-0 ${isDark ? "text-slate-400" : "text-[#7e7298]"
-          }`}>
-          <span className={`font-bold ${isDark ? "text-white" : "text-[#1e143e]"}`}>EN</span>
-          <span>·</span>
-          <span className={`cursor-pointer ${isDark ? "hover:text-slate-200" : "hover:text-[#1e143e]"}`}>हिन्दी</span>
-        </div>
 
         {/* The Najaba Theme Toggle Switcher (Crescent Moon ☾ in Light ↔ Radiant Sun ☼ in Dark) */}
         <button

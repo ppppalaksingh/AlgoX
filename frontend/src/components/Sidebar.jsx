@@ -51,14 +51,14 @@ export default function Sidebar({
         }`}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#5925dc] flex items-center justify-center font-black text-lg text-white shadow-[0_4px_16px_rgba(89,37,220,0.4)] border border-white/20 shrink-0">
-              A
+              S
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <p className={`font-extrabold text-base font-serif leading-tight tracking-tight ${
                   isDarkMode ? "text-white" : "text-[#1e143e]"
                 }`}>
-                  Algo<span className={isDarkMode ? "text-[#e2ac52]" : "text-[#5925dc]"}>X</span>
+                  StatSkill
                 </p>
                 <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                   isDarkMode ? "bg-[#5925dc]/20 text-indigo-300 border border-[#5925dc]/30" : "bg-[#5925dc]/10 text-[#5925dc] border border-[#5925dc]/25"

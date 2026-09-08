@@ -44,6 +44,7 @@ CENTRAL_TARGET_MATRIX = {
     "SSO": {"statistical": 3.5, "technical": 3.0, "digitalGovernance": 3.0, "behavioural": 3.0},
     "SO": {"statistical": 3.0, "technical": 2.5, "digitalGovernance": 2.5, "behavioural": 2.5},
     "JSO": {"statistical": 2.5, "technical": 2.0, "digitalGovernance": 2.0, "behavioural": 2.0},
+    "Other": {"statistical": 3.5, "technical": 3.0, "digitalGovernance": 3.0, "behavioural": 3.0},
 }
 
 # Foundational Cadre Entry Base Floor (at 0 years of experience)
@@ -57,6 +58,7 @@ CADRE_ENTRY_BASE = {
     "Director": 3.25,
     "ADG": 3.60,
     "DG": 3.95,
+    "Other": 1.72,
 }
 CADRE_RANK_BASE = CADRE_ENTRY_BASE
 
@@ -93,6 +95,7 @@ SERVICE_CADRE_MAP = {
     "SSO": "Subordinate Statistical Service (SSS)",
     "SO": "Subordinate Statistical Service (SSS)",
     "JSO": "Subordinate Statistical Service (SSS)",
+    "Other": "Other / Allied Statistical Cadre",
 }
 
 # Role Profiles: Responsibilities, Grade, and Target Training Tiers
@@ -223,6 +226,19 @@ ROLE_PROFILES = {
         "targetTrainingTier": "Apex Executive Forum on Global Statistical Governance",
         "primaryNsstaCategory": "NSSTA-BEH-400: Apex Statistical Governance & Public Policy",
     },
+    "Other": {
+        "cadreTitle": "Other / Allied Cadre Officer",
+        "service": "Other / Allied Cadre",
+        "grade": "General / Specialized Cadre",
+        "coreMandate": "Statistical analysis, technical support, research, and project execution across divisions.",
+        "keyResponsibilities": [
+            "Contributing to statistical surveys, data management, and empirical reporting",
+            "Collaborating on specialized analytics, research studies, and technology adoption",
+            "Applying domain expertise to support data-driven official statistics"
+        ],
+        "targetTrainingTier": "General Capacity & Applied Statistical Techniques",
+        "primaryNsstaCategory": "NSSTA-DOM-100: Official Statistics & Statistical Methodology",
+    },
 }
 
 # 3 Competency Types Mapped onto the 4 StatSkill Domains
@@ -306,6 +322,7 @@ DESIGNATION_ALIASES = {
     "additional director general": "ADG",
     "dg": "DG",
     "director general": "DG",
+    "other": "Other",
 }
 
 def normalize_designation(raw_desig: str) -> str:
@@ -317,7 +334,7 @@ def normalize_designation(raw_desig: str) -> str:
     for alias, canonical in DESIGNATION_ALIASES.items():
         if alias in clean or clean in alias:
             return canonical
-    return "Assistant Director"
+    return "Other"
 
 try:
     with open(FRAMEWORK_PATH, encoding="utf-8") as f:

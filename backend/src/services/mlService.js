@@ -126,6 +126,7 @@ const CENTRAL_TARGET_MATRIX = {
   "SSO": { statistical: 3.5, technical: 3.0, digitalGovernance: 3.0, behavioural: 3.0 },
   "SO": { statistical: 3.0, technical: 2.5, digitalGovernance: 2.5, behavioural: 2.5 },
   "JSO": { statistical: 2.5, technical: 2.0, digitalGovernance: 2.0, behavioural: 2.0 },
+  "Other": { statistical: 3.5, technical: 3.0, digitalGovernance: 3.0, behavioural: 3.0 },
 };
 
 export const CADRE_ENTRY_BASE = {
@@ -138,6 +139,7 @@ export const CADRE_ENTRY_BASE = {
   "Director": 3.25,
   "ADG": 3.60,
   "DG": 3.95,
+  "Other": 1.72,
 };
 export const CADRE_RANK_BASE = CADRE_ENTRY_BASE;
 
@@ -173,6 +175,7 @@ const DESIGNATION_ALIASES = {
   "additional director general": "ADG",
   "dg": "DG",
   "director general": "DG",
+  "other": "Other",
 };
 
 function normalizeDesignation(rawDesig) {
@@ -182,7 +185,7 @@ function normalizeDesignation(rawDesig) {
   for (const [alias, canonical] of Object.entries(DESIGNATION_ALIASES)) {
     if (alias.includes(clean) || clean.includes(alias)) return canonical;
   }
-  return "Assistant Director";
+  return "Other";
 }
 
 const BENCHMARK_DISCLAIMER =
@@ -198,6 +201,7 @@ const SERVICE_CADRE_MAP = {
   "SSO": "Subordinate Statistical Service (SSS)",
   "SO": "Subordinate Statistical Service (SSS)",
   "JSO": "Subordinate Statistical Service (SSS)",
+  "Other": "Other / Allied Statistical Cadre",
 };
 
 const COMPETENCY_TAXONOMY = {
@@ -321,6 +325,17 @@ const ROLE_PROFILES = {
       "Apex stewardship of the Indian Official Statistical System",
       "High-level coordination with Union Ministries, NITI Aayog, and Reserve Bank of India",
       "Final authority on release of official national statistics and economic indicators",
+    ],
+  },
+  "Other": {
+    cadreTitle: "Other / Allied Cadre Officer",
+    service: "Other / Allied Cadre",
+    grade: "General / Specialized Cadre",
+    coreMandate: "Statistical analysis, technical support, research, and project execution across divisions.",
+    keyResponsibilities: [
+      "Contributing to statistical surveys, data management, and empirical reporting",
+      "Collaborating on specialized analytics, research studies, and technology adoption",
+      "Applying domain expertise to support data-driven official statistics",
     ],
   },
 };
